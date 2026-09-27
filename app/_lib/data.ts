@@ -2,7 +2,7 @@
 //
 // Sources, in order of authority:
 //   registry/skills/<id>.json                     canonical CertificationRecord (committed by
-//                                                 feat/certification's `certify.py --promote`)
+//                                                 feat/certification's `certify.ts --promote`)
 //   .agent-university/skills/<id>.json            the live runtime record (gitignored)
 //   demo/fixtures/**                              committed, fictional; the demo-mode default
 //
@@ -91,7 +91,7 @@ export interface LifecycleData {
 
 /**
  * The certification engine's output (schemas/certification-record.schema.json, produced by
- * scripts/certify.py). Declared structurally, and only over the fields this UI reads, so the UI
+ * scripts/certify.ts). Declared structurally, and only over the fields this UI reads, so the UI
  * branch compiles before feat/certification merges. Once it does, this can become
  * `import type { CertificationRecord } from "@/lib/certification"` with no other change.
  */
@@ -289,8 +289,8 @@ export async function loadLifecycle(
       ...await withDemoCertification(base, outcome),
       liveNote:
         `No record at registry/skills/${skillId}.json or .agent-university/skills/${skillId}.json yet. ` +
-        "Milestone 2 (Memorable capture → transfer exam → certification) is still in progress on " +
-        "feat/runtime, so this view is showing fixtures.",
+        "Promote a transfer with `node scripts/certify.ts ... --promote` (see docs/REPO_OVERVIEW.md); " +
+        "until then this view is showing fixtures.",
       source: "demo/fixtures (no live record found)",
     };
   }

@@ -8,6 +8,7 @@
 //                whose `events` array carries the teacher's `skill.observed` event
 //   --events     extra contract Events (e.g. demo/fixtures/events.json) to find skill.observed in
 //   --isolation  {"<fact>": true|false, ...} from the runtime, e.g. different_scope, no_answer_leak
+//                (default: the transfer result's own `isolation` key, which transfer_run.py writes)
 //   --reverify   re-run the artifact's verifier on artifact.path instead of trusting the report
 //   --promote    record the decision in the company registry (registry/)
 //

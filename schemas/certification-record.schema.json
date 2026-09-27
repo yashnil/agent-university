@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "certification-record.schema.json",
   "title": "CertificationRecord",
-  "description": "One certification decision, produced by scripts/certify.py. skill is a contract Skill whose status is the decision's outcome. A certified record is the canonical source of truth for the skill (registry/skills/<id>.json); every record, pass or fail, is appended to registry/ledger.jsonl. decision.rulings says exactly which policy rule passed or failed and why. Consumers must ignore unknown keys.",
+  "description": "One certification decision, produced by scripts/certify.ts (lib/certification.ts). skill is a contract Skill whose status is the decision's outcome. A certified record is the canonical source of truth for the skill (registry/skills/<id>.json); every record, pass or fail, is appended to registry/ledger.jsonl. decision.rulings says exactly which policy rule passed or failed and why. Consumers must ignore unknown keys.",
   "type": "object",
   "required": ["recordVersion", "skill", "teacher", "transfer", "verification", "decision", "events"],
   "properties": {

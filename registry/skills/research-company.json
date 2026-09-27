@@ -1,0 +1,295 @@
+{
+  "recordVersion": 1,
+  "skill": {
+    "id": "research-company",
+    "name": "Research Company",
+    "status": "certified",
+    "teacher": {
+      "id": "qm-thread-sanitized-teacher",
+      "name": "Scout (teacher)",
+      "harness": "qm"
+    },
+    "artifactType": "company.json",
+    "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+    "transfer": {
+      "student": {
+        "id": "qm-thread-sanitized-student",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "examCase": "exam-vercel",
+      "passed": true
+    }
+  },
+  "teacher": {
+    "id": "qm-thread-sanitized-teacher",
+    "name": "Scout (teacher)",
+    "harness": "qm"
+  },
+  "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+  "transfer": {
+    "student": {
+      "id": "qm-thread-sanitized-student",
+      "name": "Scout (fresh student)",
+      "harness": "qm"
+    },
+    "examCase": "exam-vercel",
+    "examCompany": "Vercel",
+    "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+    "artifact": {
+      "type": "company.json",
+      "path": "demo/fixtures/company-vercel.json"
+    },
+    "passed": true
+  },
+  "verification": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": true,
+        "message": "at least two valid source URLs (2 distinct valid)"
+      }
+    ]
+  },
+  "decision": {
+    "certified": true,
+    "status": "certified",
+    "policy": {
+      "id": "au-transfer-v1",
+      "rules": [
+        "teacher_run_verified",
+        "procedure_recalled",
+        "exam_case_unseen",
+        "student_distinct_from_teacher",
+        "artifact_matches_skill",
+        "verifier_checks_complete",
+        "verifier_checks_passed",
+        "isolation_attested"
+      ],
+      "requireIsolation": true
+    },
+    "summary": "CERTIFIED: all 8 rules passed",
+    "failedRules": [],
+    "rulings": [
+      {
+        "rule": "teacher_run_verified",
+        "passed": true,
+        "reason": "teacher run 9f8d36da-12d3-4d42-bd7d-924fce932f46 passed its verifier",
+        "evidence": {
+          "teacher": {
+            "id": "qm-thread-sanitized-teacher",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+          "artifactPath": "$HOME/workspace/scout/linear/company.json"
+        }
+      },
+      {
+        "rule": "procedure_recalled",
+        "passed": true,
+        "reason": "student used procedure procedures/37196e61-add-company-data-to-company-json-file",
+        "evidence": {
+          "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+          "skillProcedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+        }
+      },
+      {
+        "rule": "exam_case_unseen",
+        "passed": true,
+        "reason": "exam company Vercel differs from teacher case Linear",
+        "evidence": {
+          "examCase": "exam-vercel",
+          "examCompany": "Vercel",
+          "teacherCases": [
+            "Linear"
+          ]
+        }
+      },
+      {
+        "rule": "student_distinct_from_teacher",
+        "passed": true,
+        "reason": "student qm-thread-sanitized-student (qm) != teacher qm-thread-sanitized-teacher (qm)",
+        "evidence": {
+          "student": {
+            "id": "qm-thread-sanitized-student",
+            "name": "Scout (fresh student)",
+            "harness": "qm"
+          },
+          "teacher": {
+            "id": "qm-thread-sanitized-teacher",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "crossHarness": false
+        }
+      },
+      {
+        "rule": "artifact_matches_skill",
+        "passed": true,
+        "reason": "company.json at demo/fixtures/company-vercel.json",
+        "evidence": {
+          "artifact": {
+            "type": "company.json",
+            "path": "demo/fixtures/company-vercel.json"
+          },
+          "produced": true
+        }
+      },
+      {
+        "rule": "verifier_checks_complete",
+        "passed": true,
+        "reason": "all 6 required checks reported",
+        "evidence": {
+          "required": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "reported": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "source": "re-run"
+        }
+      },
+      {
+        "rule": "verifier_checks_passed",
+        "passed": true,
+        "reason": "6/6 checks passed",
+        "evidence": {
+          "passedCount": 6,
+          "total": 6,
+          "failed": []
+        }
+      },
+      {
+        "rule": "isolation_attested",
+        "passed": true,
+        "reason": "all 13 isolation facts hold",
+        "evidence": {
+          "facts": {
+            "different_agent": true,
+            "different_session": true,
+            "different_scope": true,
+            "different_container": true,
+            "different_home_volume": true,
+            "different_thread_ref": true,
+            "layer_skill_unpublished": true,
+            "no_layer_skill_reads": true,
+            "no_source_artifact_in_fresh_sandbox": true,
+            "no_source_answer_in_prompt": true,
+            "student_container_new": true,
+            "student_home_volume_new": true,
+            "artifact_written_after_exam_start": true
+          }
+        }
+      }
+    ],
+    "decidedAt": "2026-09-27T21:58:23Z",
+    "inputsDigest": "sha256:20e46791fe70d9ca12c19229bde149344c879707b690eb5e4c725490d3c7d935"
+  },
+  "events": [
+    {
+      "type": "exam.passed",
+      "at": "2026-09-27T21:58:23Z",
+      "payload": {
+        "skillId": "research-company",
+        "examCase": "exam-vercel",
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "verification": {
+          "passed": true,
+          "checks": [
+            {
+              "name": "file_exists",
+              "passed": true,
+              "message": "file exists"
+            },
+            {
+              "name": "valid_json_object",
+              "passed": true,
+              "message": "valid JSON object"
+            },
+            {
+              "name": "company_name_present",
+              "passed": true,
+              "message": "company_name present"
+            },
+            {
+              "name": "website_valid_url",
+              "passed": true,
+              "message": "website present (http(s) URL)"
+            },
+            {
+              "name": "product_summary_present",
+              "passed": true,
+              "message": "product_summary present"
+            },
+            {
+              "name": "source_urls_min_two",
+              "passed": true,
+              "message": "at least two valid source URLs (2 distinct valid)"
+            }
+          ]
+        },
+        "artifactPath": "demo/fixtures/company-vercel.json"
+      }
+    },
+    {
+      "type": "skill.certified",
+      "at": "2026-09-27T21:58:23Z",
+      "payload": {
+        "skillId": "research-company",
+        "teacher": {
+          "id": "qm-thread-sanitized-teacher",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "examCase": "exam-vercel",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+      }
+    }
+  ]
+}

@@ -26,7 +26,7 @@ evidence in `decision.rulings`, so a failed skill shows exactly why.
 | `artifact_matches_skill` | the exam is for this skill and produced its artifact type |
 | `verifier_checks_complete` | the verifier reported every required check for the artifact type |
 | `verifier_checks_passed` | every check passed, and the `passed` flags agree with the checks |
-| `isolation_attested` | every runtime isolation fact supplied is true (required with `--require-isolation`) |
+| `isolation_attested` | every runtime isolation fact is true: `--isolation`, else the TransferResult's `isolation` key (required with `--require-isolation`) |
 
 Resulting status: `certified` if all rules hold. `transferred` if a distinct student really
 took an unseen exam for this skill but something else failed. Otherwise the skill stays
