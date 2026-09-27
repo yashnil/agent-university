@@ -1,0 +1,25 @@
+{
+  "skills": [
+    {
+      "id": "research-company",
+      "name": "Research Company",
+      "status": "certified",
+      "artifactType": "company.json",
+      "teacher": {
+        "id": "qm-thread-sanitized-teacher",
+        "name": "Scout (teacher)",
+        "harness": "qm"
+      },
+      "student": {
+        "id": "qm-thread-sanitized-student",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "examCase": "exam-vercel",
+      "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+      "certifiedAt": "2026-09-27T21:58:23Z",
+      "policy": "au-transfer-v1",
+      "record": "registry/skills/research-company.json"
+    }
+  ]
+}

@@ -61,7 +61,11 @@ distinct http(s) URLs).
   - Runtime ends at status `transferred`. Certification owns promotion to `certified`
     (`docs/HANDOFF.md` §2, "Who promotes a skill").
   - The shared, sanitized result is `demo/fixtures/transfer-result-vercel.json`.
-- Details are in `PROGRESS.md`.
+- **Certification of the real transfer: complete.** `scripts/certify.ts --reverify
+  --require-isolation` certifies it on all 8 rules of `au-transfer-v1`. The canonical record is
+  `registry/skills/research-company.json`, and `tests/integration.test.ts` replays the whole handoff.
+- The whole system in one page: [`docs/REPO_OVERVIEW.md`](docs/REPO_OVERVIEW.md). Runtime details
+  are in `PROGRESS.md`.
 
 ## Setup
 

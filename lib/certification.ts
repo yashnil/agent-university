@@ -277,8 +277,11 @@ export function certify(skill: CandidateSkill, transfer: Partial<TransferResult>
       : !checks.length ? "no checks reported" : "passed flags disagree with the checks",
     { passedCount: checks.length - failed.length, total: checks.length, failed });
 
-  // 8. Isolation facts from the runtime (different scope/sandbox/session, no leak), if any.
-  const facts = opts.isolation ?? {};
+  // 8. Isolation facts from the runtime (different scope/sandbox/session, no leak), if any: the
+  // explicit option, else the `isolation` key runtime adds to its TransferResult (transfer_run.py).
+  const reported = (transfer as { isolation?: unknown }).isolation;
+  const facts = opts.isolation
+    ?? (reported && typeof reported === "object" && !Array.isArray(reported) ? reported as Record<string, boolean> : {});
   const broken = Object.keys(facts).filter((k) => facts[k] !== true).sort();
   const requireIsolation = opts.requireIsolation ?? false;
   if (!Object.keys(facts).length)

@@ -145,7 +145,9 @@ in it is fake.
 
 **Live, sanitized (runtime Milestone 2: teacher Linear → student Vercel).** These come from the real
 QM transfer exam. Agent ids are pseudonymous, and no scope, container, volume, session, threadRef,
-URL, prompt or trace is included. They stop at `transferred` because certification has not run on them.
+URL, prompt or trace is included. They stop at `transferred` on purpose: they are runtime's handoff.
+Certification's decision on them is `registry/skills/research-company.json`, and `tests/integration.test.ts`
+replays it.
 `tests/test_runtime_fixtures.py` validates them against the contracts and scans them for personal data.
 
 | File | Contract |
