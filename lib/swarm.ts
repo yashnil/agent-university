@@ -43,7 +43,40 @@ export interface SwarmOptions {
   promote?: boolean; // recordDecision() for every record (default true)
   artifactsDir?: string; // when set, a newly canonical winner's artifact is copied to <dir>/<examCase>/<type> for the UI
   judge?: JudgeFn | null;
+  onEvent?: (e: ArenaEvent) => void; // live progress (the website's Arena); must not throw
+  heat?: number; // heat number reported in events (default 1)
   limiter?: Limiter; // shared slot pool, e.g. across concurrent tournament heats (acquired before a student starts)
+}
+
+type Id = AgentIdentity;
+
+/** Live progress of a swarm or tournament, in order. Consumed by the website's Arena (SSE). */
+export type ArenaEvent =
+  | { type: "tournament.started"; at: string; tournamentId: string; dry: boolean; perHeat: number; judgeModel: string | null;
+      heats: { heat: number; examCase: string; examCompany: string | null; students: { i: number; student: Id }[] }[] }
+  | { type: "student.started"; at: string; heat: number; i: number; student: Id }
+  | { type: "student.finished"; at: string; heat: number; i: number; student: Id; runId: string | null; certified: boolean;
+      status: "observed" | "transferred" | "certified"; summary: string; failedRules: string[]; failedChecks: string[];
+      metrics: Metrics; error: string | null; rulings: { rule: string; passed: boolean; reason: string }[] }
+  | { type: "heat.finished"; at: string; heat: number; examCase: string; certifiedCount: number;
+      winner: { i: number; student: Id; runId: string | null } | null }
+  | { type: "final.started"; at: string; judgeModel: string | null;
+      finalists: { heat: number; i: number; student: Id; runId: string | null; examCase: string }[] }
+  | { type: "final.finished"; at: string; judge: { status: string; model?: string; reason?: string };
+      ranking: { place: number; heat: number; i: number; student: Id; runId: string | null; examCase: string;
+        score: number | null; rationale: string | null }[] }
+  | { type: "tournament.finished"; at: string; champion: { heat: number; i: number; student: Id; runId: string | null;
+      examCase: string; summary: string; score: number | null } | null; promoted: boolean | null; registry: string; record: unknown }
+  | { type: "error"; at: string; message: string };
+
+/** Call a progress listener without letting it break the run. */
+export function emit(onEvent: ((e: ArenaEvent) => void) | undefined, e: ArenaEvent) {
+  if (!onEvent) return;
+  try {
+    onEvent(e);
+  } catch {
+    /* a broken listener must not fail the exam */
+  }
 }
 
 /** A counting semaphore: at most n holders at once. acquire() resolves to a release function. */
@@ -238,17 +271,39 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
   }
 
   // Bounded concurrency: at most maxParallel students in flight.
+  // Each student is certified the moment it finishes, so progress can be streamed.
   const outcomes: Outcome[] = new Array(n + 1);
+  const decided: JudgedRecord[] = new Array(n + 1);
+  const heat = opts.heat ?? 1;
+  const decide = (i: number, o: Outcome) => {
+    const iso = isolationFor(i, o.transfer, o.isolation);
+    const record: JudgedRecord = certify(skill, o.transfer, {
+      cases, events: opts.events, isolation: iso && Object.keys(iso).length ? iso : null, decidedAt: opts.decidedAt });
+    record.metrics = cleanMetrics(o.metrics);
+    record.swarm = { swarmId, student: i }; // extra key; consumers ignore unknown keys
+    decided[i] = record;
+    emit(opts.onEvent, {
+      type: "student.finished", at: now(), heat, i, student: record.transfer.student, runId: record.transfer.runId ?? null,
+      certified: record.decision.certified, status: record.decision.status, summary: record.decision.summary,
+      failedRules: record.decision.failedRules, failedChecks: record.verification.checks.filter((c) => !c.passed).map((c) => c.name),
+      metrics: record.metrics ?? {}, error: o.error,
+      rulings: record.decision.rulings.map(({ rule, passed, reason }) => ({ rule, passed, reason })),
+    });
+    return iso;
+  };
+  const isolations: (Record<string, boolean> | null)[] = new Array(n + 1);
   let next = 1;
   const workers = Array.from({ length: Math.max(1, Math.min(opts.maxParallel ?? 10, n)) }, async () => {
     while (next <= n) {
       const i = next++;
       const release = opts.limiter ? await opts.limiter.acquire() : null;
       try {
+        emit(opts.onEvent, { type: "student.started", at: now(), heat, i, student: studentFor(i) });
         outcomes[i] = await attempt(i);
       } finally {
         release?.();
       }
+      isolations[i] = decide(i, outcomes[i]);
     }
   });
   await Promise.all(workers);
@@ -259,11 +314,8 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
   const errors: Record<number, string | null> = {};
   for (let i = 1; i <= n; i++) {
     const o = outcomes[i];
-    const iso = isolationFor(i, o.transfer, o.isolation);
-    const record: JudgedRecord = certify(skill, o.transfer, {
-      cases, events: opts.events, isolation: iso && Object.keys(iso).length ? iso : null, decidedAt: opts.decidedAt });
-    record.metrics = cleanMetrics(o.metrics);
-    record.swarm = { swarmId, student: i }; // extra key; consumers ignore unknown keys
+    const iso = isolations[i];
+    const record = decided[i];
     records.push(record);
     artifacts[judgeKey(record)] = o.artifact;
     errors[i] = o.error;

@@ -18,8 +18,8 @@ import { JEV_MODEL, judgeKey, OPENROUTER_URL, openrouterKey, parseRankings } fro
 import type { JevOptions, JudgeFn, JudgedRecord, JudgeVerdict } from "./jev.ts";
 import { RECORD_DIR } from "./qm.ts";
 import * as registry from "./registry.ts";
-import { applyJudge, boardTable, publishArtifact, compareSwarm, createLimiter, fmtMetrics, runSwarm, textTable } from "./swarm.ts";
-import type { JudgeInfo, LaunchStudent, LeaderboardRow, Metrics, SwarmSummary } from "./swarm.ts";
+import { applyJudge, boardTable, defaultStudent, emit, publishArtifact, compareSwarm, createLimiter, fmtMetrics, runSwarm, textTable } from "./swarm.ts";
+import type { ArenaEvent, JudgeInfo, LaunchStudent, LeaderboardRow, Metrics, SwarmSummary } from "./swarm.ts";
 import type { AgentIdentity, AgentUniversityEvent } from "./types.ts";
 
 export type TournamentRecord = JudgedRecord & {
@@ -45,6 +45,8 @@ export interface TournamentOptions {
   events?: AgentUniversityEvent[];
   promote?: boolean; // record every decision in the registry (default true)
   artifactsDir?: string; // when set, a newly canonical champion's artifact is copied here for the UI
+  onEvent?: (e: ArenaEvent) => void; // live progress for the website's Arena
+  dry?: boolean; // reported in tournament.started only
 }
 
 export interface HeatResult {
@@ -86,10 +88,22 @@ export async function runTournament(heats: HeatSpec[], perHeat: number, opts: To
   const limiter = createLimiter(opts.maxParallel ?? 9);
 
   // Round 1: every heat at once, sharing the slot limit. No judge, no promotion inside a heat.
+  const on = opts.onEvent;
+  const company = (examCase: string) => cases.find((c) => c.id === examCase)?.company ?? null;
+  const studentsOf = (h: HeatSpec) => Array.from({ length: perHeat }, (_, k) => k + 1)
+    .map((i) => ({ i, student: h.studentFor ? h.studentFor(i) : defaultStudent(i, h.swarmId ?? `${tournamentId}-h${h.heat}`) }));
+  emit(on, { type: "tournament.started", at: now(), tournamentId, dry: !!opts.dry, perHeat, judgeModel: opts.judge?.model ?? null,
+    heats: heats.map((h) => ({ heat: h.heat, examCase: h.examCase, examCompany: company(h.examCase), students: studentsOf(h) })) });
+  const iOf = (r: TournamentRecord) => r.swarm?.student ?? 0;
   const swarms: SwarmSummary[] = await Promise.all(heats.map((h) => runSwarm(h.skill, perHeat, h.launch, {
     examCase: h.examCase, studentFor: h.studentFor, swarmId: h.swarmId ?? `${tournamentId}-h${h.heat}`,
     decidedAt: opts.decidedAt, timeoutMs: opts.timeoutMs, cases, events: opts.events,
-    maxParallel: perHeat, limiter, judge: null, promote: false,
+    maxParallel: perHeat, limiter, judge: null, promote: false, onEvent: on, heat: h.heat,
+  }).then((s) => {
+    const best = registry.best((s.records as TournamentRecord[]).filter((r) => r.decision.certified));
+    emit(on, { type: "heat.finished", at: now(), heat: h.heat, examCase: h.examCase, certifiedCount: s.certifiedCount,
+      winner: best ? { i: iOf(best), student: best.transfer.student, runId: best.transfer.runId ?? null } : null });
+    return s;
   })));
 
   const finalists: TournamentRecord[] = [];
@@ -115,6 +129,9 @@ export async function runTournament(heats: HeatSpec[], perHeat: number, opts: To
   });
 
   // Round 2: Jev compares the finalists only (all certified by construction).
+  const finalist = (r: TournamentRecord) => ({ heat: r.tournament!.heat, i: iOf(r), student: r.transfer.student,
+    runId: r.transfer.runId ?? null, examCase: heats.find((h) => h.heat === r.tournament!.heat)!.examCase });
+  emit(on, { type: "final.started", at: now(), judgeModel: opts.judge?.model ?? null, finalists: finalists.map(finalist) });
   let judge: JudgeInfo = { status: "disabled" };
   if (opts.judge && finalists.length < 2)
     judge = { status: "skipped", model: opts.judge.model, reason: finalists.length ? "a single finalist wins by default" : "no finalists" };
@@ -122,6 +139,9 @@ export async function runTournament(heats: HeatSpec[], perHeat: number, opts: To
   const ranking = [...finalists].sort((a, b) => compareSwarm(b, a));
   ranking.forEach((r, k) => { r.tournament = { ...r.tournament!, round: "final", place: k + 1 }; });
   const champion = ranking[0] ?? null;
+  emit(on, { type: "final.finished", at: now(),
+    judge: { status: judge.status, ...(judge.model ? { model: judge.model } : {}), ...(judge.reason ? { reason: judge.reason } : {}) },
+    ranking: ranking.map((r, k) => ({ place: k + 1, ...finalist(r), score: r.judge?.score ?? null, rationale: r.judge?.rationale ?? null })) });
 
   // Save: heat losers, then finalists, then the champion last.
   let promoted: boolean | null = null;
@@ -140,6 +160,10 @@ export async function runTournament(heats: HeatSpec[], perHeat: number, opts: To
         && current.transfer.student.id === champion.transfer.student.id,
     };
   }
+
+  emit(on, { type: "tournament.finished", at: now(),
+    champion: champion ? { ...finalist(champion), summary: champion.decision.summary, score: champion.judge?.score ?? null } : null,
+    promoted, registry: registry.registryDir(), record: champion });
 
   const heatOf = (r: TournamentRecord) => heatResults.find((h) => h.heat === r.tournament!.heat)!;
   return {
