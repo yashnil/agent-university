@@ -1,37 +1,42 @@
 import type { JSX } from "react";
 import type { EventPayloads } from "@/lib/types";
+import StatusNode from "./StatusNode";
 import styles from "./GapBanner.module.css";
 
-export default function GapBanner({
-  gap,
-}: {
-  gap: EventPayloads["gap.discovered"];
-}): JSX.Element {
+/**
+ * The GAP: the honest edge of certified capability, and the next skill to teach.
+ *
+ * Deliberately not an error — nothing failed here, because nothing was ever taught. It uses the
+ * dashed-empty node grammar rather than a warning colour, and reads as a finding the system
+ * reports about itself.
+ */
+export default function GapBanner({ gap }: { gap: EventPayloads["gap.discovered"] }): JSX.Element {
   return (
-    <div className={styles.banner}>
-      <span className={styles.label}>GAP</span>
-      <div className={styles.body}>
-        <p className={styles.headline}>
-          No certified skill produces{" "}
-          <span className={`mono ${styles.headlineSubject}`}>{gap.missingArtifactType}</span>
+    <section className={styles.banner} aria-labelledby="gap-heading">
+      <div className={styles.head}>
+        <StatusNode state="gap" size="lg" />
+        <p className={styles.label} id="gap-heading">
+          GAP
         </p>
-        {gap.neededBy && (
-          <p className={styles.neededBy}>
-            needed by <span className="mono">{gap.neededBy}</span>
-          </p>
-        )}
-        <p className={styles.reason}>{gap.reason}</p>
-        <dl className={styles.footer}>
-          <div>
-            <dt>goal</dt>
-            <dd className="mono">{gap.goal}</dd>
-          </div>
-          <div>
-            <dt>plan</dt>
-            <dd className="mono">{gap.planId}</dd>
-          </div>
-        </dl>
+        <span className="idTag">gap.discovered</span>
       </div>
-    </div>
+      <p className={styles.subject}>
+        <span className="mono">{gap.missingArtifactType}</span> has no certified skill
+        {gap.neededBy ? (
+          <>
+            {" "}
+            — and <span className="mono">{gap.neededBy}</span> needs it
+          </>
+        ) : null}
+        .
+      </p>
+      <p className={styles.reason}>{gap.reason}</p>
+      <dl className="kv">
+        <dt>goal</dt>
+        <dd>{gap.goal}</dd>
+        <dt>planId</dt>
+        <dd>{gap.planId}</dd>
+      </dl>
+    </section>
   );
 }

@@ -1,24 +1,53 @@
-/* AgentCard: teacher/student cards, distinguished by a left accent border. */
+/* AgentCard: origin/replicating columns, deliberately symmetrical — same field rows in the
+   same order on both sides, so the only differences are the data and the fact that the
+   replicating column is the one under test (a live status node, a one-edge accent hairline). */
 
-.agentCard {
-  border-left: 3px solid var(--border-strong);
+.card {
+  display: flex;
+  flex-direction: column;
 }
 
 .teacher {
-  border-left-color: var(--border-strong);
+  border-top-color: var(--border);
 }
 
 .student {
-  border-left-color: var(--accent);
+  border-top-color: var(--accent);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.head :global(.panelTitle) {
+  margin: 0;
+}
+
+.head :global(.idTag) {
+  margin-right: auto;
 }
 
 .name {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 600;
+  margin: 0 0 var(--s4);
+  font-family: var(--font-display);
+  font-size: var(--t1);
+  font-weight: 400;
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+}
+
+.caseDt {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
 }
 
 .note {
-  margin: 12px 0 0;
-  font-size: 12.5px;
+  margin: var(--s4) 0 0;
+  padding-top: var(--s3);
+  border-top: 1px solid var(--border);
+  font-size: var(--t-1);
 }

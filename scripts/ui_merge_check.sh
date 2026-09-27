@@ -44,7 +44,7 @@ while IFS= read -r f; do
   case "$f" in
     app/api/*)
       echo "  VIOLATION  $f  (app/api/** belongs to runtime/certification)"; fail=1 ;;
-    app/*|components/*|public/*|next.config.*|tsconfig.json|next-env.d.ts|demo/fallback-artifacts/*|demo/ui/*|docs/UI.md|scripts/ui_merge_check.sh)
+    app/*|components/*|public/*|next.config.*|tsconfig.json|next-env.d.ts|demo/fallback-artifacts/*|demo/ui/*|docs/UI.md|docs/DESIGN.md|scripts/ui_merge_check.sh)
       echo "  ui         $f" ;;
     *)
       matched=0

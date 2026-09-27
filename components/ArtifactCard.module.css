@@ -1,77 +1,48 @@
-/* ArtifactCard: <details>/<summary> collapsible built on the shared .card look.
-   :global(.card) is combined with the local .details class so this file's rules win the
-   cascade regardless of stylesheet load order, letting us reset .card's default padding and
-   hand layout to the summary/body rows below. */
-
-:global(.card).details {
-  padding: 0;
-  overflow: hidden;
-}
+.card { padding: 0; }
 
 .summary {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
+  gap: var(--s2);
+  padding: var(--s4);
   cursor: pointer;
   list-style: none;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--dur-hover) var(--ease-out);
 }
 
-.summary::-webkit-details-marker {
-  display: none;
+.summary::-webkit-details-marker { display: none; }
+.summary:hover { background: var(--surface-2); }
+
+.glyph {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-left: 5px solid var(--fg-muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--dur-expand) var(--ease);
 }
 
-.summary:hover {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-}
-
-.disclosure {
-  flex: 0 0 auto;
-  width: 1em;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-faint);
-}
-
-.disclosure::before {
-  content: "▸";
-}
-
-:global(.card).details[open] > .summary .disclosure::before {
-  content: "▾";
-}
+.card[open] .glyph { transform: rotate(90deg); }
 
 .title {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: var(--t-1);
+  color: var(--fg);
+  overflow-wrap: anywhere;
 }
 
-.badge {
-  flex: 0 0 auto;
-}
+.badge { margin-left: auto; }
 
 .path {
-  flex: 0 0 auto;
-  max-width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0 var(--s4);
+  color: var(--fg-muted);
+  overflow-wrap: anywhere;
+  user-select: all;
 }
 
 .body {
-  padding: 0 18px 16px;
+  padding: var(--s3) var(--s4) var(--s4);
   max-height: 360px;
   overflow: auto;
-}
-
-.empty {
-  margin: 0;
-  font-size: 12.5px;
 }

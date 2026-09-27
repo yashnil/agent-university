@@ -1,4 +1,6 @@
+import Link from "next/link";
 import ArtifactCard from "@/components/ArtifactCard";
+import ArtifactChip from "@/components/ArtifactChip";
 import GapBanner from "@/components/GapBanner";
 import LifecycleTimeline from "@/components/LifecycleTimeline";
 import ModeSwitch from "@/components/ModeSwitch";
@@ -9,8 +11,15 @@ import SkillStatusChip from "@/components/SkillStatusChip";
 import TransferExam from "@/components/TransferExam";
 import { isolationFacts, loadLifecycle, type DemoCaseId, type Mode, type Outcome } from "./_lib/data";
 
-// The page reads fixtures (and, in live mode, the registry or runtime record) from disk per request.
+// Fixtures and the registry are read from disk per request.
 export const dynamic = "force-dynamic";
+
+const SCHEMA: Record<string, "frozen" | "v0-placeholder"> = {
+  "company.json": "frozen",
+  "repo_analysis.json": "v0-placeholder",
+  "score.json": "v0-placeholder",
+  "outreach.md": "v0-placeholder",
+};
 
 export default async function Page({
   searchParams,
@@ -19,71 +28,54 @@ export default async function Page({
 }) {
   const params = await searchParams;
   const mode: Mode = params.mode === "live" ? "live" : "demo";
-  const requestedOutcome: Outcome = params.outcome === "failed" ? "failed" : "certified";
-  const requestedCase: DemoCaseId = params.case === "vercel" ? "vercel" : "northwind";
-  const data = await loadLifecycle(mode, requestedOutcome, requestedCase);
-  const q = (next: Record<string, string>) =>
-    "?" + new URLSearchParams({ mode: data.mode, outcome: requestedOutcome, case: requestedCase, ...next }).toString();
+  const outcome: Outcome = params.outcome === "failed" ? "failed" : "certified";
+  const demoCase: DemoCaseId = params.case === "vercel" ? "vercel" : "northwind";
+  const data = await loadLifecycle(mode, outcome, demoCase);
 
   const skill = data.skillCertified ?? data.skillObserved;
-  // Three distinct states, and the page must never blur them: certified (a decision was made and
-  // it passed), awaiting certification (the trial passed but nobody has promoted it — where runtime
-  // hands off), and withheld (the trial ran and failed).
-  const examPassed = data.transfer.passed && data.transfer.verification.passed;
+  // Three states the page must never blur: certified (a decision was made and it passed), awaiting
+  // certification (the trial passed but nobody promoted it), and withheld (the trial failed).
+  const trialPassed = data.transfer.passed && data.transfer.verification.passed;
   const certified = data.certification ? data.certification.certified : skill.status === "certified";
-  const awaitingCertification = !certified && examPassed;
+  const awaiting = !certified && trialPassed;
   const teacherCase =
-    data.cases.find((c) => c.role === "teacher" && c.skillId === data.skillObserved.id)?.id ?? "teacher case";
+    data.cases.find((c) => c.role === "teacher" && c.skillId === data.skillObserved.id)?.id ?? "origin case";
   const steps = data.plan?.steps ?? [];
-  const certifiedSteps = steps.filter((step) => step.status === "certified").length;
+  const certifiedSteps = steps.filter((s) => s.status === "certified").length;
+  const scenarioHref = (next: Outcome) =>
+    `/?mode=${data.mode}&case=${demoCase}&outcome=${next}`;
 
   return (
     <main className="page">
-      <header className="masthead">
-        <div>
-          <div className="wordmark">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="brandMark"
-              src="/swarmem-logo.png"
-              alt=""
-              width={52}
-              height={52}
-              aria-hidden="true"
-            />
-            <h1>
-              swar<em className="brandMem">mem</em>
-            </h1>
-          </div>
-          <p className="northStar">
-            One agent learns → <strong>another agent proves it</strong> → every agent can inherit it. A
-            procedure becomes trusted organizational capability only once a <em>different</em> agent has
-            reproduced it on an unseen task and a deterministic verifier has signed off.
+      <h1 className="pageTitle">Certification record</h1>
+      <p className="lede">
+        One agent learns → <strong>another agent proves it</strong> → every agent can inherit it. A
+        procedure becomes trusted capability only once a <em>different</em> agent has reproduced it on
+        a case it never saw, and a deterministic verifier has agreed.
+      </p>
+
+      <div className="controls">
+        <ModeSwitch mode={data.mode} demoCase={demoCase} outcome={outcome} source={data.source} />
+        <div className="scenario">
+          <p className="scenarioLegend">Scenario</p>
+          <p className="scenarioLinks">
+            <Link href={scenarioHref("certified")} aria-current={outcome === "certified" ? "true" : undefined}>
+              certified run
+            </Link>
+            <span className="sep" aria-hidden="true"> · </span>
+            <Link href={scenarioHref("failed")} aria-current={outcome === "failed" ? "true" : undefined}>
+              failed trial
+            </Link>
+          </p>
+          <p className="scenarioNote muted">
+            What happened in the run — a separate question from where the data came from.
           </p>
         </div>
-        <div>
-          <ModeSwitch mode={data.mode} source={data.source} />
-          <p className="mono faint" style={{ margin: "8px 0 0", textAlign: "right" }}>
-            case:{" "}
-            <a href={q({ case: "vercel" })}>real run (Linear → Vercel)</a>
-            {" · "}
-            <a href={q({ case: "northwind" })}>fictional lifecycle</a>
-            {data.fromRealRun ? (
-              <>
-                {" "}
-                <span className="badge badge--info">real QM run</span>
-              </>
-            ) : null}
-          </p>
-          <p className="mono faint" style={{ margin: "6px 0 0", textAlign: "right" }}>
-            <a href="/arena">Arena: run a tournament →</a>
-          </p>
-        </div>
-      </header>
+      </div>
 
       {data.liveNote ? (
         <div className="notice">
-          <span className="badge badge--warn">note</span>
+          <span className="tag tag--muted">note</span>
           <span>{data.liveNote}</span>
         </div>
       ) : null}
@@ -94,11 +86,9 @@ export default async function Page({
           <h2>Lifecycle</h2>
         </div>
         <p className="sectionSub">
-          Every state change is an event on the frozen contract. The skill only advances through{" "}
-          <SkillStatusChip status="observed" /> <SkillStatusChip status="transferred" />{" "}
-          <SkillStatusChip status="certified" /> by evidence — there is no manual promotion, and no{" "}
-          <code className="mono">exam.failed</code> event: a failed trial simply leaves the skill at{" "}
-          <code className="mono">transferred</code>.
+          Every state change is an event on a frozen contract, and statuses only move forward. There is
+          no <code className="mono">exam.failed</code>: a failed trial is a result with{" "}
+          <code className="mono">passed: false</code>, and the skill stays where it was.
         </p>
         <LifecycleTimeline events={data.events} status={skill.status} />
       </section>
@@ -107,18 +97,13 @@ export default async function Page({
         <div className="sectionHead">
           <span className="sectionNum">02</span>
           <h2>Transfer trial</h2>
-          <span className="mono faint">
-            <a href={q({ outcome: "certified" })}>certified run</a>
-            {" · "}
-            <a href={q({ outcome: "failed" })}>failed trial</a>
-          </span>
         </div>
         <p className="sectionSub">
           The origin agent&apos;s procedure was captured, then recalled by a different agent in a new
           scope, session and sandbox. The replicating agent never saw the origin&apos;s answer — it got
-          the generalized procedure and an unseen company, nothing else.
+          the generalized procedure and a company it had never seen, nothing else.
           {data.fromRealRun
-            ? " Every fact below comes from the real QM run, sanitized: the isolation checks are the ones the runtime actually performed."
+            ? " Every fact below comes from the real run, sanitized: the isolation checks are the ones the runtime actually performed."
             : null}
         </p>
         <TransferExam
@@ -127,24 +112,18 @@ export default async function Page({
           teacherCase={teacherCase}
           isolation={
             data.certification
-              ? data.certification.rulings.map((ruling) => ({
-                  name: ruling.rule,
-                  passed: ruling.passed,
-                  detail: ruling.reason,
-                }))
+              ? data.certification.rulings.map((r) => ({ name: r.rule, passed: r.passed, detail: r.reason }))
               : isolationFacts(data)
           }
         />
         {data.certification ? (
-          <p className="mono faint" style={{ margin: "16px 0 0" }}>
-            policy {data.certification.policyId} ·{" "}
-            {data.certification.requireIsolation
-              ? "isolation facts required, not just recorded"
-              : "isolation facts recorded but not required"}
-          </p>
-        ) : null}
-        {data.certification ? (
-          <div style={{ marginTop: 16 }}>
+          <div className="stack">
+            <p className="policyLine mono muted">
+              policy {data.certification.policyId} ·{" "}
+              {data.certification.requireIsolation
+                ? "isolation facts required, not merely recorded"
+                : "isolation facts recorded but not required"}
+            </p>
             <RulingsPanel
               policyId={data.certification.policyId}
               summary={data.certification.summary}
@@ -160,40 +139,36 @@ export default async function Page({
       <section className="section">
         <div className="sectionHead">
           <span className="sectionNum">03</span>
-          <h2>
-            {certified
-              ? "Certified capability"
-              : awaitingCertification
-                ? "Awaiting certification"
-                : "Capability withheld"}
-          </h2>
+          <h2>{certified ? "Certified capability" : awaiting ? "Awaiting certification" : "Capability withheld"}</h2>
           <SkillStatusChip status={skill.status} />
         </div>
         <p className="sectionSub">
           {certified ? (
             <>
-              The record every other agent inherits: skill <code className="mono">{skill.id}</code> produces{" "}
-              <code className="mono">{skill.artifactType}</code>, learned from {skill.teacher.name} and
-              replicated by {data.transfer.student.name} on{" "}
+              The record every other agent inherits: skill <code className="mono">{skill.id}</code>{" "}
+              produces <code className="mono">{skill.artifactType}</code>, learned from{" "}
+              {skill.teacher.name} and replicated by {data.transfer.student.name} on{" "}
               <code className="mono">{data.transfer.examCase}</code>.
             </>
-          ) : awaitingCertification ? (
+          ) : awaiting ? (
             <>
               The trial passed and the verifier agreed, but nothing is inherited yet: skill{" "}
-              <code className="mono">{skill.id}</code> is at <code className="mono">{skill.status}</code>{" "}
-              until the certification engine applies its policy. Proving and promoting are separate on
-              purpose — the agent that ran the trial does not get to rule on its own result.
+              <code className="mono">{skill.id}</code> stays at{" "}
+              <code className="mono">{skill.status}</code> until the certification engine applies its
+              policy. Proving and promoting are separate on purpose — the agent that ran the trial does
+              not get to rule on its own result.
             </>
           ) : (
             <>
-              The trial ran but did not certify, so nothing is inherited: skill{" "}
+              The trial ran and did not certify, so nothing is inherited: skill{" "}
               <code className="mono">{skill.id}</code> stays at{" "}
-              <code className="mono">{skill.status}</code> and no agent may treat it as trusted capability.
+              <code className="mono">{skill.status}</code> and no agent may treat it as trusted
+              capability.
             </>
           )}
         </p>
         {data.certification?.metrics ? (
-          <dl className="kv" style={{ marginBottom: 16 }}>
+          <dl className="kv metrics">
             {data.certification.metrics.durationMs !== undefined ? (
               <>
                 <dt>trial duration</dt>
@@ -221,20 +196,17 @@ export default async function Page({
           </dl>
         ) : null}
         <div className="grid2">
+          <ArtifactCard title="Skill record" json={skill} badge={<SkillStatusChip status={skill.status} />} open />
           <ArtifactCard
-            title="Skill record"
-            json={skill}
-            badge={<SkillStatusChip status={skill.status} />}
-            open
-          />
-          <ArtifactCard
-            title={`${data.transfer.artifact.type} (produced by the replicating agent)`}
+            title={`${data.transfer.artifact.type} — produced by the replicating agent`}
             path={data.transfer.artifact.path}
             json={data.artifacts.company}
             badge={
-              <span className={`badge ${data.transfer.verification.passed ? "badge--pass" : "badge--fail"}`}>
-                {data.transfer.verification.passed ? "verifier passed" : "verifier rejected"}
-              </span>
+              <ArtifactChip
+                name={data.transfer.artifact.type}
+                schemaStatus={SCHEMA[data.transfer.artifact.type] ?? "unknown"}
+                state={data.transfer.verification.passed ? "certified" : "missing"}
+              />
             }
           />
         </div>
@@ -246,9 +218,9 @@ export default async function Page({
           <h2>The registry</h2>
         </div>
         <p className="sectionSub">
-          Certification is only worth something if it is written down where every agent can find it.
-          This is the committed registry — the organization&apos;s answer to &ldquo;what do we actually
-          trust?&rdquo; — written only by a promotion, never by a run.
+          Certification is only worth something if it is written where every agent can find it. This is
+          the committed registry — what the organization actually trusts — written only by a promotion,
+          never by a run.
         </p>
         <RegistryPanel
           rows={data.registry?.rows ?? []}
@@ -262,41 +234,41 @@ export default async function Page({
           <h2>Composition, and the gap</h2>
         </div>
         <p className="sectionSub">
-          A fresh agent plans the full pipeline from certified skills alone — {certifiedSteps} of{" "}
-          {steps.length} steps are backed by one. Where none exists, the system reports a gap instead of
-          improvising: the honest edge of what the organization can actually trust.
+          A fresh agent plans the pipeline from certified skills alone — {certifiedSteps} of{" "}
+          {steps.length} steps are backed by one. Where none exists the system reports a gap instead of
+          improvising: the honest edge of what can be trusted, and the next skill to teach.
         </p>
         <PipelineStrip steps={steps} missingArtifactType={data.gap?.missingArtifactType} />
         {data.gap ? <GapBanner gap={data.gap} /> : null}
-        <div className="grid2" style={{ marginTop: 16 }}>
+        <div className="grid2 stack">
           <ArtifactCard
             title="repo_analysis.json"
             json={data.artifacts.repoAnalysis}
-            badge={<span className="badge badge--fail">uncertified</span>}
+            badge={<ArtifactChip name="repo_analysis.json" schemaStatus="v0-placeholder" state="missing" />}
           />
           <ArtifactCard
             title="score.json"
             json={data.artifacts.score}
-            badge={<span className="badge badge--fail">uncertified</span>}
+            badge={<ArtifactChip name="score.json" schemaStatus="v0-placeholder" state="missing" />}
           />
           <ArtifactCard
             title="outreach.md"
             markdown={data.artifacts.outreach}
-            badge={<span className="badge badge--fail">uncertified</span>}
+            badge={<ArtifactChip name="outreach.md" schemaStatus="v0-placeholder" state="missing" />}
           />
         </div>
       </section>
 
       <footer className="footer">
-        Data source: <span className="mono">{data.source}</span>
+        Reading <span className="mono">{data.source}</span>
         {data.certification ? (
           <>
-            {" "}· decision: <span className="mono">{data.certification.from}</span>
+            {" "}· decision <span className="mono">{data.certification.from}</span>
           </>
         ) : null}
         . Contracts: <span className="mono">schemas/contracts/*.schema.json</span> ⇄{" "}
-        <span className="mono">lib/types.ts</span>, checked by <span className="mono">npm test</span>. Demo
-        mode reads committed fixtures only — no QM, no secrets, no network.
+        <span className="mono">lib/types.ts</span>, checked by <span className="mono">npm test</span>.
+        Demo fiction reads committed fixtures only — no agent runtime, no secrets, no network.
       </footer>
     </main>
   );

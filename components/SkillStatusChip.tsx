@@ -1,11 +1,14 @@
-import type { CSSProperties, JSX } from "react";
+import type { JSX } from "react";
 import type { SkillStatus } from "@/lib/types";
+import StatusNode from "@/components/StatusNode";
 import styles from "./SkillStatusChip.module.css";
 
-// Small pill for a single SkillStatus ("observed" | "transferred" | "certified"),
-// colored via the --observed / --transferred / --certified CSS vars from globals.css.
-// When `active` is explicitly false, the chip renders dimmed so a progression row
-// (see LifecycleTimeline) can show which statuses have been reached so far.
+// Pairs a StatusNode with its status word — observed | transferred | certified.
+// StatusNode alone is decorative (aria-hidden), so the mono label beside it is
+// what actually carries the state to assistive tech and to anyone reading past
+// colour. `active === false` marks a status not yet reached (e.g. a step in a
+// lifecycle progression that hasn't happened yet); see SkillStatusChip.module.css
+// for how the dimmed state stays legible.
 export default function SkillStatusChip({
   status,
   active,
@@ -14,15 +17,13 @@ export default function SkillStatusChip({
   active?: boolean;
 }): JSX.Element {
   const reached = active !== false;
-  const chipStyle = { "--chip-color": `var(--${status})` } as CSSProperties;
 
   return (
-    <span
-      className={reached ? styles.chip : `${styles.chip} ${styles.dimmed}`}
-      style={chipStyle}
-    >
-      <span className={styles.dot} aria-hidden="true" />
-      {status}
+    <span className={reached ? styles.chip : `${styles.chip} ${styles.dimmed}`}>
+      <span className={styles.node}>
+        <StatusNode state={status} size="sm" />
+      </span>
+      <span className={styles.label}>{status}</span>
     </span>
   );
 }

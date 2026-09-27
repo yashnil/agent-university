@@ -1,8 +1,10 @@
 import type { JSX, ReactNode } from "react";
 import styles from "./ArtifactCard.module.css";
 
-// Collapsible artifact viewer built on <details>/<summary> — no client JS required, and
-// keyboard/AT behaviour (Enter/Space to toggle, native focus handling) comes for free.
+/**
+ * The JSON an evaluator came to read. Native <details>, so it needs no client JS and stays
+ * keyboard-operable; the body scrolls inside the panel rather than widening the page.
+ */
 export default function ArtifactCard({
   title,
   path,
@@ -18,25 +20,19 @@ export default function ArtifactCard({
   badge?: ReactNode;
   open?: boolean;
 }): JSX.Element {
-  const hasJson = json !== undefined;
-  const hasMarkdown = markdown !== undefined;
+  const body =
+    json !== undefined ? JSON.stringify(json, null, 2) : markdown !== undefined ? markdown : null;
 
   return (
-    <details className={`card ${styles.details}`} open={open}>
+    <details className={`panel ${styles.card}`} open={open}>
       <summary className={styles.summary}>
-        <span className={styles.disclosure} aria-hidden="true" />
+        <span className={styles.glyph} aria-hidden="true" />
         <span className={styles.title}>{title}</span>
         {badge ? <span className={styles.badge}>{badge}</span> : null}
-        {path ? <span className={`mono faint ${styles.path}`}>{path}</span> : null}
       </summary>
+      {path ? <p className={`mono ${styles.path}`}>{path}</p> : null}
       <div className={styles.body}>
-        {hasJson ? (
-          <pre className="code">{JSON.stringify(json, null, 2)}</pre>
-        ) : hasMarkdown ? (
-          <pre className="code">{markdown}</pre>
-        ) : (
-          <p className={`faint ${styles.empty}`}>no artifact</p>
-        )}
+        {body === null ? <p className="muted">no artifact</p> : <pre className="code">{body}</pre>}
       </div>
     </details>
   );

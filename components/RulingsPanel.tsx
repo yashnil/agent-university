@@ -28,22 +28,23 @@ export default function RulingsPanel({
   const hasFooter = Boolean(decidedAt || inputsDigest);
 
   return (
-    <div className="card">
-      <div className={styles.header}>
-        <p className="cardTitle">Certification decision</p>
-        <span className={`badge ${certified ? "badge--pass" : "badge--fail"}`}>
-          {certified ? "certified" : "not certified"}
-        </span>
-        {policyId ? <span className="faint mono">{policyId}</span> : null}
-        <span className="faint mono">
-          {passedCount}/{rulings.length} rules passed
-        </span>
-      </div>
-
-      <p className={`${styles.summary} ${certified ? styles.summaryPass : styles.summaryFail}`}>{summary}</p>
+    <section className={`panel ${styles.panel}`} aria-label="Certification decision">
+      <header className={styles.header}>
+        <p className={`${styles.verdict} ${certified ? styles.verdictPass : styles.verdictFail}`}>{summary}</p>
+        <div className={styles.headerMeta}>
+          <span className={`tag ${certified ? "tag--pass" : "tag--fail"}`}>
+            <span aria-hidden="true">{certified ? "✓" : "✗"}</span>
+            {certified ? "certified" : "not certified"}
+          </span>
+          {policyId ? <span className="idTag">{policyId}</span> : null}
+          <span className="muted count">
+            {passedCount}/{rulings.length} rules passed
+          </span>
+        </div>
+      </header>
 
       {rulings.length === 0 ? (
-        <p className="faint">no rulings recorded</p>
+        <p className="muted">no rulings recorded</p>
       ) : (
         <ol className={styles.list}>
           {rulings.map((ruling, index) => {
@@ -51,16 +52,24 @@ export default function RulingsPanel({
             return (
               <li key={ruling.rule} className={`${styles.row} ${ruling.passed ? "" : styles.rowFail}`}>
                 <div className={styles.rowHead}>
-                  <span className="faint mono">{index + 1}.</span>
-                  <span className={`badge ${ruling.passed ? "badge--pass" : "badge--fail"}`}>
-                    {ruling.passed ? "PASS" : "FAIL"}
+                  <span className={`mono ${styles.index}`} aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span className="mono">{ruling.rule}</span>
+                  <span className={`tag ${ruling.passed ? "tag--pass" : "tag--fail"}`}>
+                    <span aria-hidden="true">{ruling.passed ? "✓" : "✗"}</span>
+                    {ruling.passed ? "pass" : "fail"}
+                  </span>
+                  <span className={`mono ${styles.rule}`}>{ruling.rule}</span>
                 </div>
                 <p className={styles.reason}>{ruling.reason}</p>
                 {hasEvidence ? (
                   <details className={styles.details} open={!ruling.passed}>
-                    <summary className={styles.summaryToggle}>evidence</summary>
+                    <summary className={styles.summary}>
+                      <span className={styles.disclosureGlyph} aria-hidden="true">
+                        &#9656;
+                      </span>
+                      evidence
+                    </summary>
                     <pre className={`code ${styles.evidence}`}>{JSON.stringify(ruling.evidence, null, 2)}</pre>
                   </details>
                 ) : null}
@@ -71,19 +80,19 @@ export default function RulingsPanel({
       )}
 
       {hasFooter ? (
-        <div className={styles.footer}>
+        <footer className={styles.footer}>
           {decidedAt ? (
-            <span className="faint mono">
-              decided at <span className={styles.footerValue}>{decidedAt}</span>
-            </span>
+            <p className={styles.footerItem}>
+              <span className="muted">decided at</span> <span className="mono">{decidedAt}</span>
+            </p>
           ) : null}
           {inputsDigest ? (
-            <span className="faint mono">
-              inputs digest (reproducibility): <span className={styles.footerValue}>{inputsDigest}</span>
-            </span>
+            <p className={styles.footerItem}>
+              <span className="muted">inputs digest (reproducibility)</span> <span className="mono">{inputsDigest}</span>
+            </p>
           ) : null}
-        </div>
+        </footer>
       ) : null}
-    </div>
+    </section>
   );
 }

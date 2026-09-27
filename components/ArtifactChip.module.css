@@ -1,0 +1,37 @@
+.chip {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  max-width: 100%;
+}
+
+.body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.name { color: var(--fg); overflow-wrap: anywhere; }
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  font-size: var(--t-2);
+  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+}
+
+.state { text-transform: lowercase; }
+.note { font-size: var(--t-2); color: var(--fg-muted); }
+
+/* certified — a solid accent hairline, matching the lit node */
+.certified { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.certified .state { color: var(--accent); }
+
+/* uncertified — produced, but nothing has ruled on it */
+.uncertified { border-color: var(--border); }
+
+/* missing — dashed, because no certified skill produces this artifact at all */
+.missing { border-style: dashed; }
+.missing .name { color: var(--fg-muted); }

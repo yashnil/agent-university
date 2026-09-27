@@ -30,19 +30,19 @@ function HeatColumn({ heat, flowMode, threshold }: { heat: HeatView; flowMode: b
         {flow ? (
           <>
             <div className={styles.flowTop}>
-              <span className="mono faint">flow {heat.heat}</span>
-              <span className={`badge ${flow.source === "recall" ? "badge--info" : ""}`}>{sourceLabel(flow)}</span>
+              <span className="mono muted">flow {heat.heat}</span>
+              <span className={`tag ${flow.source === "recall" ? "tag--accent" : ""}`}>{sourceLabel(flow)}</span>
             </div>
             <h3 className={styles.heatTitle}>{flow.title}</h3>
-            <span className="mono faint" title={flow.procedureId}>
+            <span className="mono muted" title={flow.procedureId}>
               {shortId(flow.procedureId)}
             </span>
           </>
         ) : (
           <>
-            <span className="mono faint">{flowMode ? "flow" : "heat"} {heat.heat}</span>
+            <span className="mono muted">{flowMode ? "flow" : "heat"} {heat.heat}</span>
             <h3 className={styles.heatTitle}>{heat.examCompany ?? heat.examCase}</h3>
-            <span className="mono faint">{heat.examCase}</span>
+            <span className="mono muted">{heat.examCase}</span>
           </>
         )}
       </div>
@@ -61,21 +61,21 @@ function HeatColumn({ heat, flowMode, threshold }: { heat: HeatView; flowMode: b
         {f ? (
           flow || flowMode ? (
             f.advances ? (
-              <span className="badge badge--pass">
+              <span className="tag tag--pass">
                 {f.certifiedCount}/{total} certified · advances → final
               </span>
             ) : (
-              <span className="badge badge--fail">
+              <span className="tag tag--fail">
                 {f.certifiedCount}/{total} · eliminated
               </span>
             )
           ) : f.winner ? (
-            <span className="badge badge--pass">{f.certifiedCount} certified · winner → final</span>
+            <span className="tag tag--pass">{f.certifiedCount} certified · winner → final</span>
           ) : (
-            <span className="badge badge--fail">0 certified · no finalist</span>
+            <span className="tag tag--fail">0 certified · no finalist</span>
           )
         ) : (
-          <span className="mono faint">
+          <span className="mono muted">
             {done}/{heat.students.length} finished · {certifiedSoFar} certified
           </span>
         )}
@@ -119,29 +119,29 @@ function StudentCard({ s, winner, flowMode }: { s: StudentView; winner: boolean;
     <>
       <div className={styles.cardHead}>
         <span className={styles.name}>{s.student.name}</span>
-        {winner ? <span className="badge badge--pass">{flowMode ? "best run" : "→ final"}</span> : null}
+        {winner ? <span className="tag tag--pass">{flowMode ? "best run" : "→ final"}</span> : null}
       </div>
       {s.examCompany || s.examCase ? (
         <p className={`mono ${styles.exam}`}>
           trial: <strong>{s.examCompany ?? s.examCase}</strong>
-          {s.examCompany && s.examCase ? <span className="faint"> · {s.examCase}</span> : null}
+          {s.examCompany && s.examCase ? <span className="muted"> · {s.examCase}</span> : null}
         </p>
       ) : null}
       <div className={styles.cardMeta}>
-        {s.state === "pending" ? <span className="mono faint">pending</span> : null}
+        {s.state === "pending" ? <span className="mono muted">pending</span> : null}
         {s.state === "running" ? (
           <span className={`mono ${styles.runningLabel}`}>running{elapsed !== null ? ` · ${fmtDuration(elapsed)}` : ""}</span>
         ) : null}
         {r ? (
           <>
-            <span className={`badge ${r.certified ? "badge--pass" : "badge--fail"}`}>
+            <span className={`tag ${r.certified ? "tag--pass" : "tag--fail"}`}>
               {r.certified ? "certified" : "not certified"}
             </span>
             <SkillStatusChip status={r.status} />
           </>
         ) : null}
       </div>
-      <p className={`mono faint ${styles.harness}`}>
+      <p className={`mono muted ${styles.harness}`}>
         {s.student.harness} · {s.student.id}
       </p>
       {r && !r.certified && (r.failedRules.length > 0 || r.failedChecks.length > 0 || r.error) ? (
@@ -151,7 +151,7 @@ function StudentCard({ s, winner, flowMode }: { s: StudentView; winner: boolean;
           {r.error ? <div>error: {r.error}</div> : null}
         </div>
       ) : null}
-      {metrics.length ? <p className={`mono faint ${styles.metrics}`}>{metrics.join(" · ")}</p> : null}
+      {metrics.length ? <p className={`mono muted ${styles.metrics}`}>{metrics.join(" · ")}</p> : null}
     </>
   );
 
@@ -161,7 +161,7 @@ function StudentCard({ s, winner, flowMode }: { s: StudentView; winner: boolean;
     <div className={`${styles.card} ${stateClass} ${winner ? styles.winner : ""}`}>
       <button type="button" className={styles.cardButton} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {head}
-        <span className={`mono faint ${styles.toggle}`}>{open ? "hide rulings ▴" : "rulings ▾"}</span>
+        <span className={`mono muted ${styles.toggle}`}>{open ? "hide rulings ▴" : "rulings ▾"}</span>
       </button>
       {open ? (
         <div className={styles.rulings}>
@@ -169,13 +169,13 @@ function StudentCard({ s, winner, flowMode }: { s: StudentView; winner: boolean;
           <ol className={styles.rulingList}>
             {r.rulings.map((ru) => (
               <li key={ru.rule} className={ru.passed ? "" : styles.rulingFail}>
-                <span className={`badge ${ru.passed ? "badge--pass" : "badge--fail"}`}>{ru.passed ? "pass" : "fail"}</span>
+                <span className={`tag ${ru.passed ? "tag--pass" : "tag--fail"}`}>{ru.passed ? "pass" : "fail"}</span>
                 <span className="mono">{ru.rule}</span>
                 <p className={styles.reason}>{ru.reason}</p>
               </li>
             ))}
           </ol>
-          {r.runId ? <p className="mono faint">run {r.runId}</p> : null}
+          {r.runId ? <p className="mono muted">run {r.runId}</p> : null}
         </div>
       ) : null}
     </div>

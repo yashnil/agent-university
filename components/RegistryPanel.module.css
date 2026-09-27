@@ -1,19 +1,26 @@
-/* RegistryPanel: the company-wide ledger of certified skills — one row per
-   promoted skill, with a nested block for the champion flow when the row
-   came from a tournament. */
+/* RegistryPanel: the organization's canonical register of certified skills —
+   one ruled row per promotion, read like an accreditation office's record
+   book, not a card grid. Tokens come from app/globals.css; nothing here
+   hardcodes colour or spacing, and nothing here draws a circle — that shape
+   is reserved for StatusNode. */
+
+.panel {
+  display: block;
+}
 
 .header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: var(--s3);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s4);
 }
 
 .note {
-  margin: 0 0 16px;
-  color: var(--text-dim);
-  max-width: 78ch;
+  margin: 0 0 var(--s4);
+  max-width: var(--measure);
   overflow-wrap: anywhere;
 }
 
@@ -21,13 +28,10 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .row {
-  padding: 14px 0 0;
+  padding: var(--s4) 0;
   border-top: 1px solid var(--border);
 }
 
@@ -40,49 +44,55 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
 }
 
 .name {
-  font-size: 15px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t2);
+  line-height: var(--lh-tight);
   letter-spacing: -0.01em;
+  color: var(--fg);
   overflow-wrap: anywhere;
 }
 
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* Champion flow — set apart with surface tone and a hairline, never a shadow. */
 .procedure {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  margin-top: var(--s4);
+  padding: var(--s4);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   overflow: hidden;
 }
 
-.procedureLabel {
-  margin: 0 0 6px;
+.procedureHead {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
+  gap: var(--s2);
+  margin-bottom: var(--s3);
 }
 
 .procedureTitle {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  margin: 0 0 var(--s3);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t1);
+  line-height: var(--lh-tight);
+  color: var(--fg);
   overflow-wrap: anywhere;
 }
 
 .noProcedure {
-  margin: 12px 0 0;
-  color: var(--text-faint);
+  margin: var(--s4) 0 0;
 }
