@@ -27,8 +27,8 @@ panel, where the square edge would show. Never stretch, recolour, rotate, crop f
 effects. Minimum 24px in UI, 16px in the favicon only; below that the dots blur, so use the
 wordmark alone. The brain is never reused as decoration — only its grammar is.
 
-**Lockup** (`components/Logo.tsx`, rendered once in `app/layout.tsx`): mark 32×32 + 8px + wordmark
-at 20px, `letter-spacing: -0.01em`, inside a link to `/` with `aria-label="swarmem home"` and
+**Lockup** (`components/Logo.tsx`, rendered once in `app/layout.tsx`): mark 48×48 + 12px + wordmark
+at 25px, `letter-spacing: -0.01em`, inside a link to `/` with `aria-label="swarmem home"` and
 `alt=""` on the image. Hover underlines the wordmark; the mark itself never changes.
 
 ## 2. Visual grammar

@@ -1,7 +1,7 @@
 .lockup {
   display: inline-flex;
   align-items: center;
-  gap: var(--s2);
+  gap: var(--s3);
   text-decoration: none;
   color: var(--fg);
   transition: opacity var(--dur-hover) var(--ease-out);
@@ -17,17 +17,17 @@
 .mark {
   display: block;
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
 }
 
 .wordmark {
   font-family: var(--font-display);
-  font-size: var(--t1);
+  font-size: var(--t2);
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--fg);
-  font-variation-settings: "opsz" 20;
+  font-variation-settings: "opsz" 28;
 }
 
 .wordmark em {
