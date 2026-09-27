@@ -6,7 +6,7 @@
       "teacher run 9f8d36da (Linear) and student run 5e30ec98 (Vercel) were real QM + Memorable runs, recorded"
     ],
     "registry": [
-      "Research Company certification: production engine, strict mode, same decision as registry/skills/research-company.json"
+      "Research Company certification: production engine, strict mode, the same decision as the real Vercel entry in registry/ledger.jsonl (the canonical record in registry/skills/ may since have been replaced by a newer certified run)"
     ],
     "fixture": [
       "Analyze Repository and Evaluate Opportunity outputs are hand-written stand-ins (demo/fixtures/composite/)",
@@ -492,14 +492,15 @@
         "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
         "certifiedAt": "2026-09-27T21:58:23Z",
         "policy": "au-transfer-v1",
-        "record": "registry/skills/research-company.json",
+        "record": "registry/ledger.jsonl",
         "verification": "6/6",
         "provenance": {
           "teacherRunId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
           "examRunId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
           "examCase": "exam-vercel",
           "examCompany": "Vercel",
-          "realRun": true
+          "realRun": true,
+          "canonical": false
         }
       }
     ]
@@ -524,7 +525,7 @@
       {
         "skillId": "research-company",
         "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
-        "record": "registry/skills/research-company.json",
+        "record": "registry/ledger.jsonl",
         "status": "certified"
       }
     ],
@@ -542,7 +543,7 @@
         "inherited": true,
         "certifiedSkillId": "research-company",
         "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
-        "record": "registry/skills/research-company.json",
+        "record": "registry/ledger.jsonl",
         "evidence": {
           "examRunId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
           "examCase": "exam-vercel",
@@ -780,7 +781,7 @@
       "verifiedChecks": {
         "passed": 6,
         "total": 6,
-        "source": "registry/skills/research-company.json"
+        "source": "registry/ledger.jsonl"
       },
       "teacherChecks": {
         "passed": 6,
@@ -796,14 +797,15 @@
       "comparison": [
         {
           "role": "teacher",
-          "label": "Teacher · Linear · authored Scout skill, no recalled memory",
+          "label": "Teacher · Linear",
           "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
           "wallClockMs": 49971,
           "shellToolCalls": 4,
           "failedShellToolCalls": 2,
+          "toolCalls": null,
+          "note": "real QM run, recorded",
           "tokens": null,
-          "verification": "6/6",
-          "note": "real QM run"
+          "verification": "6/6"
         },
         {
           "role": "student",
@@ -812,9 +814,10 @@
           "wallClockMs": 16611,
           "shellToolCalls": 2,
           "failedShellToolCalls": 0,
+          "toolCalls": null,
+          "note": "real QM run, recorded",
           "tokens": null,
-          "verification": "6/6",
-          "note": "real QM run"
+          "verification": "6/6"
         },
         {
           "role": "intern",
@@ -823,13 +826,14 @@
           "wallClockMs": null,
           "shellToolCalls": 0,
           "failedShellToolCalls": 0,
+          "toolCalls": null,
           "tokens": null,
           "verification": "6/6",
           "note": "the research step was inherited, not re-run: no agent time to report"
         }
       ],
       "sources": [
-        "registry/skills/research-company.json",
+        "registry/ledger.jsonl",
         "demo/fixtures/run-metrics.json"
       ]
     },

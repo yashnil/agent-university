@@ -9,7 +9,7 @@
 // steps that are not implemented live run from hand-written stand-ins labelled `fixture`. A step
 // with no capability at all is a GAP, which becomes a candidate, never trusted knowledge.
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT } from "./certification.ts";
 import type { CertificationRecord } from "./certification.ts";
@@ -98,6 +98,8 @@ export interface RunMetric {
   wallClockMs: number | null;
   shellToolCalls: number | null;
   failedShellToolCalls: number | null;
+  /** Every tool call of the run (QM activity entries of type tool_call), when that is what was recorded. */
+  toolCalls: number | null;
   tokens: number | null;
   verification: string | null;
   note: string;
@@ -132,7 +134,7 @@ export interface CompositeRun {
 
 export interface ComposeOptions {
   /** Only certified records are used; anything else passed in is ignored (never trusted). */
-  certified: { record: CertificationRecord; path: string }[];
+  certified: { record: CertificationRecord & { metrics?: { durationMs?: number; toolCalls?: number } }; path: string }[];
   at: string; // ISO time of the run's first step; later steps are 1s apart (orchestration order, not agent time)
   planId: string;
   internId: string;
@@ -151,6 +153,7 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
     .map((c) => [c.record.skill.id, c]));
   const intern: AgentIdentity = { id: opts.internId, name: "Intern (fresh)", harness: "agent-university" };
   const produced = new Map<StepOutput, StepStatus>();
+  const available = new Set<StepOutput>(); // outputs actually produced (an artifact exists) in this run
   const steps: CompositeStep[] = [];
 
   DILIGENCE_PLAN.forEach((plan, i) => {
@@ -158,20 +161,29 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
       seq: i + 1, skillId: plan.skillId, skillName: plan.name, inputs: plan.inputs, output: plan.output,
       startedAt: tick(opts.at, 2 * i), finishedAt: tick(opts.at, 2 * i + 1),
     };
-    const missingInputs = plan.inputs.filter((inp) => {
-      const s = produced.get(inp);
-      return s === "missing" || s === "blocked";
-    });
     const cert = trusted.get(plan.skillId);
+    // Whether a capability exists is decided first, so a missing skill is always a GAP; a skill that
+    // exists but lacks an input is blocked. An input is available only if this run produced it.
+    const missingInputs = plan.inputs.filter((inp) => !available.has(inp));
+    const noCapability = missingInputs.filter((inp) => ["missing", "blocked"].includes(produced.get(inp) ?? "missing"));
+    const notProduced = missingInputs.filter((inp) => !noCapability.includes(inp));
     let step: CompositeStep;
-    if (missingInputs.length) {
+    if (!cert && plan.standIn === undefined) {
+      step = { ...base, status: "missing", source: "gap", inherited: false, artifact: null,
+        note: `No certified skill, and no procedure at all, produces ${plan.output}. Reported as a GAP; a candidate skill was created.` };
+    } else if (missingInputs.length) {
       step = { ...base, status: "blocked", source: "gap", inherited: false, artifact: null,
-        note: `Blocked: needs ${missingInputs.join(", ")}, which no capability produces. Not attempted.` };
+        note: "Blocked: needs " + [
+          ...(noCapability.length ? [`${noCapability.join(", ")}, which no capability produces`] : []),
+          ...(notProduced.length ? [`${notProduced.join(", ")}, which was not produced in this run`] : []),
+        ].join("; and ") + ". Not attempted." };
     } else if (cert) {
       const r = cert.record;
       const path = r.transfer.artifact.path;
-      const sameCase = r.transfer.examCompany === DILIGENCE_COMPANY && path && r.transfer.artifact.type === plan.output;
-      // Reuse the certified exam's output only after re-verifying it now; otherwise nothing is reused.
+      // Reuse the certified exam's own output only when it is for this task's company, is on disk, and
+      // re-verifies now. Nothing else stands in for a certified output.
+      const sameCase = r.transfer.examCompany === DILIGENCE_COMPANY && path && r.transfer.artifact.type === plan.output
+        && existsSync(join(ROOT, path));
       const check = sameCase ? verifyCompanyFile(join(ROOT, path)) : null;
       const reusable = !!check?.passed;
       step = { ...base, status: "certified", source: "certified-registry", inherited: true,
@@ -182,18 +194,18 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
         note: reusable
           ? `Inherited certified skill ${r.skill.id}. Output reused from the certified exam run ${r.transfer.runId} ` +
             `(real QM run, recorded), re-verified now ${ratio(check!.checks)}. Not re-executed.`
-          : `Inherited certified skill ${r.skill.id}; no verified output for ${DILIGENCE_COMPANY} to reuse, and the composite does not run agents live.` };
+          : `Inherited certified skill ${r.skill.id}, certified on ${r.transfer.examCase} (${r.transfer.examCompany ?? "unknown company"}, ` +
+            `run ${r.transfer.runId ?? "unknown"}, verifier ${ratio(r.verification.checks)}). That exam's output is not a verified ` +
+            `${plan.output} for ${DILIGENCE_COMPANY} available here, and the composite runs no agents, so no ${plan.output} was produced in this run.` };
     } else if (typeof plan.standIn === "string") {
       step = { ...base, status: "uncertified", source: "fixture", inherited: false,
         artifact: { type: plan.output, path: plan.standIn, content: readJson(plan.standIn) },
         note: `Not certified and not implemented live: a hand-written stand-in (${plan.standIn}) produced ${plan.output}. Not trusted, not inherited.` };
-    } else if (plan.standIn === true) {
+    } else {
       step = { ...base, status: "uncertified", source: "fixture", inherited: false, artifact: null,
         note: "Not certified; a stand-in exists but produced nothing for this task." };
-    } else {
-      step = { ...base, status: "missing", source: "gap", inherited: false, artifact: null,
-        note: `No certified skill, and no procedure at all, produces ${plan.output}. Reported as a GAP; a candidate skill was created.` };
     }
+    if (step.artifact) available.add(plan.output);
     produced.set(plan.output, step.status);
     steps.push(step);
   });
@@ -239,12 +251,42 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
 
   const research = steps.find((s) => s.source === "certified-registry");
   const researchRecord = research ? trusted.get(research.skillId)!.record : null;
-  const rm = opts.runMetrics?.runs ?? [];
-  const teacherRun = rm.find((r) => r.role === "teacher");
-  const studentRun = rm.find((r) => r.role === "student");
   const teacher = researchRecord ? teacherObservation(researchRecord, opts.observed ?? []) : null;
   const reused = steps.filter((s) => s.inherited);
   const reverified = research?.artifact ? research.note.match(/re-verified now (\d+\/\d+)/)?.[1] ?? null : null;
+  const teacherRunId = researchRecord ? stringOrNull(researchRecord.decision.rulings
+    .find((r) => r.rule === "teacher_run_verified")?.evidence.runId) : null;
+  const teacherCompany = researchRecord ? (researchRecord.decision.rulings.find((r) => r.rule === "exam_case_unseen")
+    ?.evidence.teacherCases as string[] | undefined)?.join(", ") ?? null : null;
+  const recorded = opts.runMetrics?.runs ?? [];
+  const usedSources = new Set<string>();
+  // A run's metrics come only from that run: the recorded-runs file by run id, else the certification
+  // record's own metrics for its own exam run. Never borrowed from another run or company.
+  const metricsFor = (runId: string | null, own?: { durationMs?: number; toolCalls?: number }) => {
+    const rec = runId ? recorded.find((r) => r.runId === runId) : undefined;
+    if (rec) {
+      usedSources.add("demo/fixtures/run-metrics.json");
+      return { wallClockMs: rec.wallClockMs, shellToolCalls: rec.shellToolCalls, failedShellToolCalls: rec.failedShellToolCalls,
+        toolCalls: null, note: "real QM run, recorded" };
+    }
+    if (own && (own.durationMs != null || own.toolCalls != null)) {
+      usedSources.add(`${research!.record} (metrics)`);
+      return { wallClockMs: own.durationMs ?? null, shellToolCalls: null, failedShellToolCalls: null,
+        toolCalls: own.toolCalls ?? null, note: "real QM run, metrics from its certification record" };
+    }
+    return { wallClockMs: null, shellToolCalls: null, failedShellToolCalls: null, toolCalls: null,
+      note: runId ? "real QM run, metrics not recorded" : "no run" };
+  };
+  const comparison: RunMetric[] = researchRecord ? [
+    { role: "teacher", label: `Teacher · ${teacherCompany ?? "teacher case"}`, runId: teacherRunId,
+      ...metricsFor(teacherRunId), tokens: null, verification: teacher ? `${teacher.passed}/${teacher.total}` : null },
+    { role: "student", label: `Student · ${researchRecord.transfer.examCompany ?? researchRecord.transfer.examCase} · recalled Memorable procedure`,
+      runId: researchRecord.transfer.runId ?? null, ...metricsFor(researchRecord.transfer.runId ?? null, researchRecord.metrics),
+      tokens: null, verification: ratio(researchRecord.verification.checks) },
+  ] : [];
+  comparison.push({ role: "intern", label: `Intern · ${DILIGENCE_COMPANY} · certified reuse`, runId: null, wallClockMs: null,
+    shellToolCalls: 0, failedShellToolCalls: 0, toolCalls: null, tokens: null, verification: reverified,
+    note: "the research step was inherited, not re-run: no agent time to report" });
   const metrics: CompositeMetrics = {
     verifiedChecks: researchRecord ? {
       passed: researchRecord.verification.checks.filter((c) => c.passed).length,
@@ -252,26 +294,14 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
     } : null,
     teacherChecks: teacher,
     certifiedSkillsReused: new Set(reused.map((s) => s.certifiedSkillId)).size,
-    stepsFromCertified: reused.length,
+    stepsFromCertified: reused.filter((s) => s.artifact).length, // solved = produced its output
     stepsFromFixtures: steps.filter((s) => s.source === "fixture").length,
     stepsTotal: steps.length,
     gapsDiscovered: gaps.length,
     candidatesCreated: candidates.length,
     blockedSteps: steps.filter((s) => s.status === "blocked").length,
-    comparison: [
-      { role: "teacher", label: "Teacher · Linear · authored Scout skill, no recalled memory",
-        runId: teacherRun?.runId ?? null, wallClockMs: teacherRun?.wallClockMs ?? null,
-        shellToolCalls: teacherRun?.shellToolCalls ?? null, failedShellToolCalls: teacherRun?.failedShellToolCalls ?? null,
-        tokens: null, verification: teacher ? `${teacher.passed}/${teacher.total}` : null, note: "real QM run" },
-      { role: "student", label: "Student · Vercel · recalled Memorable procedure",
-        runId: studentRun?.runId ?? null, wallClockMs: studentRun?.wallClockMs ?? null,
-        shellToolCalls: studentRun?.shellToolCalls ?? null, failedShellToolCalls: studentRun?.failedShellToolCalls ?? null,
-        tokens: null, verification: researchRecord ? ratio(researchRecord.verification.checks) : null, note: "real QM run" },
-      { role: "intern", label: "Intern · Vercel · certified reuse",
-        runId: null, wallClockMs: null, shellToolCalls: 0, failedShellToolCalls: 0, tokens: null,
-        verification: reverified, note: "the research step was inherited, not re-run: no agent time to report" },
-    ],
-    sources: [...(research?.record ? [research.record] : []), ...(opts.runMetrics ? ["demo/fixtures/run-metrics.json"] : [])],
+    comparison,
+    sources: [...(research?.record ? [research.record] : []), ...usedSources].filter((v, i, a) => a.indexOf(v) === i),
   };
 
   return {
@@ -288,6 +318,8 @@ export function composeRun(opts: ComposeOptions): CompositeRun {
     metrics,
   };
 }
+
+const stringOrNull = (v: unknown) => (typeof v === "string" ? v : null);
 
 /** The teacher's verifier result, from its skill.observed event (the one teacher_run_verified cites). */
 function teacherObservation(record: CertificationRecord, events: AgentUniversityEvent[]) {

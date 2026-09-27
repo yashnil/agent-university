@@ -277,15 +277,18 @@ export async function loadLifecycle(
     const liveTransfer = toTransferResult(registryRecord, base.transfer);
     const liveCompany = await readLiveArtifact(liveTransfer.examCase, liveTransfer.artifact.type);
     const certification = toCertificationView(registryRecord, `registry/skills/${skillId}.json`);
-    const recordEvents = registryRecord.events?.length ? registryRecord.events : base.events;
+    // Live shows only events this record actually supports: its own (a tournament champion carries just
+    // exam.passed / skill.certified), the runtime's history only when this is the exam that history is
+    // about, then the Intern's composite events. Never the fictional fixtures' events.
+    const recordEvents = registryRecord.events ?? [];
     const composite = runComposite("live");
-    // The whole lifecycle: runtime's events for the certified exam, certification's, then the Intern's.
     const runtimeEvents = liveTransfer.runId === vercelHandoff().transfer.runId ? vercelHandoff().events : [];
+    const realRun = typeof liveTransfer.runId === "string" && !liveTransfer.runId.startsWith("run-fixture");
     return {
       ...base,
       mode: "live",
-      demoCase: "vercel",
-      fromRealRun: runtimeEvents.length > 0,
+      demoCase,
+      fromRealRun: realRun,
       composite,
       skills: getSkills("live"),
       outcome: certification.certified ? "certified" : "failed",
@@ -296,7 +299,8 @@ export async function loadLifecycle(
       skillCertified: registryRecord.skill.status === "certified" ? registryRecord.skill : null,
       transfer: liveTransfer,
       certification,
-      artifacts: { ...base.artifacts, company: liveCompany ?? base.artifacts.company },
+      // Never show another run's artifact as this student's: if the body is not on disk, say so.
+      artifacts: { ...base.artifacts, company: liveCompany ?? unavailableArtifact(liveTransfer) },
     };
   }
 
@@ -337,7 +341,7 @@ export async function loadLifecycle(
     skillObserved: record,
     skillCertified: record.status === "certified" ? record : null,
     transfer: liveTransfer,
-    artifacts: { ...base.artifacts, company: liveCompany ?? base.artifacts.company },
+    artifacts: { ...base.artifacts, company: liveCompany ?? unavailableArtifact(liveTransfer) },
     plan: firstPayload(liveEvents, "plan.composed") ?? base.plan,
     gap: firstPayload(liveEvents, "gap.discovered") ?? base.gap,
   };
@@ -424,9 +428,15 @@ async function withDemoCertification(base: LifecycleData, outcome: Outcome): Pro
 function missingArtifactNote(transfer: TransferResult): string {
   return (
     "Live lifecycle loaded, but the artifact body is still only inside the QM sandbox. Copy it to " +
-    `.agent-university/artifacts/${transfer.examCase}/${transfer.artifact.type} to show the real file; ` +
-    "the fixture is standing in below."
+    `.agent-university/artifacts/${transfer.examCase}/${transfer.artifact.type} to show the real file.`
   );
+}
+
+function unavailableArtifact(transfer: TransferResult): Record<string, unknown> {
+  return {
+    unavailable: `The ${transfer.artifact.type} from run ${transfer.runId ?? "unknown"} (${transfer.examCase}) is inside its QM ` +
+      "sandbox and not part of this deployment. Its verification is shown above; no other artifact stands in for it.",
+  };
 }
 
 function unknownAgent(): AgentIdentity {

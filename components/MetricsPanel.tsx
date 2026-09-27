@@ -33,7 +33,7 @@ export default function MetricsPanel({ metrics }: { metrics: CompositeMetrics })
             <th>research step</th>
             <th>verifier</th>
             <th>wall-clock</th>
-            <th>shell tool calls</th>
+            <th>tool calls</th>
             <th>tokens</th>
           </tr>
         </thead>
@@ -47,8 +47,9 @@ export default function MetricsPanel({ metrics }: { metrics: CompositeMetrics })
               <td className="mono">{row.verification ?? "—"}</td>
               <td className="mono">{secs(row.wallClockMs) ?? (row.role === "intern" ? "not re-run" : "not recorded")}</td>
               <td className="mono">
-                {row.shellToolCalls === null ? "not recorded"
-                  : `${row.shellToolCalls}${row.failedShellToolCalls ? ` (${row.failedShellToolCalls} failed)` : ""}`}
+                {row.shellToolCalls !== null
+                  ? `${row.shellToolCalls} shell${row.failedShellToolCalls ? ` (${row.failedShellToolCalls} failed)` : ""}`
+                  : row.toolCalls != null ? `${row.toolCalls} (all tools)` : "not recorded"}
               </td>
               <td className="mono faint">{row.tokens ?? "not recorded"}</td>
             </tr>
@@ -56,9 +57,9 @@ export default function MetricsPanel({ metrics }: { metrics: CompositeMetrics })
         </tbody>
       </table>
       <p className={`faint ${styles.caveat}`}>
-        Single recorded runs on different companies, not a benchmark. The teacher had the authored Scout skill; the
-        student had only the recalled Memorable procedure; the Intern re-ran nothing. QM records no token usage, so none
-        is shown. Sources: <span className="mono">{metrics.sources.join(", ")}</span>.
+        Single recorded runs, not a benchmark. Each row&apos;s numbers come only from that row&apos;s own run; a run with
+        nothing recorded says so. The Intern re-ran nothing. QM records no token usage, so none is shown. Sources:{" "}
+        <span className="mono">{metrics.sources.join(", ")}</span>.
       </p>
     </div>
   );

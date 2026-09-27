@@ -7,6 +7,10 @@
 //
 // No second registry: skills come from registry/index.json and registry/skills/<id>.json only, and
 // a record is exposed as certified only when its own decision says so. Nothing here writes.
+//
+// Live follows whatever record is canonical now (a flow tournament may have replaced the Vercel exam);
+// demo stays the frozen Vercel story, whose decision lives in registry/ledger.jsonl. Both return the
+// same response contracts; their values differ, and `provenance.canonical` says which one you have.
 
 import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, normalize, relative } from "node:path";
@@ -23,8 +27,12 @@ export interface SkillsResponse {
   mode: ApiMode;
   source: string;
   skills: (RegistryIndex["skills"][number] & {
-    verification: string; // "6/6" from the canonical record
-    provenance: { teacherRunId: string | null; examRunId: string | null; examCase: string; examCompany: string | null; realRun: boolean };
+    verification: string; // "6/6" from the record
+    provenance: {
+      teacherRunId: string | null; examRunId: string | null; examCase: string; examCompany: string | null; realRun: boolean;
+      /** True for the registry's current canonical record; false for the frozen demo's ledger decision. */
+      canonical: boolean;
+    };
   })[];
   ledger: { decisions: number; certified: number };
 }
@@ -84,24 +92,28 @@ export const loadFinalDemo = (): FinalDemo => readJson<FinalDemo>(join(FIX, "fin
 
 // ---- GET /api/skills -------------------------------------------------------------------------
 
-function certifiedRecords(): { record: CertificationRecord; path: string }[] {
+type Certified = { record: CertificationRecord; path: string; canonical: boolean; procedure?: RegistryIndex["skills"][number]["procedure"] };
+
+function certifiedRecords(): Certified[] {
   return registry.index().skills.flatMap((row) => {
     const record = registry.load(row.id);
     // The index is a cache; the record's own decision is authoritative.
     return record?.decision?.certified === true && record.skill.status === "certified"
-      ? [{ record, path: row.record }] : [];
+      ? [{ record, path: row.record, canonical: true, ...(row.procedure ? { procedure: row.procedure } : {}) }] : [];
   });
 }
 
-export function skillsFrom(records: { record: CertificationRecord; path: string }[], mode: ApiMode, source: string,
+export function skillsFrom(records: Certified[], mode: ApiMode, source: string,
   ledger: { decisions: number; certified: number }): SkillsResponse {
   return {
     mode, source, ledger,
-    skills: records.map(({ record }) => {
+    skills: records.map(({ record, path, canonical, procedure }) => {
       const teacherRunId = record.decision.rulings.find((r) => r.rule === "teacher_run_verified")?.evidence.runId;
       const checks = record.verification.checks;
       return {
         ...registry.summary(record),
+        record: path, // where this record actually is: registry/skills/<id>.json, or the ledger for the frozen demo
+        ...(procedure ? { procedure } : {}),
         verification: `${checks.filter((c) => c.passed).length}/${checks.length}`,
         provenance: {
           teacherRunId: typeof teacherRunId === "string" ? teacherRunId : null,
@@ -109,6 +121,7 @@ export function skillsFrom(records: { record: CertificationRecord; path: string 
           examCase: record.transfer.examCase,
           examCompany: record.transfer.examCompany ?? null,
           realRun: typeof record.transfer.runId === "string" && !record.transfer.runId.startsWith("run-fixture"),
+          canonical,
         },
       };
     }),
@@ -188,7 +201,8 @@ export function buildFinalDemo(): FinalDemo {
   const handoff = vercelHandoff();
   const src = "demo/fixtures/final-demo.json (frozen output of lib/product.ts)";
   const exam = { ...examOf(handoff, "demo", src, DEMO_DECIDED_AT) };
-  const certified = [{ record: exam.record, path: "registry/skills/research-company.json" }];
+  // The frozen Vercel decision is kept in the ledger; the canonical record may have moved on since.
+  const certified = [{ record: exam.record, path: "registry/ledger.jsonl", canonical: false }];
   const run = composeRun({ certified, at: DEMO_RUN_AT, planId: "plan-final-demo-0001", internId: "intern-final-demo-0001",
     runMetrics: runMetrics(), observed: handoff.events });
   return {
@@ -197,7 +211,7 @@ export function buildFinalDemo(): FinalDemo {
     generatedBy: "node scripts/final_demo.ts (lib/product.ts buildFinalDemo)",
     labels: {
       live: ["teacher run 9f8d36da (Linear) and student run 5e30ec98 (Vercel) were real QM + Memorable runs, recorded"],
-      registry: ["Research Company certification: production engine, strict mode, same decision as registry/skills/research-company.json"],
+      registry: ["Research Company certification: production engine, strict mode, the same decision as the real Vercel entry in registry/ledger.jsonl (the canonical record in registry/skills/ may since have been replaced by a newer certified run)"],
       fixture: ["Analyze Repository and Evaluate Opportunity outputs are hand-written stand-ins (demo/fixtures/composite/)",
         "the composite run is orchestration only: no agent is executed, timestamps are step order"],
     },
