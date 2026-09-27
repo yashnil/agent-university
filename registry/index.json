@@ -11,13 +11,13 @@
         "harness": "qm"
       },
       "student": {
-        "id": "qm-thread-ee59aabb453b",
+        "id": "qm-thread-7402ffde17ac",
         "name": "Freshman #2",
         "harness": "qm"
       },
       "examCase": "exam-stripe",
       "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
-      "certifiedAt": "2026-09-27T22:08:25Z",
+      "certifiedAt": "2026-09-27T22:14:06Z",
       "policy": "au-transfer-v1",
       "record": "registry/skills/research-company.json",
       "procedure": {
@@ -25,8 +25,8 @@
         "title": "A previous session solved a near-identical task: Add company data to company.json file",
         "passRate": 1,
         "runs": 3,
-        "judgeScore": null,
-        "tournamentId": "tournament-20260927T220805Z-dfc707",
+        "judgeScore": 9.5,
+        "tournamentId": "tournament-20260927T221336Z-46971a",
         "record": "registry/procedures/research-company/37196e61-add-company-data-to-company-json-file.json"
       }
     }
