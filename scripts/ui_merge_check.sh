@@ -31,6 +31,11 @@ trap 'rm -f "$listfile"' EXIT
 # Shared files the UI scaffold PR is explicitly allowed to touch, once (HANDOFF §1).
 shared_exceptions="package.json package-lock.json .gitignore"
 
+# Files outside UI ownership that the repo owner directed the UI branch to change: the swarmem
+# rename, which retires the "Freshman #N" student naming. Display strings only, no behaviour.
+# Remove these once the rename has merged.
+rename_exceptions="lib/swarm.ts scripts/swarm.ts tests/swarm.test.ts tests/tournament.test.ts tests/certification.test.ts"
+
 while IFS= read -r f; do
   [ -n "$f" ] || continue
   case "$f" in
@@ -41,8 +46,12 @@ while IFS= read -r f; do
     *)
       matched=0
       for s in $shared_exceptions; do [ "$f" = "$s" ] && matched=1; done
+      renamed=0
+      for s in $rename_exceptions; do [ "$f" = "$s" ] && renamed=1; done
       if [ "$matched" = 1 ]; then
         echo "  shared*    $f  (scaffold PR exception: dependencies / ignore rules)"
+      elif [ "$renamed" = 1 ]; then
+        echo "  rename*    $f  (owner-directed swarmem rename; display strings only)"
       else
         echo "  VIOLATION  $f  (not UI-owned; ask its owner before changing it)"; fail=1
       fi ;;
