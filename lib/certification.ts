@@ -34,11 +34,12 @@ import type {
 } from "./types.ts";
 import { COMPANY_CHECKS, verifyCompanyFile } from "./verifiers/company.ts";
 
-// The repo root. Resolved from this file, except when bundled (Next on Vercel runs from
-// .next/server/...), where the file-relative path is wrong and the project root is process.cwd().
-// AU_ROOT overrides both.
-const FILE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-export const ROOT = process.env.AU_ROOT || (existsSync(join(FILE_ROOT, "demo", "cases.json")) ? FILE_ROOT : process.cwd());
+// The repo root. Next inlines import.meta.url at build time, so in a deployed server bundle it names
+// the build machine's checkout (Vercel builds in /vercel/path0 and serves from /var/task, the working
+// directory, with the traced data files beside it). Use the module's own location only when it really
+// is the repo (CLI, tests, `next dev`/`next start` in place), else the working directory.
+const MODULE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const ROOT = process.env.AU_ROOT || (existsSync(join(MODULE_ROOT, "demo", "cases.json")) ? MODULE_ROOT : process.cwd());
 export const POLICY_ID = "au-transfer-v1";
 export const RECORD_VERSION = 1;
 
