@@ -1,4 +1,4 @@
-/* Agent University demo UI. Owned by feat/ui-demo.
+/* swarmem demo UI. Owned by feat/ui-demo.
    Tokens + shared primitives. Component-specific styles live in *.module.css. */
 
 :root {
@@ -57,6 +57,12 @@ a { color: var(--accent); }
   margin: 0;
   font-size: 28px;
   letter-spacing: -0.02em;
+}
+
+/* The brand is "swarmem" with "mem" italicised. <em> already italicises; this keeps the two
+   halves reading as one word rather than an emphasised aside. */
+.brandMem {
+  font-style: italic;
 }
 
 .northStar {

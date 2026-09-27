@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Agent University",
+  title: "swarmem",
   description:
     "One agent learns, another agent proves it, every agent can inherit it: certified skill transfer.",
 };

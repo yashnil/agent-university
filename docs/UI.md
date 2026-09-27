@@ -1,6 +1,6 @@
 # UI / demo app (`feat/ui-demo`)
 
-The Next.js app that renders the Agent University story. New file, owned by the UI branch: it
+The Next.js app that renders the swar*mem* story. New file, owned by the UI branch: it
 does not touch `README.md`, `PROGRESS.md` or `docs/HANDOFF.md`, which stay shared.
 
 ## Run it

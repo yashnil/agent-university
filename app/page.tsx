@@ -40,7 +40,9 @@ export default async function Page({
     <main className="page">
       <header className="masthead">
         <div>
-          <h1>Agent University</h1>
+          <h1>
+            swar<em className="brandMem">mem</em>
+          </h1>
           <p className="northStar">
             One agent learns → <strong>another agent proves it</strong> → every agent can inherit it. A
             procedure is trusted organizational capability only once a <em>different</em> agent has

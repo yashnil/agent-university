@@ -203,7 +203,7 @@ describe("registry", () => {
   afterEach(() => rmSync(tmp, { recursive: true, force: true }));
 
   const student = (i: number, metrics?: RankedRecord["metrics"], t: TransferResult = transfer): RankedRecord => {
-    const s = { ...clone(t), runId: `run-${i}`, student: { id: `agent-student-${i}`, name: `Freshman #${i}`, harness: "qm" } };
+    const s = { ...clone(t), runId: `run-${i}`, student: { id: `agent-student-${i}`, name: `Student #${i}`, harness: "qm" } };
     return { ...decide(s), ...(metrics ? { metrics } : {}) };
   };
 
