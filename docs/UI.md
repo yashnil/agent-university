@@ -8,11 +8,20 @@ does not touch `README.md`, `PROGRESS.md` or `docs/HANDOFF.md`, which stay share
 ```bash
 nvm use            # Node 24
 npm install        # the scaffold PR added next/react/react-dom + TypeScript
-npm run dev        # http://localhost:3000
+npm run dev        # http://localhost:3001
 npm run typecheck  # tsc --noEmit
 npm run build      # production build
 npm test           # unchanged shared baseline (python only, offline, no node_modules needed)
 ```
+
+Two scaffold constraints, both deliberate:
+
+- **Port 3001, not 3000.** `.env`'s `PUBLIC_API_URL` points QM agents at
+  `http://host.docker.internal:3000`. If the UI sat on 3000, a sandboxed agent's self-API calls
+  would hit this Next app instead of QM core.
+- **`typescript` is pinned to `5.9.3`.** With `typescript@7`, `next build` silently stops reading
+  `paths` from `tsconfig.json` and every `@/*` import fails to resolve. Do not bump it without
+  re-running `npm run build`.
 
 `npm test` was deliberately left alone: it must keep passing without `node_modules` so runtime
 and certification can use it as the shared gate.
@@ -21,6 +30,9 @@ and certification can use it as the shared gate.
 
 One scrolling page, `app/page.tsx`, in the demo's order:
 
+0. **Certification decision** — `components/RulingsPanel.tsx` over the 8 rulings of policy
+   `au-transfer-v1`, each with its verbatim reason and its evidence JSON. This is the credibility
+   centerpiece: it shows *why* a skill was or was not certified, straight from the engine.
 1. **Lifecycle** — `components/LifecycleTimeline.tsx` over the `Event[]` stream, plus the
    `observed → transferred → certified` progression.
 2. **Transfer exam** — `components/TransferExam.tsx`: teacher vs fresh student, the derived
@@ -32,7 +44,7 @@ One scrolling page, `app/page.tsx`, in the demo's order:
 Everything is derived from contract data. Nothing about the lifecycle is hardcoded in the UI,
 so live data replaces fixtures without component changes.
 
-## Demo mode / live mode
+## Demo mode / live mode / outcome
 
 The mode is a URL query param, so it needs no client JS and is safe to drive from a keyboard
 during a demo:
@@ -44,7 +56,24 @@ during a demo:
   page falls back to fixtures and says so in a banner. **The demo can never break because the
   runtime is mid-flight.**
 
-All of that lives in one file: `app/_lib/data.ts` (`loadLifecycle(mode)`).
+`?outcome=failed` presents the recorded **failed** exam instead of the certified one
+(`demo/fixtures/certification-record-failed.json`): the timeline drops `exam.passed` and
+`skill.certified`, the failing verifier check is shown, the failed rule's evidence is expanded, and
+section 03 becomes "Capability withheld". A failed exam is a `TransferResult` with
+`passed: false` — there is no `exam.failed` event and the skill stays `transferred`.
+
+All of that lives in one file: `app/_lib/data.ts` (`loadLifecycle(mode, outcome)`), which resolves
+sources in this order:
+
+| Order | Source | Written by |
+|---|---|---|
+| 1 | `registry/skills/<id>.json` (`CertificationRecord`) | `feat/certification`, `certify.py --promote` |
+| 2 | `.agent-university/skills/<id>.json` (`Skill` + `events[]`) | `feat/runtime`, `au_record.py` |
+| 3 | `demo/fixtures/**` | committed fixtures |
+
+The UI declares the `CertificationRecord` fields it reads structurally, so it compiles before the
+certification branch merges; afterwards that block can become
+`import type { CertificationRecord } from "@/lib/certification"` with no other change.
 
 ## Seam for the backend branches
 
