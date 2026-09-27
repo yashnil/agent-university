@@ -25,7 +25,12 @@ export default async function Page({
     "?" + new URLSearchParams({ mode: data.mode, outcome: requestedOutcome, case: requestedCase, ...next }).toString();
 
   const skill = data.skillCertified ?? data.skillObserved;
-  const certified = data.certification ? data.certification.certified : data.transfer.passed;
+  // Three distinct states, and the page must never blur them: certified (a decision was made and
+  // it passed), awaiting certification (the exam passed but nobody has promoted it — where runtime
+  // hands off), and withheld (the exam ran and failed).
+  const examPassed = data.transfer.passed && data.transfer.verification.passed;
+  const certified = data.certification ? data.certification.certified : skill.status === "certified";
+  const awaitingCertification = !certified && examPassed;
   const teacherCase =
     data.cases.find((c) => c.role === "teacher" && c.skillId === data.skillObserved.id)?.id ?? "teacher case";
   const steps = data.plan?.steps ?? [];
@@ -130,7 +135,13 @@ export default async function Page({
       <section className="section">
         <div className="sectionHead">
           <span className="sectionNum">03</span>
-          <h2>{certified ? "Certified capability" : "Capability withheld"}</h2>
+          <h2>
+            {certified
+              ? "Certified capability"
+              : awaitingCertification
+                ? "Awaiting certification"
+                : "Capability withheld"}
+          </h2>
           <SkillStatusChip status={skill.status} />
         </div>
         <p className="sectionSub">
@@ -139,6 +150,13 @@ export default async function Page({
               The record every other agent inherits: skill <code className="mono">{skill.id}</code> produces{" "}
               <code className="mono">{skill.artifactType}</code>, taught by {skill.teacher.name} and proved by{" "}
               {data.transfer.student.name} on <code className="mono">{data.transfer.examCase}</code>.
+            </>
+          ) : awaitingCertification ? (
+            <>
+              The exam passed and the verifier agreed, but nothing is inherited yet: skill{" "}
+              <code className="mono">{skill.id}</code> is at <code className="mono">{skill.status}</code>{" "}
+              until the certification engine applies its policy. Proving and promoting are separate on
+              purpose — the agent that ran the exam does not get to grade itself.
             </>
           ) : (
             <>
@@ -161,7 +179,7 @@ export default async function Page({
             json={data.artifacts.company}
             badge={
               <span className={`badge ${data.transfer.verification.passed ? "badge--pass" : "badge--fail"}`}>
-                {data.transfer.verification.passed ? "verified" : "rejected"}
+                {data.transfer.verification.passed ? "verifier passed" : "verifier rejected"}
               </span>
             }
           />
