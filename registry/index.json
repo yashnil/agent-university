@@ -6,20 +6,29 @@
       "status": "certified",
       "artifactType": "company.json",
       "teacher": {
-        "id": "qm-thread-sanitized-teacher",
+        "id": "qm-thread-16c17979fd84",
         "name": "Scout (teacher)",
         "harness": "qm"
       },
       "student": {
-        "id": "qm-thread-sanitized-student",
-        "name": "Scout (fresh student)",
+        "id": "qm-thread-ee59aabb453b",
+        "name": "Freshman #2",
         "harness": "qm"
       },
-      "examCase": "exam-vercel",
+      "examCase": "exam-stripe",
       "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
-      "certifiedAt": "2026-09-27T21:58:23Z",
+      "certifiedAt": "2026-09-27T22:08:25Z",
       "policy": "au-transfer-v1",
-      "record": "registry/skills/research-company.json"
+      "record": "registry/skills/research-company.json",
+      "procedure": {
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "title": "A previous session solved a near-identical task: Add company data to company.json file",
+        "passRate": 1,
+        "runs": 3,
+        "judgeScore": null,
+        "tournamentId": "tournament-20260927T220805Z-dfc707",
+        "record": "registry/procedures/research-company/37196e61-add-company-data-to-company-json-file.json"
+      }
     }
   ]
 }
