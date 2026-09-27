@@ -47,8 +47,11 @@ export async function recallMany(task: string, k: number): Promise<{ procedureId
 
 /** A flow's display title: its first Markdown heading, else the slug without its hash prefix. */
 export function flowTitle(procedureId: string, text: string): string {
+  // Memorable keeps a different way to do the same task as a revision (`--r2`) with the same
+  // heading; name the revision so two flows never share a title.
+  const rev = /--(r\d+)$/.exec(procedureId)?.[1];
   const h = /^\s*#+\s+(.+?)\s*$/m.exec(text);
-  if (h) return h[1];
+  if (h) return rev ? `${h[1]} (${rev})` : h[1];
   const slug = procedureId.replace(/^procedures\//, "").replace(/^[0-9a-f]{6,}-/, "");
   return slug.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
