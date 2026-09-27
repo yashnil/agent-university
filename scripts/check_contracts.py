@@ -295,16 +295,7 @@ def main():
         report("certification-record-failed is not certified and stays transferred",
                not bad["decision"]["certified"] and bad["skill"]["status"] == "transferred"
                and bad["decision"]["failedRules"] == ["verifier_checks_passed"])
-        sys.path.insert(0, os.path.join(ROOT, "scripts"))
-        import certify
-        events = data.get("events.json")
-        for name, tname in (("certification-record.json", "transfer-result.json"),
-                            ("certification-record-failed.json", "transfer-result-failed.json")):
-            fx = data[name]
-            iso = next(r for r in fx["decision"]["rulings"] if r["rule"] == "isolation_attested")["evidence"].get("facts")
-            again = certify.certify(obs, data[tname], events=events, isolation=iso, decided_at=fx["decision"]["decidedAt"])
-            report(f"{name} is what scripts/certify.py produces today", again == fx,
-                   "regenerate it (see tests/test_certify.py)")
+        # That these fixtures are exactly what the engine produces is checked by tests/certification.test.ts.
 
     print("verifier on fixture")
     r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "verify_company.py"), "--json",

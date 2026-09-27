@@ -9,7 +9,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "test": "npm run test:contracts && npm run test:unit && npm run test:compile",
+    "test": "npm run test:contracts && npm run test:unit && npm run test:ts && npm run test:compile",
     "test:contracts": "python3 scripts/check_contracts.py",
     "test:unit": "python3 -m unittest discover -s tests",
     "test:compile": "python3 -m py_compile scripts/*.py tests/*.py",
@@ -19,6 +19,10 @@
     "plan": "qm plan",
     "deploy": "qm up",
     "status": "qm status",
-    "conformance": "qm conformance --static"
-  }
+    "conformance": "qm conformance --static",
+    "test:ts": "node --test tests/*.test.ts",
+    "certify": "node scripts/certify.ts",
+    "registry": "node scripts/registry.ts"
+  },
+  "type": "module"
 }

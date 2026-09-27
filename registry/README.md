@@ -1,7 +1,7 @@
 # Company skill registry
 
-What the organization trusts. Written only by `scripts/certify.py --promote` (and the swarm
-runner), through `scripts/registry.py`. Committed on purpose: every promotion is a reviewable
+What the organization trusts. Written only by `node scripts/certify.ts --promote` (and the swarm
+runner), through `lib/registry.ts`. Committed on purpose: every promotion is a reviewable
 diff in a PR.
 
 | File | Contents |
@@ -10,7 +10,7 @@ diff in a PR.
 | `skills/<id>.json` | The canonical `CertificationRecord` of each **certified** skill. Source of truth for the UI and for composition. |
 | `index.json` | `RegistryIndex`: one summary row per certified skill. |
 
-Schema: `schemas/certification-record.schema.json`. TypeScript: `lib/certification.ts`.
+Schema: `schemas/certification-record.schema.json`. Engine and types: `lib/certification.ts`.
 
 ## Policy `au-transfer-v1`
 
@@ -33,11 +33,12 @@ took an unseen exam for this skill but something else failed. Otherwise the skil
 `observed`. No new statuses; `exam.passed` and `skill.certified` are emitted only when earned.
 
 Ranking when several students pass (e.g. a swarm): certified > rules passed > checks passed >
-lower `costUsd` > fewer `toolCalls` > lower `durationMs` > `runId`. A certified record is never
+higher Jev judge score (`judge.score`, from `typesafe/jev-router` on OpenRouter; advisory, never
+certifies) > lower `costUsd` > fewer `toolCalls` > lower `durationMs` > `runId`. A certified record is never
 replaced by a worse one.
 
 ```bash
-python3 scripts/certify.py --skill demo/fixtures/skill-observed.json \
+node scripts/certify.ts --skill demo/fixtures/skill-observed.json \
   --transfer demo/fixtures/transfer-result.json --events demo/fixtures/events.json
-python3 scripts/registry.py list | show <id> | ledger [<id>]
+node scripts/registry.ts list | show <id> | ledger [<id>]
 ```

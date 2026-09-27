@@ -3,6 +3,7 @@
   "skill": {
     "id": "research-company",
     "name": "Research Company",
+    "status": "transferred",
     "teacher": {
       "id": "agent-teacher-0001",
       "name": "Scout (teacher)",
@@ -10,7 +11,6 @@
     },
     "artifactType": "company.json",
     "procedureId": "procedures/0000aaaa-research-a-company-fixture",
-    "status": "transferred",
     "transfer": {
       "student": {
         "id": "agent-student-0003",
@@ -160,7 +160,8 @@
           "artifact": {
             "type": "company.json",
             "path": "demo/fixtures/company-invalid.json"
-          }
+          },
+          "produced": true
         }
       },
       {
