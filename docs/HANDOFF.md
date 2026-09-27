@@ -1,4 +1,9 @@
-# Handoff: parallel work on Agent University
+# Handoff: parallel work on Swarmem
+
+> Swarmem was formerly called Agent University. The branch names, file paths and identifiers below
+> (`.agent-university/`, `qm-agent-university-core`, `au_record.py`, `au-transfer-v1`) are real and
+> unchanged. This document records the ownership protocol the branches were built under. For the
+> current system, see `docs/REPO_OVERVIEW.md`.
 
 Read this with `README.md` before branching. Every file below has exactly one owner. If a
 change is needed in a file someone else owns, ask them first; do not just edit it. Merge

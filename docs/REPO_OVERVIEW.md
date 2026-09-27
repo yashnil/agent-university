@@ -1,28 +1,41 @@
-# Agent University: repository overview
+# Swarmem: repository overview
 
 ## 1. What it is
 
-Agent University certifies that a procedure one agent learned **transfers** to a different,
-fresh agent on an unseen task before the organization trusts it. North star: *one agent learns →
-another agent proves it → every agent can inherit it.*
+Swarmem is a trust layer for shared agent capabilities. A capability demonstrated by one agent must
+**transfer** to a different agent on an unseen case, and pass deterministic verification, before it
+becomes reusable certified memory. North star: *one agent learns → another agent proves it → every
+agent can inherit it.*
 
-The demo skill is **Research Company**. It produces `company.json`. The teacher case is **Linear**
-and the unseen exam case is **Vercel** (`demo/cases.json`).
+The lifecycle is **observe → transfer trial → verify → certify → registry → reuse** (§7).
+
+The demo skill is **Research Company**. It produces `company.json`. The origin (`teacher`) case is
+**Linear**, and the unseen trial cases are **Vercel**, **Stripe** and **Supabase** (`demo/cases.json`).
+
+- **Naming.** The project was formerly called Agent University. Real technical identifiers keep that
+  name: the repository and clone directory `agent-university`, `.agent-university/` (gitignored runtime
+  output), the QM container `qm-agent-university-core`, `au-transfer-v1`, and `scripts/au_record.py`.
+- **Vocabulary.** The UI says origin / replica / trial. Contracts and this document's technical
+  sections keep the field and event names `teacher`, `student`, `exam.*`, which are data
+  (`docs/UI.md`, "Brand and vocabulary").
 
 ## Final demo path
 
 ```
-Teacher / Linear → Memorable → Student / Vercel → deterministic verification → Certified Research Company
+Origin / Linear → Memorable → Replica / Vercel → deterministic verification → Certified Research Company
   → Fresh Intern → composite of certified skills → FIND TECHNICAL CONTACT GAP → new candidate
 ```
+
+This is the **Demo** story: frozen and deterministic. **Live** mode shows the current canonical
+registry record instead, which today is a flow-tournament champion on Stripe (§10, §11).
 
 | Stage | Where it comes from | Kind |
 |---|---|---|
 | Teacher researches Linear (run `9f8d36da`) | QM + the Scout skill, recorded | **live**, real run |
 | Memorable captures the generalized procedure `procedures/37196e61-…` | native `memorable ingest` | **live**, real |
 | A fresh student researches Vercel from the recalled procedure (run `5e30ec98`) | QM + Memorable recall, recorded, sanitized into `demo/fixtures/*-vercel*.json` | **live**, real run |
-| Deterministic verification (6/6) and certification (all 8 rules, strict) | `lib/certification.ts` via `POST /api/exam` | deterministic engine; decision in `registry/` |
-| Research Company is Certified | `registry/skills/research-company.json`, via `GET /api/skills` | **registry-backed** |
+| Deterministic verification (6/6) and certification (all 8 rules, strict) | `lib/certification.ts` via `POST /api/exam` | deterministic engine; decision kept in `registry/ledger.jsonl` |
+| Research Company is Certified | the Vercel ledger decision (Demo) or the current canonical `registry/skills/research-company.json` (Live), via `GET /api/skills` | **registry-backed** |
 | A fresh Intern (0 prior runs, 0 personal skills) gets a diligence task and inherits the certified skill | `lib/composite.ts` via `POST /api/run` | orchestration only: **no agent is executed** |
 | Research Company step | the certified exam's own output, re-verified 6/6 | **registry-backed** (reused, not re-run) |
 | Analyze Repository, Evaluate Opportunity | hand-written stand-ins in `demo/fixtures/composite/` | **fixture**, uncertified, not inherited |
@@ -47,16 +60,20 @@ Every step leaves evidence, and certification is a pure function of that evidenc
 
 ```
 User / UI (Next.js, app/)  ── reads contracts + fixtures + registry, never QM internals
-  ↓
-Agent University orchestration (Python scripts/, TypeScript lib/)
+  ↓   GET /api/skills · POST /api/exam · POST /api/run   (lib/product.ts)
+Swarmem orchestration (Python scripts/, TypeScript lib/)
   ├── QM runtime (@yc-software/qm 0.1.12, docker target)
   │    └── teacher + fresh student agents, each in its own Docker sandbox
   ├── Memorable (memorable-cli 0.5.19, local encrypted store)
   │    └── procedure capture (ingest) / recall (recall, show)
   ├── Certification engine (lib/certification.ts, policy au-transfer-v1)
   │    └── 8 deterministic evidence rules → CertificationRecord
-  └── Registry (lib/registry.ts → registry/)
-       └── canonical certified capabilities, index, append-only ledger
+  ├── Registry (lib/registry.ts → registry/)
+  │    └── canonical certified capabilities, index, append-only ledger, flow records
+  ├── Swarm / flow tournament (lib/swarm.ts, lib/tournament.ts, lib/jev.ts; /arena)
+  │    └── many agents per flow on unseen cases → certified runs → champion flow promoted
+  └── Composite run (lib/composite.ts)
+       └── a Fresh Intern reuses certified skills; a missing capability → GAP → candidate
 
 shared, frozen: schemas/contracts/*.schema.json ⇄ lib/types.ts (npm test fails on drift)
 ```
@@ -83,18 +100,23 @@ Storage and retrieval are native: `memorable ingest`, `memorable recall`, `memor
 recalled procedure is the only procedural knowledge injected into the student's prompt, which
 mirrors Memorable's own prompt hook.
 
-## 6. What Agent University adds
+## 6. What Swarmem adds
 
-QM runs agents and Memorable remembers procedures. Agent University adds:
+QM runs agents and Memorable remembers procedures. Swarmem adds:
 - **The transfer exam:** a fresh-scope student, a hidden skill, freshness checks, and leak checks.
 - **The contracts:** `Skill`, `TransferResult`, `VerificationResult`, `Event`, `CertificationRecord`.
 - **Deterministic verification:** `scripts/verify_company.py`, and its TypeScript twin
   `lib/verifiers/company.ts`.
 - **The certification policy:** `au-transfer-v1`.
 - **The registry**, which is the organization's source of truth for trusted capabilities.
+- **The flow tournament**, which decides between competing Memorable flows by certified pass rate.
+- **Reuse with honest edges:** a new agent composes work from certified skills and reports a GAP,
+  and a new candidate, where none exists.
 - **The UI**, which explains *why* a skill is or is not trusted.
 
 ## 7. Skill lifecycle
+
+**observe → transfer trial → verify → certify → registry → reuse.** The contract events, in order:
 
 | Step | Kind | Emitted by |
 |---|---|---|
@@ -108,6 +130,11 @@ QM runs agents and Memorable remembers procedures. Agent University adds:
 Statuses only move forward: `observed → transferred → certified`. There is no `exam.failed`. A
 failed exam is a `TransferResult` with `passed: false`, and the skill stays `transferred` or
 `observed`.
+
+After certification:
+- **Registry:** the record is promoted into `registry/` (§10).
+- **Reuse:** a new agent composes from it (`plan.composed`), and each missing capability becomes a
+  `gap.discovered` and a candidate (§11).
 
 ## 8. Runtime flow (`feat/runtime`)
 
@@ -184,38 +211,65 @@ ranking is:
 7. duration
 8. runId
 
-`judge.score` counts only on already-certified records. It is set by the Jev judge
-(`lib/jev.ts`, OpenRouter, advisory only) in the swarm and flow-tournament runners
-(`lib/swarm.ts`, `lib/tournament.ts`, `/arena`). Those are documented in their own modules; the
-committed registry's record comes from the single real Vercel exam, not from a tournament.
+`judge.score` counts only on already-certified records. It is set by the Jev judge (`lib/jev.ts`,
+OpenRouter, advisory only).
 
-`node scripts/registry.ts list | show <id> | ledger` inspects it. Today it holds **Research
-Company, certified** from the real Vercel transfer.
+**Swarm and flow tournament.** They share one pipeline, which `/arena` streams:
+- **Runners:** `lib/swarm.ts` and `lib/tournament.ts`, via `node scripts/tournament.ts` or `/arena`.
+- **Candidates:** each Memorable flow (procedure) is screened for answer leaks, then handed to
+  several different agents, each on a different unseen case.
+- **Certification:** every run is certified by the same engine.
+- **Advancing:** a flow advances when at least half its runs certify.
+- **Final:** Jev (or a deterministic ranking) picks the champion among the advancing flows.
+- **Promotion:** `registry.promoteProcedure` makes the champion's best certified run canonical and
+  points the index row at the flow (`registry/procedures/<skill>/<flow>.json`).
+- **Modes:** a dry run uses fixture agents and a throwaway registry. A live run needs QM, Docker,
+  Memorable and keys.
+
+`node scripts/registry.ts list | show <id> | ledger` inspects it. Today:
+- The canonical Research Company record is a **live flow-tournament champion**: trial case Stripe,
+  procedure `procedures/37196e61-…`, 6/6, pass rate 3/3.
+- The ledger also keeps the original real Linear → Vercel decision, which `tests/integration.test.ts`
+  re-derives from the sanitized fixtures.
 
 ## 11. UI / demo layer (`feat/ui-demo`)
 
-A Next.js page (`app/page.tsx`, `components/*`, data access in `app/_lib/data.ts`) shows:
-- the certification rulings;
-- the lifecycle timeline;
-- the transfer exam: teacher vs student, isolation facts, verifier checks;
-- the certified capability;
-- the composition, with its visible **GAP**.
+A Next.js page (`app/page.tsx`, `components/*`, data access in `app/_lib/data.ts`), branded
+Swarmem, shows:
+1. **Lifecycle:** the 6-step chain and its events.
+2. **Transfer trial:** origin vs replicating agent, isolation facts, verifier checks, the 8 policy
+   rulings.
+3. **Certified capability.**
+4. **The registry:** `RegistryPanel`, including the champion-flow block.
+5. **The Fresh Intern:** a composite run with its visible **GAP**, the new candidate, and metrics.
+
+`/arena` runs and streams a flow tournament.
 
 Modes, set by URL query. Switching keeps the case, so the story on screen stays the same:
-- `?mode=demo` (default; `case=vercel` is the default case): the real sanitized Vercel handoff,
-  plus `final-demo.json` for the engine's decision and the Intern's composite run.
-- `?mode=live`: `GET /api/skills` and `POST /api/run` read `registry/` live, and the decision comes
-  from `registry/skills/research-company.json`.
+- `?mode=demo` (default; `case=vercel` is the default case): frozen. The real sanitized Vercel
+  handoff, plus `final-demo.json` for the engine's decision, the registry state (the Vercel ledger
+  decision, labelled as not canonical) and the Intern's composite run.
+- `?mode=live`: the current canonical record in `registry/skills/research-company.json`, via
+  `GET /api/skills` and `POST /api/run`. Live shows only what that record supports:
+  - its own events, and no runtime history it does not have;
+  - its own metrics, or "not recorded";
+  - its artifact, or an explicit "unavailable" if it is inside a QM sandbox;
+  - an Intern step 1 that is certified and inherited but has no Vercel output, so its dependent
+    steps are blocked.
 - `&case=northwind`: the older fictional lifecycle, including its `repo_analysis.json` GAP.
 - `&run=1`: render the Intern's run immediately. Without it, "Assign the diligence task" POSTs
   `/api/run` and reveals the steps in order.
 
-Section 04 is the product layer: the Fresh Intern, its inherited skills, the labelled composite
-timeline, the yellow GAP, the new candidate, and a metrics panel.
+Section 05 is the product layer: the Fresh Intern, its inherited skills, the labelled composite
+timeline, the yellow GAP, the new candidate, and a metrics panel. Metrics are attributed by run id
+only: a run's numbers never come from another run or company, and tokens are never shown because
+QM does not record them.
 
 APIs (read-only; `?mode=demo|live`, live by default):
-- `GET /api/skills`: the registry's certified skills with provenance.
-- `POST /api/exam`: `{}` certifies the real Vercel transfer in strict mode; or send
+- `GET /api/skills`: the certified skills with provenance. `provenance.canonical` is true in Live
+  and false for the frozen demo decision.
+- `POST /api/exam`: `{}` certifies the designated sanitized Vercel transfer in strict mode (it is
+  not compared with whatever is canonical); or send
   `{skill, transfer, events}` with the artifact under `demo/fixtures/`. It never promotes.
 - `POST /api/run`: the composite run.
 
@@ -268,10 +322,10 @@ The UI never calls QM, Memorable or Docker. Details: `docs/UI.md`.
 ## 15. Replayed deterministically, or fixture-only
 
 - **Deterministic certification replay.** The real, sanitized Vercel `TransferResult` is certified
-  by the production engine in strict mode, and the result is promoted into `registry/`.
-  `tests/integration.test.ts` re-derives the committed record and fails if it goes stale. This
-  step is deterministic and needs no live services, so "replay" here means re-running the
-  engine, not re-running the agents.
+  by the production engine in strict mode, and that decision is in `registry/ledger.jsonl`.
+  `tests/integration.test.ts` re-derives it and fails if it goes stale. The canonical record may
+  since have been replaced by a tournament champion. "Replay" here means re-running the engine,
+  not re-running the agents.
 - **Fictional (Northwind, `*.example.com`, fake ids).** `events.json`, `skill-observed.json`,
   `skill-certified.json`, `transfer-result{,-failed}.json`,
   `certification-record{,-failed}.json`, `plan-composed.json`, `gap-discovered.json`, and
@@ -303,7 +357,22 @@ The UI never calls QM, Memorable or Docker. Details: `docs/UI.md`.
 - **Certification is manual.** `transfer_run.py` does not call `certify.ts`; promotion is a
   separate command.
 - **The composite run is fixed to one task** (Vercel diligence). A certified step is reused only when
-  the certified exam produced a verified artifact for that same company.
+  the certified exam produced a verified artifact for that same company. In Live, with a Stripe
+  canonical record, the research step is inherited but produces nothing, and its dependents are
+  blocked.
+- **Vercel deployment needs output-file tracing.**
+  - The page and the product API read committed data (`demo/cases.json`, `demo/fixtures/**`,
+    `registry/**`) with node `fs` at request time.
+  - `next.config.mjs` lists those files in `outputFileTracingIncludes` for `/`, `/api/skills`,
+    `/api/exam` and `/api/run`. `tests/deploy.test.ts` guards that list.
+  - `lib/certification.ts` falls back to the working directory as the repo root, because Next
+    inlines `import.meta.url` with the build machine's path.
+  - The Arena's live mode writes to `.agent-university/`, so it is not usable on a read-only
+    serverless host.
+- **Some committed registry data predates the rename.** The canonical tournament record names its
+  student `Freshman #2` and carries real (not pseudonymized) `qm-thread-…` ids. It is certified
+  data under an `inputsDigest`, so it is left as recorded; a re-run tournament with current code
+  replaces it.
 - **`plan.composed` / `gap.discovered` are the frozen v1 events.** The missing contact is not a
   pipeline artifact, so the GAP names `outreach.md` as the artifact that cannot be produced. The
   capability travels in producer-added keys (`skillId`, `status: "candidate"`, `message`).
@@ -323,8 +392,15 @@ npm run typecheck && npm run build
 - certification tests (`certification.test.ts`);
 - the end-to-end test (`integration.test.ts`: real Vercel handoff → engine → record → registry →
   retrieval, plus failure cases);
-- the product layer (`product.test.ts`): the three route handlers, the composite run and GAP,
-  the frozen final demo, a tampered registry, and the page adapter in both modes.
+- the product layer (`product.test.ts`):
+  - the three route handlers;
+  - the composite run and GAP;
+  - the frozen final demo;
+  - Live derived from the current canonical record;
+  - a tampered registry;
+  - the page adapter in both modes;
+- deployment packaging (`deploy.test.ts`): the Vercel output-tracing include list;
+- swarm and tournament (`swarm.test.ts`, `tournament.test.ts`, `arena.test.ts`).
 
 ## 18. Run the UI
 
@@ -338,21 +414,25 @@ nvm use 24 && npm ci && npm run dev    # http://localhost:3001 (not 3000; see do
 |---|---|
 | `feat/runtime` | QM deployment + Scout skill, Memorable capture/recall adapter, fresh-student transfer exam, `TransferResult` + sanitized fixtures |
 | `feat/certification` | deterministic verifiers, policy `au-transfer-v1`, `CertificationRecord` schema, registry, `certify`/`registry` CLIs |
-| `feat/ui-demo` | Next.js lifecycle/exam/certification/GAP views, demo/live modes |
+| `feat/ui-demo` | Next.js lifecycle/exam/certification/GAP views, demo/live modes, then the Swarmem rename and RegistryPanel (`feat/ui-rename-swarmem`) |
+| `feat/arena`, `feat/live-flow-result` | swarm, flow tournament, Jev judge, `/arena`, and the live tournament result now canonical |
+| `feat/demo-final-integration` | product API, Fresh Intern composite run, GAP → candidate, metrics, frozen final demo, Vercel tracing |
 
 The handoff seams are `TransferResult` (runtime → certification) and `CertificationRecord` /
 `registry/` (certification → UI). Runtime ends at `transferred`; certification owns `certified`.
 
 ## 20. Recommended demo flow
 
-`npm run dev`, then open `http://localhost:3001/` (demo mode, real Vercel case).
-1. **01 Lifecycle.** Teacher observed on Linear → procedure recalled → exam started on Vercel →
-   exam passed → certified. Then the Intern's `plan.composed` and `gap.discovered`.
-2. **02 Transfer exam.** Teacher vs fresh student, the 13 runtime isolation facts, the 6/6 checks,
-   and the 8 policy rulings: "one agent learned it, a different agent proved it".
-3. **03 Certified capability.** The skill record and the student's real `company.json`: "the
+`npm run dev`, then open `http://localhost:3001/`. This is Demo mode: the frozen, real Vercel case.
+1. **01 Lifecycle.** Observed on Linear → procedure recalled → trial started on Vercel → verified
+   → certified. Then the Intern's `plan.composed` and `gap.discovered`.
+2. **02 Transfer trial.** The origin vs the replicating agent, the 13 runtime isolation facts, the
+   6/6 checks, and the 8 policy rulings: "one agent learned it, a different agent proved it".
+3. **03 Certified capability.** The skill record and the replica's real `company.json`: "the
    organization certified it".
-4. **04 Fresh Intern.** Point at *prior runs 0 · personal skills 0 · inherits research-company*,
+4. **04 The registry.** What the organization trusts. In Demo it is the frozen Vercel decision,
+   labelled as not canonical.
+5. **05 Fresh Intern.** Point at *prior runs 0 · personal skills 0 · inherits research-company*,
    then click **Assign the diligence task**. The steps appear in order:
    - certified and inherited (green);
    - two fixture stand-ins (dashed, uncertified);
@@ -362,11 +442,14 @@ The handoff seams are `TransferResult` (runtime → certification) and `Certific
 
    Talking point: "a brand-new agent inherited it, and the system knew where its knowledge
    stopped."
-5. **Metrics.** 6/6 verified; 1 certified skill reused; 1 of 5 steps from certified capability;
-   1 gap; the recorded wall-clock and tool calls of the teacher and student runs (no tokens: QM
-   does not record them).
-6. Click **Live (runtime)** at the top right. The same screen now reads `registry/` live, with the
-   same contracts.
-7. Optional: `curl -XPOST localhost:3001/api/exam -d '{}'` to show the engine certifying the real
-   transfer. Do not improvise the live QM + Memorable run (section 8) on stage: it takes minutes and
-   needs the local QM stack.
+6. **Metrics.** 6/6 verified; 1 certified skill reused; 1 of 5 steps from certified capability;
+   1 gap; the recorded wall-clock and tool calls of the two real runs (no tokens: QM does not
+   record them).
+7. Click **Live (runtime)** at the top right. The same screen now reads the current canonical
+   registry, which today is the Stripe tournament champion.
+   - Its Intern run inherits the skill but has no Vercel output, so the downstream steps are
+     blocked. That is the honest result, so present from Demo.
+   - `/arena` shows how that champion was chosen.
+8. Optional: `curl -XPOST localhost:3001/api/exam -d '{}'` to show the engine certifying the real
+   Vercel transfer. Do not improvise the live QM + Memorable run (section 8) or a live tournament on
+   stage: they take minutes and need the local QM stack.

@@ -90,7 +90,7 @@ so live data replaces fixtures without component changes.
 
 - The default case is now the real Linear → Vercel story (`?case=vercel`), and the mode switch
   keeps the case.
-- Section 04 renders `components/CompositeRun.tsx` in both modes. It shows:
+- Section 05 renders `components/CompositeRun.tsx` in both modes. It shows:
   - the Intern (0 prior runs, 0 personal skills) and its inherited certified skills;
   - "Assign the diligence task", which POSTs `/api/run` and reveals the labelled steps;
   - the yellow GAP (`GapBanner`), the new candidate, and `components/MetricsPanel.tsx`.
@@ -105,18 +105,23 @@ during a demo:
 
 - `/` or `/?mode=demo` — **demo mode.** Reads `demo/fixtures/*` and `demo/cases.json` only. No
   QM, no Docker, no secrets, no network.
-- `/?mode=live` — **live mode.** Reads the runtime's record at
-  `.agent-university/skills/<skillId>.json` (gitignored). If that file does not exist yet, the
-  page falls back to fixtures and says so in a banner. **The demo can never break because the
-  runtime is mid-flight.**
+- `/?mode=live` — **live mode.** Reads the current canonical record,
+  `registry/skills/<skillId>.json`, and only if there is none, the runtime's gitignored record at
+  `.agent-university/skills/<skillId>.json`. Live shows only what that record supports:
+  - its own events;
+  - its own metrics, or "not recorded";
+  - its artifact, or an explicit "unavailable".
 
-`?case=vercel` presents the **real** transfer exam instead of the fictional one: the sanitized
-Linear → Vercel run `feat/runtime` produced (`demo/fixtures/*-vercel*.json`), including the 13
-isolation checks the runtime actually performed, which the UI renders in place of its own derived
-ones (`TransferResult.isolation`, a producer-added key per `docs/HANDOFF.md` §2). That run stops at
-`transferred` by design — runtime proves, certification promotes — so the page says so instead of
-claiming certification. `?case=northwind` (default) is the fictional end-to-end lifecycle with the
-certified decision and the composition GAP.
+  It never falls back to fictional data. With neither record present, the page shows fixtures and
+  says so in a banner.
+
+`?case=vercel` (default) presents the **real** transfer trial: the sanitized Linear → Vercel run
+`feat/runtime` produced (`demo/fixtures/*-vercel*.json`), including the 13 isolation checks the
+runtime actually performed (`TransferResult.isolation`, a producer-added key per
+`docs/HANDOFF.md` §2). In demo mode it is shown certified, using the production engine's decision
+frozen in `demo/fixtures/final-demo.json`, which is the same decision `registry/ledger.jsonl` keeps.
+`?case=northwind` is the fictional end-to-end lifecycle with the certified decision and the
+composition GAP.
 
 `?outcome=failed` presents the recorded **failed** exam instead of the certified one
 (`demo/fixtures/certification-record-failed.json`): the timeline drops `exam.passed` and
@@ -133,9 +138,13 @@ sources in this order:
 | 2 | `.agent-university/skills/<id>.json` (`Skill` + `events[]`) | `feat/runtime`, `au_record.py` |
 | 3 | `demo/fixtures/**` | committed fixtures |
 
-`registry/index.json` is read in **every** mode (it is committed, so it is real data either way) and
-rendered by `components/RegistryPanel.tsx` as section 04, "The registry" — one row per certified
-skill, with the champion-flow block (`title`, `passRate`, `runs`, `judgeScore`, `tournamentId`) when
+Section 04, "The registry", is rendered by `components/RegistryPanel.tsx`.
+- **Live:** it shows `registry/index.json`.
+- **Frozen Vercel demo:** it shows that story's registry state (the Vercel decision, as
+  `GET /api/skills?mode=demo` reports it), with a note that it is not the current canonical record.
+- **Fictional case:** it shows `registry/index.json`.
+
+Each row is one certified skill, with the champion-flow block (`title`, `passRate`, `runs`, `judgeScore`, `tournamentId`) when
 a flow tournament promoted it, and an explicit "certified by a single exam" line when it did not.
 Empty registry renders as "nothing is certified yet", which is a meaningful state, not an error.
 
