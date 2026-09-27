@@ -341,10 +341,12 @@ async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
   ]);
 
   if (!skill || !transfer) {
+    // Fall back to the complete fictional lifecycle (decision included) rather than a half-populated
+    // page, and say why.
     return {
-      ...base,
+      ...(await withDemoCertification(base, "certified")),
       liveNote:
-        "The real Linear → Vercel transfer fixtures (demo/fixtures/*-vercel*.json) are not in this " +
+        "The real Linear → Vercel transfer fixtures (demo/fixtures/*-vercel*.json) are not on this " +
         "branch yet; they arrive with feat/runtime's Milestone 2. Showing the fictional lifecycle.",
     };
   }
