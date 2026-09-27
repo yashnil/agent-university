@@ -1,0 +1,98 @@
+/* RegistryPanel: the organization's canonical register of certified skills —
+   one ruled row per promotion, read like an accreditation office's record
+   book, not a card grid. Tokens come from app/globals.css; nothing here
+   hardcodes colour or spacing, and nothing here draws a circle — that shape
+   is reserved for StatusNode. */
+
+.panel {
+  display: block;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s3);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s4);
+}
+
+.note {
+  margin: 0 0 var(--s4);
+  max-width: var(--measure);
+  overflow-wrap: anywhere;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  padding: var(--s4) 0;
+  border-top: 1px solid var(--border);
+}
+
+.row:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t2);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* Champion flow — set apart with surface tone and a hairline, never a shadow. */
+.procedure {
+  margin-top: var(--s4);
+  padding: var(--s4);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.procedureHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.procedureTitle {
+  margin: 0 0 var(--s3);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t1);
+  line-height: var(--lh-tight);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.noProcedure {
+  margin: var(--s4) 0 0;
+}

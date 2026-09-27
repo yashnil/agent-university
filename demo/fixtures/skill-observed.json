@@ -2,7 +2,7 @@
   "id": "research-company",
   "name": "Research Company",
   "status": "observed",
-  "teacher": { "id": "agent-teacher-0001", "name": "Scout (teacher)", "harness": "qm" },
+  "teacher": { "id": "agent-teacher-0001", "name": "Scout (origin)", "harness": "qm" },
   "artifactType": "company.json",
   "procedureId": "procedures/0000aaaa-research-a-company-fixture"
 }

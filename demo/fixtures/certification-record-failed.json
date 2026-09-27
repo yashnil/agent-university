@@ -6,7 +6,7 @@
     "status": "transferred",
     "teacher": {
       "id": "agent-teacher-0001",
-      "name": "Scout (teacher)",
+      "name": "Scout (origin)",
       "harness": "qm"
     },
     "artifactType": "company.json",
@@ -14,7 +14,7 @@
     "transfer": {
       "student": {
         "id": "agent-student-0003",
-        "name": "Scout (second student)",
+        "name": "Scout (second replica)",
         "harness": "qm"
       },
       "examCase": "exam-northwind",
@@ -23,14 +23,14 @@
   },
   "teacher": {
     "id": "agent-teacher-0001",
-    "name": "Scout (teacher)",
+    "name": "Scout (origin)",
     "harness": "qm"
   },
   "procedureId": "procedures/0000aaaa-research-a-company-fixture",
   "transfer": {
     "student": {
       "id": "agent-student-0003",
-      "name": "Scout (second student)",
+      "name": "Scout (second replica)",
       "harness": "qm"
     },
     "examCase": "exam-northwind",
@@ -106,7 +106,7 @@
         "evidence": {
           "teacher": {
             "id": "agent-teacher-0001",
-            "name": "Scout (teacher)",
+            "name": "Scout (origin)",
             "harness": "qm"
           },
           "runId": "run-fixture-0001",
@@ -141,12 +141,12 @@
         "evidence": {
           "student": {
             "id": "agent-student-0003",
-            "name": "Scout (second student)",
+            "name": "Scout (second replica)",
             "harness": "qm"
           },
           "teacher": {
             "id": "agent-teacher-0001",
-            "name": "Scout (teacher)",
+            "name": "Scout (origin)",
             "harness": "qm"
           },
           "crossHarness": false
@@ -216,7 +216,7 @@
       }
     ],
     "decidedAt": "2026-01-01T00:05:01Z",
-    "inputsDigest": "sha256:9b8ddd202d9391b66b53834fccafaf2ffe895341967396397de7654d0e63bea9"
+    "inputsDigest": "sha256:a90e3ff8ccc82d3084138d6c952ca011584c6293049d0cea64de916b1f63e000"
   },
   "events": []
 }

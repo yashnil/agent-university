@@ -21,58 +21,75 @@ export default function TransferExam({
   teacherCase: string;
   isolation: IsolationFact[];
 }): JSX.Element {
-  const studentNote = `Never saw the teacher's answer — worked only from the recalled procedure${
+  const replicatingNote = `The replicating agent never saw the origin agent's answer — worked only from the recalled procedure${
     transfer.procedureId ? ` (${transfer.procedureId})` : ""
   }.`;
+
+  const passedIsolation = isolation.filter((fact) => fact.passed).length;
 
   return (
     <div className={styles.exam}>
       <div className="grid2">
         <AgentCard role="teacher" agent={teacher} caseLabel={teacherCase} />
-        <AgentCard role="student" agent={transfer.student} caseLabel={transfer.examCase} note={studentNote} />
+        <AgentCard role="student" agent={transfer.student} caseLabel={transfer.examCase} note={replicatingNote} />
       </div>
 
-      <div className="card">
-        <p className="cardTitle">Isolation</p>
-        <p className="muted">
-          Certification requires all of these to hold: a different agent, working only from the recalled
-          procedure, on an unseen case.
+      <section className="panel" aria-label="Isolation">
+        <div className={styles.isolationHead}>
+          <p className="panelTitle">Isolation</p>
+          <span className="muted count mono">
+            {passedIsolation}/{isolation.length}
+          </span>
+        </div>
+        <p className={`muted ${styles.intro}`}>
+          Certification requires all of these to hold: a different agent, only the recalled procedure, an
+          unseen case.
         </p>
-        <ul className={styles.list}>
-          {isolation.map((fact) => (
-            <li key={fact.name} className={styles.row}>
-              <span className={`badge ${fact.passed ? "badge--pass" : "badge--fail"}`}>
-                {fact.passed ? "PASS" : "FAIL"}
-              </span>
-              <span className="mono">{fact.name}</span>
-              <span className="muted">{fact.detail}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
 
-      <div className="card">
-        <p className="cardTitle">Produced artifact</p>
+        {isolation.length === 0 ? (
+          <p className="muted">no isolation facts recorded</p>
+        ) : (
+          <ul className={styles.list}>
+            {isolation.map((fact) => (
+              <li key={fact.name} className={styles.row}>
+                <span className={`tag ${fact.passed ? "tag--pass" : "tag--fail"}`}>
+                  <span aria-hidden="true">{fact.passed ? "✓" : "✗"}</span>
+                  {fact.passed ? "pass" : "fail"}
+                </span>
+                <span className={`mono ${styles.factName}`}>{fact.name}</span>
+                <span className={`muted ${styles.detail}`}>{fact.detail}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="panel" aria-label="Produced artifact">
+        <p className="panelTitle">Produced artifact</p>
         <dl className="kv">
           <dt>type</dt>
-          <dd>{transfer.artifact.type}</dd>
+          <dd className="mono">{transfer.artifact.type}</dd>
           <dt>path</dt>
           <dd>{transfer.artifact.path}</dd>
           {transfer.runId ? (
             <>
-              <dt>run</dt>
+              <dt>runId</dt>
               <dd>{transfer.runId}</dd>
             </>
           ) : null}
         </dl>
-      </div>
+      </section>
 
       <ChecksTable result={transfer.verification} title="Deterministic verifier" />
 
-      <p className={`${styles.verdict} ${transfer.passed ? styles.verdictPass : styles.verdictFail}`}>
-        {transfer.passed
-          ? "EXAM PASSED — the procedure transferred"
-          : "EXAM FAILED — the skill stays `transferred`, not certified"}
+      <p className={`${styles.verdict} ${transfer.passed ? styles.pass : styles.fail}`}>
+        {transfer.passed ? (
+          "TRIAL PASSED — the procedure transferred"
+        ) : (
+          <>
+            TRIAL FAILED — the skill stays at <span className="mono">transferred</span>, nothing is promoted
+          </>
+        )}
       </p>
     </div>
   );

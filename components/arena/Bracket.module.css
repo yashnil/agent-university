@@ -20,8 +20,8 @@
   gap: 10px;
   padding: 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-sunken);
+  border-radius: var(--r);
+  background: var(--bg);
   min-width: 0;
 }
 
@@ -49,9 +49,9 @@
 }
 
 .card {
-  background: var(--bg-raised);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--border-strong);
+  border-left: 3px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
   transition: border-color 0.2s ease, background-color 0.2s ease;
@@ -75,7 +75,7 @@
   cursor: pointer;
 }
 
-.cardButton:hover { background: color-mix(in srgb, var(--text) 3%, transparent); }
+.cardButton:hover { background: color-mix(in srgb, var(--fg) 3%, transparent); }
 .cardButton:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 .cardHead {
@@ -135,8 +135,8 @@
 .runningLabel { color: var(--accent); font-size: 11.5px; }
 
 @keyframes pulse {
-  0%, 100% { background: var(--bg-raised); }
-  50% { background: color-mix(in srgb, var(--accent) 9%, var(--bg-raised)); }
+  0%, 100% { background: var(--surface); }
+  50% { background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -144,18 +144,18 @@
 }
 
 .pass {
-  border-left-color: var(--certified);
-  background: color-mix(in srgb, var(--certified) 5%, var(--bg-raised));
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
 }
 
 .fail {
   border-left-color: var(--fail);
-  background: color-mix(in srgb, var(--fail) 5%, var(--bg-raised));
+  background: color-mix(in srgb, var(--fail) 5%, var(--surface));
 }
 
 .winner {
-  border-color: color-mix(in srgb, var(--certified) 55%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--certified) 35%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .rulings {
@@ -196,7 +196,7 @@
 .reason {
   flex-basis: 100%;
   margin: 0;
-  color: var(--text-dim);
+  color: var(--fg-muted);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -209,7 +209,7 @@
   margin-bottom: 2px;
 }
 
-.colAdvances { border-color: color-mix(in srgb, var(--certified) 40%, transparent); }
+.colAdvances { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .colOut { opacity: 0.85; }
 
 .heatStatus {
@@ -234,7 +234,7 @@
   transition: width 0.4s ease;
 }
 
-.ratePass { background: var(--certified); }
+.ratePass { background: var(--accent); }
 .rateFail { background: var(--fail); }
 
 .rateMark {
@@ -243,15 +243,15 @@
   bottom: 0;
   left: 50%;
   width: 1px;
-  background: var(--text-faint);
+  background: var(--fg-muted);
 }
 
 .exam {
   margin: 4px 0 0;
   font-size: 11.5px;
-  color: var(--text-dim);
+  color: var(--fg-muted);
   overflow-wrap: anywhere;
 }
 
-.exam strong { color: var(--text); font-weight: 600; }
+.exam strong { color: var(--fg); font-weight: 600; }
 .card > .exam { padding-inline: 12px; }

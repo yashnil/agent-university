@@ -108,7 +108,7 @@ export default function Arena(): JSX.Element {
 
   return (
     <>
-      <section className={`card ${styles.controls}`} aria-label="Tournament controls">
+      <section className={`panel ${styles.controls}`} aria-label="Tournament controls">
         <div className={styles.field}>
           <span className={styles.label}>Mode</span>
           <div className={styles.segment} role="group" aria-label="Mode">
@@ -158,29 +158,29 @@ export default function Arena(): JSX.Element {
         <button type="button" className={styles.run} onClick={run} disabled={running}>
           {running ? "Running…" : "Run tournament"}
         </button>
-        <p className={`mono faint ${styles.modeNote}`}>
+        <p className={`mono muted ${styles.modeNote}`}>
           {mode === "dry"
-            ? "Dry run: fixture flows and fabricated students, real certification engine, offline fixture judge. No QM, no keys."
-            : "Live: real students on QM, flows recalled from Memorable (or the ids you list). Needs QM + Memorable running and keys (OpenRouter for Jev) on the server."}
+            ? "Dry run: fixture flows and fabricated agents, real certification engine, offline fixture judge. No QM, no keys."
+            : "Live: real agents on QM, flows recalled from Memorable (or the ids you list). Needs QM + Memorable running and keys (OpenRouter for Jev) on the server."}
         </p>
       </section>
 
       {notice ? (
         <div className="notice">
-          <span className="badge badge--warn">note</span>
+          <span className="tag tag--muted">note</span>
           <span>{notice}</span>
         </div>
       ) : null}
 
       {view.error ? (
         <div className={`notice ${styles.error}`}>
-          <span className="badge badge--fail">error</span>
+          <span className="tag tag--fail">error</span>
           <span className="mono">{view.error.message}</span>
         </div>
       ) : null}
 
       {!jobId && conn === "idle" ? (
-        <p className={`faint ${styles.empty}`}>No tournament yet. Pick a mode and press Run.</p>
+        <p className={`muted ${styles.empty}`}>No tournament yet. Pick a mode and press Run.</p>
       ) : null}
 
       {view.started ? (
@@ -189,22 +189,22 @@ export default function Arena(): JSX.Element {
             <div className="sectionHead">
               <span className="sectionNum">01</span>
               <h2>{view.flowMode ? "Flows" : "Heats"}</h2>
-              <span className="mono faint">
+              <span className="mono muted">
                 {view.started.tournamentId} · {view.started.dry ? "dry run" : "live"}
               </span>
             </div>
             <p className="sectionSub">
               {view.flowMode
                 ? `Each column is one candidate flow. Every agent in it gets only that flow and a different unseen company; the 8-rule engine certifies each run. A flow advances when at least ${Math.round(view.threshold * 100)}% of its runs are certified.`
-                : "Each heat is one unseen exam case. Every student is certified by the 8-rule engine; the best certified record in a heat advances. A heat with nobody certified sends no finalist."}
+                : "Each heat is one unseen trial case. Every agent is certified by the 8-rule engine; the best certified record in a heat advances. A heat with nobody certified sends no finalist."}
             </p>
             {view.rejected.length ? (
               <div className="notice" style={{ marginTop: 0, marginBottom: 16 }}>
-                <span className="badge badge--warn">rejected</span>
+                <span className="tag tag--muted">rejected</span>
                 <span>
                   {view.rejected.map((r) => (
                     <span key={r.procedureId} style={{ display: "block" }}>
-                      <strong>{r.title}</strong> <span className="mono faint">{r.procedureId}</span> — {r.reason}
+                      <strong>{r.title}</strong> <span className="mono muted">{r.procedureId}</span> — {r.reason}
                     </span>
                   ))}
                 </span>
@@ -247,7 +247,7 @@ export default function Arena(): JSX.Element {
           ) : null}
         </>
       ) : jobId ? (
-        <p className={`faint mono ${styles.empty}`}>waiting for the tournament to start…</p>
+        <p className={`muted mono ${styles.empty}`}>waiting for the tournament to start…</p>
       ) : null}
 
       {events.length > 0 ? <EventLog events={events} /> : null}

@@ -1,38 +1,60 @@
-/* RulingsPanel: certification decision header + one row per named rule. */
+/* RulingsPanel: the certification verdict + one hairline-ruled row per policy rule.
+   Tokens come from app/globals.css; nothing here hardcodes colour or spacing. */
 
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+.panel {
+  display: block;
 }
 
-.summary {
-  margin: 0 0 18px;
-  font-size: 15px;
-  font-weight: 600;
+.header {
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s4);
+}
+
+.verdict {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t2);
+  line-height: var(--lh-tight);
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
 
-.summaryPass { color: var(--pass); }
-.summaryFail { color: var(--fail); }
+@media (min-width: 640px) {
+  .verdict {
+    font-size: var(--t4);
+  }
+}
+
+.verdictPass {
+  color: var(--pass);
+}
+
+.verdictFail {
+  color: var(--fail);
+}
+
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  margin-top: var(--s3);
+}
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .row {
-  padding: 10px 12px;
+  padding: var(--s3) 0;
+  padding-left: var(--s3);
   border-top: 1px solid var(--border);
-  border-left: 3px solid transparent;
-  border-radius: 6px;
+  border-left: 2px solid transparent;
+  transition: background-color var(--dur-hover) var(--ease);
 }
 
 .row:first-child {
@@ -40,56 +62,89 @@
   padding-top: 0;
 }
 
+.row:hover {
+  background: var(--surface-2);
+}
+
 .rowFail {
   border-left-color: var(--fail);
-  background: color-mix(in srgb, var(--fail) 7%, transparent);
+  background: var(--surface-2);
 }
 
 .rowHead {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: var(--s2);
+}
+
+.index {
+  color: var(--fg-muted);
+  min-width: 1.8em;
+  text-align: right;
+  flex: none;
+}
+
+.rule {
+  color: var(--fg);
+  overflow-wrap: anywhere;
 }
 
 .reason {
-  margin: 6px 0 0;
-  color: var(--text-dim);
+  margin: var(--s2) 0 0;
+  color: var(--fg);
+  max-width: var(--measure);
   overflow-wrap: anywhere;
-  max-width: 90ch;
 }
 
 .details {
-  margin-top: 8px;
+  margin-top: var(--s2);
 }
 
-.summaryToggle {
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
   cursor: pointer;
-  color: var(--text-faint);
-  font-family: var(--mono);
-  font-size: 11px;
+  list-style: none;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: var(--t-2);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   user-select: none;
 }
 
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosureGlyph {
+  display: inline-block;
+  transition: transform var(--dur-expand) var(--ease);
+}
+
+.details[open] .disclosureGlyph {
+  transform: rotate(90deg);
+}
+
 .evidence {
-  margin-top: 8px;
-  max-height: 220px;
+  margin-top: var(--s2);
+  max-height: 240px;
   overflow: auto;
   max-width: 100%;
 }
 
 .footer {
+  margin-top: var(--s6);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  font-size: 11.5px;
+  gap: var(--s1);
+  font-size: var(--t-1);
 }
 
-.footerValue {
-  color: var(--text-dim);
+.footerItem {
+  margin: 0;
 }

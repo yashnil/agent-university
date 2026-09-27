@@ -6,7 +6,7 @@
   margin-bottom: 12px;
 }
 
-.reason { margin: 0 0 12px; color: var(--warn); font-size: 12px; overflow-wrap: anywhere; }
+.reason { margin: 0 0 12px; color: var(--fg-muted); font-size: 12px; overflow-wrap: anywhere; }
 .note { margin: 0 0 12px; font-size: 12.5px; }
 
 .list {
@@ -22,10 +22,10 @@
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--bg-sunken);
+  background: var(--bg);
 }
 
-.first { border-color: color-mix(in srgb, var(--certified) 45%, transparent); }
+.first { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 
 .waiting { animation: pulse 1.8s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -38,8 +38,8 @@
   gap: 10px;
 }
 
-.place { color: var(--text-faint); }
-.first .place { color: var(--certified); }
+.place { color: var(--fg-muted); }
+.first .place { color: var(--accent); }
 .name { font-weight: 600; }
 
 .scoreRow {
@@ -64,13 +64,13 @@
   transition: width 0.6s ease;
 }
 
-.first .fill { background: var(--certified); }
+.first .fill { background: var(--accent); }
 
 .score { min-width: 52px; text-align: right; }
 
 .rationale {
   margin: 8px 0 0;
-  color: var(--text-dim);
+  color: var(--fg-muted);
   font-size: 13px;
   overflow-wrap: anywhere;
 }

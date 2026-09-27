@@ -1,0 +1,36 @@
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  text-decoration: none;
+  color: var(--fg);
+  transition: opacity var(--dur-hover) var(--ease-out);
+}
+
+/* Hover touches the wordmark only; the mark itself is never altered. */
+.lockup:hover .wordmark {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.mark {
+  display: block;
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: var(--t1);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  font-variation-settings: "opsz" 20;
+}
+
+.wordmark em {
+  font-style: italic;
+  font-synthesis: none; /* Newsreader ships a true italic; never let the browser slant it */
+}

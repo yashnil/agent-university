@@ -6,7 +6,7 @@
     "status": "certified",
     "teacher": {
       "id": "agent-teacher-0001",
-      "name": "Scout (teacher)",
+      "name": "Scout (origin)",
       "harness": "qm"
     },
     "artifactType": "company.json",
@@ -14,7 +14,7 @@
     "transfer": {
       "student": {
         "id": "agent-student-0002",
-        "name": "Scout (fresh student)",
+        "name": "Scout (replica)",
         "harness": "qm"
       },
       "examCase": "exam-northwind",
@@ -23,14 +23,14 @@
   },
   "teacher": {
     "id": "agent-teacher-0001",
-    "name": "Scout (teacher)",
+    "name": "Scout (origin)",
     "harness": "qm"
   },
   "procedureId": "procedures/0000aaaa-research-a-company-fixture",
   "transfer": {
     "student": {
       "id": "agent-student-0002",
-      "name": "Scout (fresh student)",
+      "name": "Scout (replica)",
       "harness": "qm"
     },
     "examCase": "exam-northwind",
@@ -104,7 +104,7 @@
         "evidence": {
           "teacher": {
             "id": "agent-teacher-0001",
-            "name": "Scout (teacher)",
+            "name": "Scout (origin)",
             "harness": "qm"
           },
           "runId": "run-fixture-0001",
@@ -139,12 +139,12 @@
         "evidence": {
           "student": {
             "id": "agent-student-0002",
-            "name": "Scout (fresh student)",
+            "name": "Scout (replica)",
             "harness": "qm"
           },
           "teacher": {
             "id": "agent-teacher-0001",
-            "name": "Scout (teacher)",
+            "name": "Scout (origin)",
             "harness": "qm"
           },
           "crossHarness": false
@@ -212,7 +212,7 @@
       }
     ],
     "decidedAt": "2026-01-01T00:04:01Z",
-    "inputsDigest": "sha256:c1b788127a7170222cfad9cd37823fd4638bb89c960fc4af28fe3ab083c87f0f"
+    "inputsDigest": "sha256:3981421ac3566123a8616af1338bc664a5bd910954c021815e01feeee546e885"
   },
   "events": [
     {
@@ -223,7 +223,7 @@
         "examCase": "exam-northwind",
         "student": {
           "id": "agent-student-0002",
-          "name": "Scout (fresh student)",
+          "name": "Scout (replica)",
           "harness": "qm"
         },
         "verification": {
@@ -271,12 +271,12 @@
         "skillId": "research-company",
         "teacher": {
           "id": "agent-teacher-0001",
-          "name": "Scout (teacher)",
+          "name": "Scout (origin)",
           "harness": "qm"
         },
         "student": {
           "id": "agent-student-0002",
-          "name": "Scout (fresh student)",
+          "name": "Scout (replica)",
           "harness": "qm"
         },
         "examCase": "exam-northwind",

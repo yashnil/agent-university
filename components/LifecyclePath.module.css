@@ -1,0 +1,71 @@
+.path {
+  display: block;
+  flex: 1 1 auto;
+  --dot: var(--fg-muted);
+}
+
+.horizontal { height: 1px; min-width: var(--s6); background-repeat: repeat-x; }
+.vertical { width: 1px; min-height: var(--s6); background-repeat: repeat-y; }
+
+/* pending — dotted, provisional */
+.pending.horizontal {
+  background-image: radial-gradient(circle, var(--fg-muted) 0 1px, transparent 1px);
+  background-size: 5px 1px;
+}
+.pending.vertical {
+  background-image: radial-gradient(circle, var(--fg-muted) 0 1px, transparent 1px);
+  background-size: 1px 5px;
+}
+
+/* done — solid accent-dim, lit on arrival */
+.done.horizontal,
+.done.vertical {
+  background-image: none;
+  background-color: var(--accent-dim);
+  animation: light var(--dur-path) var(--ease) 1;
+}
+
+.done.horizontal { transform-origin: left center; }
+.done.vertical { transform-origin: top center; }
+
+@keyframes light {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* live — dotted, with the leading segment travelling toward the next node */
+.live.horizontal {
+  background-image: linear-gradient(90deg, var(--accent) 0 40%, transparent 40% 100%),
+    radial-gradient(circle, var(--accent-dim) 0 1px, transparent 1px);
+  background-size: 28px 1px, 5px 1px;
+  animation: travel 1800ms linear infinite;
+}
+.live.vertical {
+  background-image: linear-gradient(180deg, var(--accent) 0 40%, transparent 40% 100%),
+    radial-gradient(circle, var(--accent-dim) 0 1px, transparent 1px);
+  background-size: 1px 28px, 1px 5px;
+  animation: travelY 1800ms linear infinite;
+}
+
+@keyframes travel {
+  from { background-position: -28px 0, 0 0; }
+  to { background-position: 100% 0, 0 0; }
+}
+@keyframes travelY {
+  from { background-position: 0 -28px, 0 0; }
+  to { background-position: 0 100%, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .done.horizontal, .done.vertical { animation: none; }
+  .live.horizontal {
+    animation: none;
+    background-image: radial-gradient(circle, var(--accent) 0 1px, transparent 1px);
+    background-size: 5px 1px;
+  }
+  .live.vertical {
+    animation: none;
+    background-image: radial-gradient(circle, var(--accent) 0 1px, transparent 1px);
+    background-size: 1px 5px;
+  }
+}

@@ -1,109 +1,157 @@
-/* Scoped styles for LifecycleTimeline. */
+/* Scoped styles for LifecycleTimeline — an "academic instrument" reading, not a dashboard.
+   Colour never carries state alone: every StatusNode/LifecyclePath here is paired with a
+   text label (a number, a word, an .idTag) so the record still parses in grayscale. */
 
 .wrapper {
   display: block;
 }
 
-.progression {
+.header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 0 22px;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s6);
 }
 
-.arrow {
-  color: var(--text-faint);
-  font-family: var(--mono);
-  font-size: 13px;
+/* A. The chain — six StatusNodes joined by LifecyclePaths, forward-only. Scrolls
+   horizontally rather than wrapping, so a path is never severed mid-line. */
+.chainScroll {
+  overflow-x: auto;
+  padding-bottom: var(--s2);
 }
 
+.chain {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  gap: 0;
+  list-style: none;
+  margin: 0 0 var(--s8);
+  padding: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 13ch;
+  gap: var(--s1);
+  text-align: center;
+}
+
+.stepNum {
+  color: var(--fg-muted);
+  font-size: var(--t-2);
+}
+
+.stepLabel {
+  font-family: var(--font-body);
+  font-size: var(--t-1);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+/* The connector between two steps. Aligned to the StatusNode's vertical centre: a
+   size="md" node is --node-lg (16px) across, so half of that is --s2 (8px). */
+.pathItem {
+  flex: 1 1 auto;
+  min-width: var(--s8);
+  margin-top: var(--s2);
+}
+
+.producerLine {
+  font-family: var(--font-body);
+  font-size: var(--t-2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.stateWord {
+  font-family: var(--font-mono);
+  font-size: var(--t-2);
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* B. The one derived sentence of current truth. */
+.narrative {
+  margin: 0 0 var(--s8);
+  max-width: var(--measure);
+  font-family: var(--font-display);
+  font-size: var(--t1);
+  font-weight: 400;
+  line-height: var(--lh-snug);
+  color: var(--fg);
+}
+
+/* C. The event record — a hairline-ruled lab notebook, one row per event. */
 .timeline {
   list-style: none;
   margin: 0;
   padding: 0;
+  border-top: 1px solid var(--border);
 }
 
 .row {
   display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 14px;
+  grid-template-columns: var(--node) 1fr;
+  gap: var(--s4);
+  border-bottom: 1px solid var(--border);
 }
 
 .rail {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: var(--s4);
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--border-strong);
-  background: var(--bg-raised);
-  flex: none;
-  margin-top: 3px;
-}
-
-.dot--pass {
-  border-color: var(--pass);
-  background: color-mix(in srgb, var(--pass) 40%, var(--bg-raised));
-}
-
-.dot--accent {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 40%, var(--bg-raised));
-}
-
-.dot--warn {
-  border-color: var(--warn);
-  background: color-mix(in srgb, var(--warn) 40%, var(--bg-raised));
-}
-
-.dot--neutral {
-  border-color: var(--border-strong);
-  background: var(--bg-raised);
-}
-
-.line {
+.railLine {
   flex: 1;
-  width: 1px;
-  min-height: 22px;
-  margin-top: 3px;
-  background: var(--border);
+  display: flex;
+  justify-content: center;
+  margin-top: var(--s1);
 }
 
 .content {
-  padding-bottom: 22px;
+  padding: var(--s4) 0;
+  transition: background-color var(--dur-hover) var(--ease-out);
+}
+
+.row:hover .content {
+  background: var(--surface-2);
 }
 
 .rowHead {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 6px;
+  gap: var(--s3);
+  margin-bottom: var(--s2);
 }
 
-.type {
-  color: var(--text);
-  font-weight: 600;
+.timestamp {
+  color: var(--fg-muted);
 }
 
 .summary {
-  margin: 0 0 8px;
-  color: var(--text-dim);
-  font-size: 13.5px;
-  line-height: 1.5;
+  margin: 0 0 var(--s2);
+  max-width: var(--measure);
+  color: var(--fg-muted);
+  font-size: var(--t0);
+  line-height: var(--lh-body);
 }
 
-.gap {
-  background: color-mix(in srgb, var(--warn) 7%, transparent);
-  border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
-  border-radius: 8px;
-  padding: 10px 14px 16px;
-  margin-top: -2px;
+/* gap.discovered rows: the GAP grammar is muted + dashed, never amber. */
+.gapContent {
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
 }
 
-.gap .summary {
-  color: var(--text);
+.gapContent .summary {
+  color: var(--fg);
 }

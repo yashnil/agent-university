@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Arena from "@/components/arena/Arena";
 
 export const metadata: Metadata = {
-  title: "Arena · Agent University",
-  description: "Memorable flows compete on unseen companies; certification decides which runs pass; Jev judges the flows that mostly pass.",
+  title: "Arena · swarmem",
+  description:
+    "Memorable flows compete: each flow is handed to fresh agents on unseen cases, the certification engine rules on every result, and the champion flow becomes trusted.",
 };
 
 export const dynamic = "force-dynamic";
@@ -11,20 +12,12 @@ export const dynamic = "force-dynamic";
 export default function ArenaPage() {
   return (
     <main className="page">
-      <header className="masthead">
-        <div>
-          <p className="mono faint" style={{ margin: "0 0 6px" }}>
-            <a href="/">← Agent University</a>{" · "}<a href="/battle">Flow Fighter: battle mode →</a>
-          </p>
-          <h1>Arena</h1>
-          <p className="northStar">
-            Memorable flows compete: each flow is handed to fresh agents on unseen companies. The certification
-            engine decides <strong>deterministically</strong> which runs pass; flows that mostly pass reach the
-            final, where Jev judges the flows themselves. The champion flow becomes the company&apos;s trusted
-            procedure.
-          </p>
-        </div>
-      </header>
+      <h1 className="pageTitle">Arena</h1>
+      <p className="lede">
+        Rival procedures compete for trust. Each flow is handed to fresh agents on cases they have
+        never seen; the deterministic engine rules on every result; the champion flow is promoted
+        into the registry. <strong>Nothing here can certify itself.</strong>
+      </p>
       <Arena />
     </main>
   );

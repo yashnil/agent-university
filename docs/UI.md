@@ -1,7 +1,43 @@
 # UI / demo app (`feat/ui-demo`)
 
-The Next.js app that renders the Agent University story. New file, owned by the UI branch: it
+The Next.js app that renders the swar*mem* story. New file, owned by the UI branch: it
 does not touch `README.md`, `PROGRESS.md` or `docs/HANDOFF.md`, which stay shared.
+
+## Brand and vocabulary
+
+The mark is `public/swarmem-logo.png` (and `app/icon.png`, which Next serves as the favicon),
+cropped from the source art. The dark ramp in `app/globals.css` is taken from the logo itself —
+ground `#14161f`, ink `#f4f1ea` — so the mark sits *in* the page rather than on a mismatched
+square. `--brand: #f0a04b` and `--brand-dim: #8d6237` are the logo's amber; they are used for the
+mark only, never for status, so brand never competes with `--pass` / `--fail` / `--warn`.
+
+**No education vocabulary in user-visible copy.** The product is about one agent's procedure being
+reproduced and verified by a different agent, not about school:
+
+| Not this | This |
+|---|---|
+| teacher | origin agent |
+| student / fresh student | replicating agent |
+| exam, transfer exam | trial, transfer trial |
+| exam case | trial case |
+| taught by / proved by | learned from / replicated by |
+| Freshman #N, Student #N | Agent #N |
+
+`certified`, `verified`, `skill`, `procedure`, `flow` and `registry` stay: those are quality and
+compliance words, not school words.
+
+**Contract identifiers are data and are never relabelled.** Event names (`exam.started`,
+`exam.passed`), field names (`examCase`, `student`, `teacher`), rule ids
+(`student_distinct_from_teacher`) and verifier check names render verbatim, in mono. A row can
+legitimately read **ORIGIN AGENT** beside the raw key `teacher`: the label is ours, the key is
+data. Renaming a key to match our prose would mean the page no longer shows what is on disk.
+
+The fictional Northwind fixtures were relabelled (`Scout (origin)`, `Scout (replica)`) and the
+engine-generated fixtures regenerated with `UPDATE_FIXTURES=1 npm run test:ts`. The sanitized
+real-run fixtures (`demo/fixtures/*-vercel*.json`) and `registry/` were **not** touched:
+`tests/integration.test.ts` pins the committed ledger to a recomputation from those fixtures, so
+relabelling them would force a rewrite of an audit record. Those rows still read "teacher" and
+"student" until whoever owns them re-runs the certify command in `docs/REPO_OVERVIEW.md` §9.
 
 ## Run it
 
@@ -30,6 +66,12 @@ and certification can use it as the shared gate.
 
 One scrolling page, `app/page.tsx`, in the demo's order:
 
+0. **The 6-step chain** — `components/LifecycleTimeline.tsx` renders
+   `observed → recalled → exam started → exam passed → transferred → certified` per
+   `docs/HANDOFF.md`, with every unsatisfied step marked **pending**. A run that stopped at
+   `transferred` shows steps 4 and 6 pending rather than a shorter timeline: seeing where proof
+   stops is the point. Step 5 is tagged `status`, because `transferred` is a `Skill.status` and
+   there is no event for it.
 0. **Certification decision** — `components/RulingsPanel.tsx` over the 8 rulings of policy
    `au-transfer-v1`, each with its verbatim reason and its evidence JSON. This is the credibility
    centerpiece: it shows *why* a skill was or was not certified, straight from the engine.
@@ -90,6 +132,21 @@ sources in this order:
 | 1 | `registry/skills/<id>.json` (`CertificationRecord`) | `feat/certification`, `certify.ts --promote` |
 | 2 | `.agent-university/skills/<id>.json` (`Skill` + `events[]`) | `feat/runtime`, `au_record.py` |
 | 3 | `demo/fixtures/**` | committed fixtures |
+
+`registry/index.json` is read in **every** mode (it is committed, so it is real data either way) and
+rendered by `components/RegistryPanel.tsx` as section 04, "The registry" — one row per certified
+skill, with the champion-flow block (`title`, `passRate`, `runs`, `judgeScore`, `tournamentId`) when
+a flow tournament promoted it, and an explicit "certified by a single exam" line when it did not.
+Empty registry renders as "nothing is certified yet", which is a meaningful state, not an error.
+
+The UI imports `CertificationRecord` and `RegistryIndex` from `@/lib/certification` directly — the
+structural stand-in that predated that file is gone. `decision.policy.requireIsolation` and the
+optional `metrics` (`durationMs`, `toolCalls`, `turns`, `costUsd`) are rendered when present and
+omitted silently when absent, which is the common case for hand-certified records.
+
+A promoted record's `transfer.artifact.path` is either a sandbox path (unreadable from Next) or a
+repo-relative path certification committed. The UI reads the latter, so live mode shows the artifact
+that was actually certified instead of a stand-in.
 
 The UI declares the `CertificationRecord` fields it reads structurally, so it compiles before the
 certification branch merges; afterwards that block can become

@@ -1,6 +1,6 @@
 .banner {
-  border-color: color-mix(in srgb, var(--certified) 50%, transparent);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--certified) 10%, var(--bg-raised)), var(--bg-raised) 60%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: var(--surface);
 }
 
 .none { border-color: color-mix(in srgb, var(--fail) 40%, transparent); }
@@ -14,7 +14,7 @@
   letter-spacing: -0.02em;
 }
 
-.summary { margin: 0 0 14px; color: var(--certified); }
+.summary { margin: 0 0 14px; color: var(--accent); }
 
 .note { margin: 14px 0 0; font-size: 13px; }
 
@@ -22,4 +22,4 @@
 .record summary { cursor: pointer; user-select: none; }
 .record pre { margin-top: 8px; max-height: 360px; overflow: auto; }
 
-.flowText { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+.flowText { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--fg); }

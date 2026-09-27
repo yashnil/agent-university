@@ -34,12 +34,12 @@ export default function EventLog({ events }: { events: ArenaEvent[] }): JSX.Elem
   return (
     <details className={`section ${styles.log}`}>
       <summary className={styles.summary}>
-        <span className="sectionNum">log</span> Event stream <span className="mono faint">({events.length})</span>
+        <span className="sectionNum">log</span> Event stream <span className="mono muted">({events.length})</span>
       </summary>
       <ol className={styles.list}>
         {events.map((e, k) => (
           <li key={k} className={e.type === "error" ? styles.err : ""}>
-            <span className="mono faint">{fmtTime(e.at)}</span>
+            <span className="mono muted">{fmtTime(e.at)}</span>
             <span className={`mono ${styles.type}`}>{e.type}</span>
             <span className={styles.text}>{describe(e)}</span>
           </li>

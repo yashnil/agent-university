@@ -1,21 +1,26 @@
 import type { JSX } from "react";
 import type { EventPayloads } from "@/lib/types";
+import ArtifactChip, { type SchemaStatus } from "./ArtifactChip";
+import LifecyclePath from "./LifecyclePath";
+import StatusNode from "./StatusNode";
 import styles from "./PipelineStrip.module.css";
 
 type Step = EventPayloads["plan.composed"]["steps"][number];
 
-const STATUS_BADGE: Record<Step["status"], string> = {
-  certified: "badge--pass",
-  uncertified: "badge--warn",
-  missing: "badge--fail",
+// company.json is frozen and certified today; the rest are v0 placeholders with no certified skill.
+const SCHEMA: Record<string, SchemaStatus> = {
+  "company.json": "frozen",
+  "repo_analysis.json": "v0-placeholder",
+  "score.json": "v0-placeholder",
+  "outreach.md": "v0-placeholder",
 };
 
-const STEP_CLASS: Record<Step["status"], string> = {
-  certified: styles["step--certified"],
-  uncertified: styles["step--uncertified"],
-  missing: styles["step--missing"],
-};
+const NODE = { certified: "certified", uncertified: "transferred", missing: "gap" } as const;
 
+/**
+ * The artifact chain, drawn with the node grammar rather than a stepper: a path is lit only when
+ * the step before it is certified, so the chain visibly stops where certification stops.
+ */
 export default function PipelineStrip({
   steps,
   missingArtifactType,
@@ -23,26 +28,36 @@ export default function PipelineStrip({
   steps: Step[];
   missingArtifactType?: string;
 }): JSX.Element {
+  if (steps.length === 0) {
+    return <p className="muted">No plan composed, so there is no chain to inspect.</p>;
+  }
+
   return (
-    <div className={styles.strip}>
-      {steps.map((step, index) => {
-        const isFirstGap = step.artifactType === missingArtifactType;
+    <ol className={styles.strip}>
+      {steps.map((step, i) => {
+        const firstGap = missingArtifactType === step.artifactType;
         return (
-          <div key={`${step.artifactType}-${index}`} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {index > 0 && <span className={styles.arrow} aria-hidden="true">→</span>}
-            <div className={`${styles.step} ${STEP_CLASS[step.status]}`}>
-              <div className={styles.stepHead}>
-                <span className={`mono ${styles.artifactName}`}>{step.artifactType}</span>
-                <span className={`badge ${STATUS_BADGE[step.status]}`}>{step.status}</span>
-              </div>
-              <span className={`mono ${styles.skillLine}`}>
-                {step.skillId ?? "no certified skill"}
-              </span>
-              {isFirstGap && <span className={styles.gapMarker}>FIRST GAP</span>}
+          <li key={`${step.artifactType}-${i}`} className={styles.step}>
+            <div className={styles.rail}>
+              <StatusNode state={NODE[step.status]} size="md" />
+              {i < steps.length - 1 ? <LifecyclePath done={step.status === "certified"} /> : null}
             </div>
-          </div>
+            <ArtifactChip
+              name={step.artifactType}
+              schemaStatus={SCHEMA[step.artifactType] ?? "unknown"}
+              state={step.status}
+            />
+            <p className={styles.skill}>
+              {step.skillId ? (
+                <span className="mono">{step.skillId}</span>
+              ) : (
+                <span className="muted">no certified skill</span>
+              )}
+            </p>
+            {firstGap ? <p className={styles.firstGap}>the chain stops here</p> : null}
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

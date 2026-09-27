@@ -17,15 +17,15 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: var(--fg-muted);
 }
 
 .segment {
   display: inline-flex;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r);
   overflow: hidden;
-  background: var(--bg-sunken);
+  background: var(--bg);
 }
 
 .option {
@@ -33,7 +33,7 @@
   font: inherit;
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--text-dim);
+  color: var(--fg-muted);
   background: none;
   border: none;
   border-right: 1px solid var(--border);
@@ -42,11 +42,11 @@
 }
 
 .option:last-child { border-right: none; }
-.option:hover:not(:disabled) { color: var(--text); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.option:hover:not(:disabled) { color: var(--fg); background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .option:disabled { cursor: not-allowed; }
 
 .active {
-  color: var(--text);
+  color: var(--fg);
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   box-shadow: inset 0 -2px 0 0 var(--accent);
 }
@@ -56,8 +56,8 @@
   font-size: 13px;
   padding: 6px 10px;
   min-width: 64px;
-  color: var(--text);
-  background: var(--bg-sunken);
+  color: var(--fg);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
@@ -67,8 +67,8 @@
   font-size: 13.5px;
   font-weight: 600;
   padding: 8px 18px;
-  color: #06120c;
-  background: var(--certified);
+  color: var(--bg);
+  background: var(--accent);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -76,7 +76,7 @@
 }
 
 .run:hover:not(:disabled) { filter: brightness(1.08); }
-.run:disabled { cursor: progress; background: var(--border-strong); color: var(--text-dim); }
+.run:disabled { cursor: progress; background: var(--border); color: var(--fg-muted); }
 .run:focus-visible, .option:focus-visible, .select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .modeNote {
@@ -97,15 +97,15 @@
 
 .input {
   font: inherit;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 12.5px;
   padding: 6px 10px;
   width: 100%;
-  color: var(--text);
-  background: var(--bg-sunken);
+  color: var(--fg);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
-.input::placeholder { color: var(--text-faint); }
+.input::placeholder { color: var(--fg-muted); }
 .input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

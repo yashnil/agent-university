@@ -1,33 +1,39 @@
-/* Scoped styles for SkillStatusChip. Color comes from the --chip-color custom
-   property set inline by the component (var(--observed|--transferred|--certified)). */
+/* SkillStatusChip: pairs a StatusNode with its status word. Tokens come from
+   app/globals.css; nothing here hardcodes colour or spacing. The node itself
+   carries the state's shape grammar (dotted / ringed / dashed) — this file only
+   lays the two pieces out and, when `active` is false, dims the node so a
+   progression (see LifecycleTimeline) can show a status not yet reached
+   without ever dropping the label below a readable contrast. */
 
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 11px;
+  gap: var(--s2);
+  vertical-align: middle;
+}
+
+.node {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--t-2);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--chip-color);
-  color: var(--chip-color);
-  background: color-mix(in srgb, var(--chip-color) 12%, transparent);
+  color: var(--fg);
   white-space: nowrap;
-  opacity: 1;
-  transition: opacity 0.15s ease;
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  flex: none;
+/* Dimmed = not yet reached. The label drops to --fg-muted (6.1:1 on --bg, well
+   above the 4.5:1 floor) rather than losing opacity, so it stays legible; only
+   the decorative node itself fades. */
+.dimmed .node {
+  opacity: 0.5;
 }
 
-.dimmed {
-  opacity: 0.35;
+.dimmed .label {
+  color: var(--fg-muted);
 }

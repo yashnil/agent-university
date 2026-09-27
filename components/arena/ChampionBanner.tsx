@@ -16,12 +16,12 @@ export default function ChampionBanner({
   const c = finished.champion;
   if (!c) {
     return (
-      <div className={`card ${styles.none}`}>
+      <div className={`panel ${styles.none}`}>
         <p className={styles.title}>{flowMode ? "No trusted flow" : "No champion"}</p>
         <p className="muted">
           {flowMode
-            ? "No flow passed enough of its exams to reach a verdict, so nothing was promoted. The registry is unchanged."
-            : "No student produced a certified record, so nothing was promoted. The registry is unchanged."}
+            ? "No flow passed enough of its trials to reach a verdict, so nothing was promoted. The registry is unchanged."
+            : "No agent produced a certified record, so nothing was promoted. The registry is unchanged."}
         </p>
       </div>
     );
@@ -37,12 +37,12 @@ export default function ChampionBanner({
   const isFlow = Boolean(title || procedureId);
 
   return (
-    <div className={`card ${styles.banner}`}>
+    <div className={`panel ${styles.banner}`}>
       <div className={styles.top}>
-        <span className="badge badge--pass">{isFlow ? "trusted flow" : "champion"}</span>
-        {finished.promoted === true ? <span className="badge badge--pass">promoted</span> : null}
-        {finished.promoted === false ? <span className="badge badge--warn">not promoted</span> : null}
-        {heat?.flow ? <span className="badge">{heat.flow.source}</span> : null}
+        <span className="tag tag--pass">{isFlow ? "trusted flow" : "champion"}</span>
+        {finished.promoted === true ? <span className="tag tag--pass">promoted</span> : null}
+        {finished.promoted === false ? <span className="tag tag--muted">not promoted</span> : null}
+        {heat?.flow ? <span className="tag">{heat.flow.source}</span> : null}
       </div>
       <p className={styles.title}>{isFlow ? `Trusted flow: ${title ?? procedureId}` : c.student.name}</p>
       <p className={`mono ${styles.summary}`}>
@@ -68,7 +68,7 @@ export default function ChampionBanner({
         <dt>{isFlow ? "flow" : "heat"}</dt>
         <dd>
           {c.heat}
-          {proc?.examCases?.length ? ` · exams ${proc.examCases.join(", ")}` : ` · ${heat?.examCompany ?? c.examCase} (${c.examCase})`}
+          {proc?.examCases?.length ? ` · trials ${proc.examCases.join(", ")}` : ` · ${heat?.examCompany ?? c.examCase} (${c.examCase})`}
         </dd>
         <dt>best run</dt>
         <dd>
@@ -87,7 +87,7 @@ export default function ChampionBanner({
         </dd>
       </dl>
       {dry ? (
-        <p className={`faint ${styles.note}`}>
+        <p className={`muted ${styles.note}`}>
           Dry run: saved to a throwaway registry; the committed registry and the lifecycle page are untouched.
         </p>
       ) : (
@@ -97,19 +97,19 @@ export default function ChampionBanner({
       )}
       {proc?.flow ? (
         <details className={styles.record}>
-          <summary className="mono faint">the flow (procedure text)</summary>
+          <summary className="mono muted">the flow (procedure text)</summary>
           <pre className={`code ${styles.flowText}`}>{proc.flow}</pre>
         </details>
       ) : null}
       {proc ? (
         <details className={styles.record}>
-          <summary className="mono faint">procedure record</summary>
+          <summary className="mono muted">procedure record</summary>
           <pre className="code">{JSON.stringify(proc, null, 2)}</pre>
         </details>
       ) : null}
       {finished.record ? (
         <details className={styles.record}>
-          <summary className="mono faint">certification record (best run)</summary>
+          <summary className="mono muted">certification record (best run)</summary>
           <pre className="code">{JSON.stringify(finished.record, null, 2)}</pre>
         </details>
       ) : null}
