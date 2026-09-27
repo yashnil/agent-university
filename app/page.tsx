@@ -49,11 +49,6 @@ export default async function Page({
   return (
     <main className="page">
       <h1 className="pageTitle">Certification record</h1>
-      <p className="lede">
-        One agent learns → <strong>another agent proves it</strong> → every agent can inherit it. A
-        procedure becomes trusted capability only once a <em>different</em> agent has reproduced it on
-        a case it never saw, and a deterministic verifier has agreed.
-      </p>
 
       <div className="controls">
         <ModeSwitch mode={data.mode} demoCase={demoCase} outcome={outcome} source={data.source} />
@@ -67,9 +62,6 @@ export default async function Page({
             <Link href={scenarioHref("failed")} aria-current={outcome === "failed" ? "true" : undefined}>
               failed trial
             </Link>
-          </p>
-          <p className="scenarioNote muted">
-            What happened in the run — a separate question from where the data came from.
           </p>
         </div>
       </div>
@@ -86,11 +78,6 @@ export default async function Page({
           <span className="sectionNum">01</span>
           <h2>Lifecycle</h2>
         </div>
-        <p className="sectionSub">
-          Every state change is an event on a frozen contract, and statuses only move forward. There is
-          no <code className="mono">exam.failed</code>: a failed trial is a result with{" "}
-          <code className="mono">passed: false</code>, and the skill stays where it was.
-        </p>
         <LifecycleTimeline events={data.events} status={skill.status} />
       </section>
 
@@ -99,14 +86,6 @@ export default async function Page({
           <span className="sectionNum">02</span>
           <h2>Transfer trial</h2>
         </div>
-        <p className="sectionSub">
-          The origin agent&apos;s procedure was captured, then recalled by a different agent in a new
-          scope, session and sandbox. The replicating agent never saw the origin&apos;s answer — it got
-          the generalized procedure and a company it had never seen, nothing else.
-          {data.fromRealRun
-            ? " Every fact below comes from the real run, sanitized: the isolation checks are the ones the runtime actually performed."
-            : null}
-        </p>
         <TransferExam
           transfer={data.transfer}
           teacher={data.skillObserved.teacher}
@@ -143,31 +122,6 @@ export default async function Page({
           <h2>{certified ? "Certified capability" : awaiting ? "Awaiting certification" : "Capability withheld"}</h2>
           <SkillStatusChip status={skill.status} />
         </div>
-        <p className="sectionSub">
-          {certified ? (
-            <>
-              The record every other agent inherits: skill <code className="mono">{skill.id}</code>{" "}
-              produces <code className="mono">{skill.artifactType}</code>, learned from{" "}
-              {skill.teacher.name} and replicated by {data.transfer.student.name} on{" "}
-              <code className="mono">{data.transfer.examCase}</code>.
-            </>
-          ) : awaiting ? (
-            <>
-              The trial passed and the verifier agreed, but nothing is inherited yet: skill{" "}
-              <code className="mono">{skill.id}</code> stays at{" "}
-              <code className="mono">{skill.status}</code> until the certification engine applies its
-              policy. Proving and promoting are separate on purpose — the agent that ran the trial does
-              not get to rule on its own result.
-            </>
-          ) : (
-            <>
-              The trial ran and did not certify, so nothing is inherited: skill{" "}
-              <code className="mono">{skill.id}</code> stays at{" "}
-              <code className="mono">{skill.status}</code> and no agent may treat it as trusted
-              capability.
-            </>
-          )}
-        </p>
         {data.metrics ? (
           <dl className="kv metrics">
             {data.metrics.durationMs !== undefined ? (
@@ -218,11 +172,6 @@ export default async function Page({
           <span className="sectionNum">04</span>
           <h2>The registry</h2>
         </div>
-        <p className="sectionSub">
-          Certification is only worth something if it is written where every agent can find it. This is
-          the committed registry — what the organization actually trusts — written only by a promotion,
-          never by a run.
-        </p>
         <RegistryPanel
           rows={data.registry?.rows ?? []}
           source={data.registry?.source ?? "registry/index.json (not present)"}
@@ -234,11 +183,6 @@ export default async function Page({
           <span className="sectionNum">05</span>
           <h2>Composition, and the gap</h2>
         </div>
-        <p className="sectionSub">
-          A fresh agent plans the pipeline from certified skills alone — {certifiedSteps} of{" "}
-          {steps.length} steps are backed by one. Where none exists the system reports a gap instead of
-          improvising: the honest edge of what can be trusted, and the next skill to teach.
-        </p>
         {data.composite ? (
           <CompositeRun mode={data.mode} fallback={data.composite} autoRun={params.run === "1"} />
         ) : null}
