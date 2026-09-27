@@ -1,9 +1,9 @@
-# Agent University
+# Swarmem
 
 <img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/c926a5d9-5c29-4d39-ad16-48f0fb565fa7" />
 
 
-**Agent University certifies that a procedure learned by one agent transfers to a different
+**Swarmem certifies that a procedure learned by one agent transfers to a different
 agent on a fresh task before it becomes trusted organizational capability.**
 
 North star: *one agent learns → another agent proves it → every agent can inherit it.*
