@@ -54,8 +54,13 @@ distinct http(s) URLs).
 
 - **Milestone 1: complete.** A real QM sandbox researched Linear and wrote `company.json`, and the
   verifier reports PASS.
-- **Milestone 2 (Memorable capture → fresh-agent transfer → certification): in progress** on
-  `feat/runtime`.
+- **Milestone 2: complete (runtime side).**
+  - Memorable captured a generalized "Research Company" procedure from the Linear run.
+  - A fresh QM agent recalled it and researched Vercel. The verifier reports PASS (6/6), and the
+    transfer was isolated.
+  - Runtime ends at status `transferred`. Certification owns promotion to `certified`
+    (`docs/HANDOFF.md` §2, "Who promotes a skill").
+  - The shared, sanitized result is `demo/fixtures/transfer-result-vercel.json`.
 - Details are in `PROGRESS.md`.
 
 ## Setup
@@ -82,6 +87,9 @@ against committed fixtures:
 - `demo/fixtures/*`: sanitized, fictional data (Northwind Labs, fake ids). There is one fixture
   per artifact, both skill states (observed, certified), a transfer result, a verification
   result, a composed plan, a discovered gap, and the full `events.json` lifecycle.
+- `demo/fixtures/*-vercel*.json`: the real Linear → Vercel transfer, sanitized, stopping at
+  `transferred`. That is the transfer result, the skill record, the runtime's events, and the
+  student's `company.json`.
 - `npm run verify:fixture` runs the real verifier on the fixture `company.json`.
 - `python3 scripts/verify_company.py --json <file>` prints a contract `VerificationResult`.
 

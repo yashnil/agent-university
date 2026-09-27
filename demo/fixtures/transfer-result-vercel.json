@@ -1,0 +1,85 @@
+{
+  "skillId": "research-company",
+  "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+  "examCase": "exam-vercel",
+  "student": {
+    "id": "qm-thread-sanitized-student",
+    "name": "Scout (fresh student)",
+    "harness": "qm"
+  },
+  "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+  "artifact": {
+    "type": "company.json",
+    "path": "demo/fixtures/company-vercel.json"
+  },
+  "verification": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": true,
+        "message": "at least two valid source URLs (2 distinct valid)"
+      }
+    ]
+  },
+  "passed": true,
+  "teacher": {
+    "id": "qm-thread-sanitized-teacher",
+    "name": "Scout (teacher)",
+    "harness": "qm"
+  },
+  "sourceCase": "teach-linear",
+  "sourceRunId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+  "examStartedAt": "2026-09-27T21:04:49Z",
+  "examFinishedAt": "2026-09-27T21:05:17Z",
+  "isolation": {
+    "different_agent": true,
+    "different_session": true,
+    "different_scope": true,
+    "different_container": true,
+    "different_home_volume": true,
+    "different_thread_ref": true,
+    "layer_skill_unpublished": true,
+    "no_layer_skill_reads": true,
+    "no_source_artifact_in_fresh_sandbox": true,
+    "no_source_answer_in_prompt": true,
+    "student_container_new": true,
+    "student_home_volume_new": true,
+    "artifact_written_after_exam_start": true
+  },
+  "provenance": {
+    "source": "live QM transfer exam on feat/runtime (Milestone 2), sanitized for sharing",
+    "sandboxArtifactPath": "$HOME/workspace/scout/vercel/company.json",
+    "skillStatusAfterExam": "transferred",
+    "redacted": [
+      "teacher.id and student.id replaced with pseudonyms (the real ids hash a threadRef that contains an email)",
+      "artifact.path points at the committed copy of the student's artifact instead of the sandbox path",
+      "no QM scope, container, volume, session, threadRef, admin URL, prompt or raw trace"
+    ]
+  }
+}

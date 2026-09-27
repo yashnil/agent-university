@@ -1,0 +1,24 @@
+/* AgentCard: teacher/student cards, distinguished by a left accent border. */
+
+.agentCard {
+  border-left: 3px solid var(--border-strong);
+}
+
+.teacher {
+  border-left-color: var(--border-strong);
+}
+
+.student {
+  border-left-color: var(--accent);
+}
+
+.name {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+}

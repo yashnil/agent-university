@@ -21,41 +21,67 @@
   - Offline `npm test`, README, and `docs/HANDOFF.md` (ownership and protocol).
   - `verify_company.py --json` emits a contract `VerificationResult`.
 
-## IN PROGRESS
+## MILESTONE 2: COMPLETE (2026-09-27)
 
-**Milestone 2: Memorable capture → fresh-agent transfer → certification** (`feat/runtime`).
+**Memorable capture → fresh-agent transfer → verified exam** (`feat/runtime`). Runtime stops at
+status `transferred` and hands certification a contract `TransferResult`. Runtime no longer emits
+`exam.passed` / `skill.certified` or sets `certified`: those belong to certification (HANDOFF §2).
 
-Done:
-- **Memorable surface mapped** (CLI 0.5.19, from its source).
-  - Capture (`ingest`/`record`) needs `memorable login`, and extraction runs on memorable.sh.
-  - `recall`/`show`/`list`/`mcp` are local.
-  - Memorable has no QM hook. The native pattern is prompt injection (`hook user-prompt`).
-- **Adapter written** (custom glue; the native parts are marked).
-  - `scripts/memorable_capture.py` (custom) turns a QM run's `execute` calls into a Memorable
-    trace. It generalizes company name, domain, Wikipedia title and slug to placeholders, and
-    replaces the written JSON with a schema template.
-  - It aborts if any of the source answer's values leak. The dry run on the Linear run was
-    clean over 13 terms.
-  - Storage is **native** `memorable ingest`. Retrieval is **native** `memorable recall` and
-    `memorable show`.
-  - `scripts/transfer_run.py` (custom) injects the recalled procedure into the fresh agent's
-    turn, the way Memorable's own prompt hook does.
-- **Fresh-agent isolation designed** (verified from QM source).
-  - A new QM project gives scope `group:web-project-<id>`, which means its own sandbox
-    container and home volume. A new `threadRef` gives a new session.
-  - The `scout-research-company` layer skill is listed for every scope. It is hidden during the
-    exam via `qm layer sync` (one HTTP PUT; core is not recreated), and `transfer_run.py`
-    refuses to run while it is published.
-- **Lifecycle mapped onto the frozen contract.**
-  - observed = `skill.observed`
-  - Milestone 2's "reproduced" = `skill.recalled` (not a status)
-  - `exam.started` → status `transferred` → `exam.passed` → `skill.certified` → status
-    `certified`
-  - Live records go to `.agent-university/skills/research-company.json`, which is gitignored.
+**Teacher**
+- Case `teach-linear` (Linear). Real QM run `9f8d36da-12d3-4d42-bd7d-924fce932f46`: fetched the
+  homepage, /about and Wikipedia live with curl and wrote `/root/workspace/scout/linear/company.json`
+  in the admin's personal sandbox.
+- Re-verified in place at capture time: `verify_company.py` **PASS 6/6**.
+- Teacher: the admin's default web thread (scope `personal:<admin>`). The real `qm-thread-…` id stays in
+  the local record because it hashes a threadRef that contains an email.
 
-Not done:
-- `memorable login` (needs the runtime owner in a browser).
-- The live capture, the Vercel exam, and certification.
+**Memorable** (CLI 0.5.19, logged in, extraction API configured, local encrypted store)
+- Capture: **stored** by native `memorable ingest` from the generalized trace (4 tool calls).
+- Procedure: **`procedures/37196e61-add-company-data-to-company-json-file`** (Memorable chose the title).
+- The trace carries placeholders (`<Company>`, `<company-domain>`, `<Wikipedia_Title>`, `<slug>`) and
+  a schema template instead of the written JSON.
+- Leakage test: **PASS**. 0 of 79 source-answer terms are in the stored procedure (`memorable show`).
+  The terms are the name, domain, source URLs, capitalized words, numbers and every 4-word run of the
+  summary. "linear" appears nowhere, and a positive control (answer appended) is detected.
+  Offline: `tests/test_memorable_capture.py`.
+- Recall for an unseen company ranks it first (0.551 at capture, 0.629 for the Vercel task).
+
+**Transfer**
+- Case `exam-vercel` (Vercel). QM run `5e30ec98-4e35-48eb-9460-d40b8ded3bc3`.
+- Fresh student (a new `qm-thread-…` id, from a random threadRef): new project → scope
+  `group:web-project-23b7fd8b-aaf5-452f-b56b-6265135e7aa9`, new threadRef and session, new
+  sandbox container and home volume.
+- Freshness: before the turn the scope had no sandbox, so no artifact could exist. The student's
+  container and volume were not among those present before the exam, and the artifact's mtime is after
+  exam start. The student workspace contains only `scout/vercel/` (no Linear artifact).
+- The `scout-research-company` layer skill was unpublished during the exam (layer v3), and the run
+  never read it. It was restored afterwards (layer v4). Core was not recreated, and the patch is intact.
+- Recall evidence: native `memorable recall` → procedure above at rank 1. Native `memorable show` output
+  was the only procedural knowledge in the prompt, and the prompt passed the leak check.
+  `skill.recalled` (agent = student) and `exam.started` were emitted.
+- The student fetched https://vercel.com and https://en.wikipedia.org/wiki/Vercel live (HTTP 200)
+  and wrote `/root/workspace/scout/vercel/company.json` itself. No expected values were injected.
+- Verifier: **PASS 6/6**. All 13 isolation and freshness checks hold.
+- Skill record status: `transferred`, `transfer.passed = true`.
+
+**Handoff to certification** (details: `docs/HANDOFF.md` §4, "Handoff: Milestone 2 transfer result")
+- Shared, sanitized: `demo/fixtures/transfer-result-vercel.json`, plus `skill-transferred-vercel.json`,
+  `events-vercel-transferred.json` and `company-vercel.json` (the student's artifact).
+  - They are validated against the frozen contracts and privacy-scanned by `tests/test_runtime_fixtures.py`.
+  - Agent ids are pseudonymized. No scope, container, volume, session, threadRef or URL is included.
+- Live, unsanitized, gitignored: `.agent-university/transfers/5e30ec98-4e35-48eb-9460-d40b8ded3bc3.json`
+  and `.agent-university/skills/research-company.json`.
+- Certification applies its policy (for example `passed` and every `isolation` check → `exam.passed`,
+  `skill.certified`, `certified`) without knowing QM internals.
+
+**Commands**
+```bash
+nvm use 24
+python3 scripts/memorable_capture.py --run 9f8d36da-12d3-4d42-bd7d-924fce932f46 --company Linear
+mv sandbox/skills/scout-research-company .agent-university/hidden-skills/ && npm exec qm -- layer sync
+python3 scripts/transfer_run.py Vercel
+mv .agent-university/hidden-skills/scout-research-company sandbox/skills/ && npm exec qm -- layer sync
+```
 
 ## KNOWN ISSUES
 
@@ -78,20 +104,26 @@ Not done:
    - `qm admin-login` and `scripts/*` read it from `.env` (or the environment).
    - The running core already has it, and the grant is persisted in Postgres.
    - A fresh clone needs `ADMIN_GRANTS=<email>:org_admin` in `.env` only to run QM itself.
-6. **No app scaffold yet.** The PDF skeleton's Next.js app (`npm run dev`) is the UI owner's
+6. **Hiding the Scout skill is manual** (move it out of `sandbox/`, `layer sync`, then restore).
+   `transfer_run.py` refuses to run while it is published.
+7. **Memorable recall is store-wide.** Memorable's own Claude Code hooks also store procedures from
+   coding sessions on this machine (one is `procedures/a2663497-…`). It ranked second, below Research
+   Company, but a future unrelated procedure could outrank it. `transfer_run.py` takes rank 1.
+8. **Memorable 0.5.19** (0.5.30 is available). It was left unchanged for this milestone.
+9. **Student run reply is not in `result`.** `/api/runs/:id` returns only `status`, `sessionId`
+   and `adminUrl`, so the script prints `None`. The reply is in the run activity.
+10. **No app scaffold yet.** The PDF skeleton's Next.js app (`npm run dev`) is the UI owner's
    first PR. Until it is merged, `npm test` is the shared baseline command.
 
 ## NEXT
 
-- **Runtime:**
-  - `memorable login` → `memorable_capture.py` → hide the Scout skill + `layer sync` →
-    `transfer_run.py Vercel` → `certified` → restore the skill.
-  - Then the run API.
-- **Certification:** the next verifiers (`repo_analysis`, `score`, `outreach`), a pure
-  certification decision, and failing fixtures.
-- **UI/demo:** the Next.js scaffold PR, then the lifecycle, exam, composition and GAP views
-  from fixtures.
-- **Checkpoint 1** is 60 minutes after branching (`docs/HANDOFF.md` §5).
+- **Runtime:** the run API (`lib/qm.ts`, `app/api/run/**`) returning these `TransferResult`s and
+  `Event`s. It could also automate hiding and restoring the skill.
+- **Certification:** consume `demo/fixtures/transfer-result-vercel.json` and decide `certified`.
+  Also the next verifiers and failing fixtures.
+- **UI/demo:** the lifecycle, exam, composition and GAP views from fixtures, including the live
+  Vercel set (`*-vercel*.json`, which stops at `transferred`) next to the fictional full lifecycle.
+  Then from live output.
 
 ---
 

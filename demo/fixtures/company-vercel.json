@@ -1,0 +1,9 @@
+{
+  "company_name": "Vercel",
+  "website": "https://vercel.com",
+  "product_summary": "Vercel is an American cloud platform company that provides a frontend cloud for building, deploying, and hosting web applications. It is the creator and maintainer of the open-source React framework Next.js, and its platform offers Git-based deployments, a global edge network, preview environments, serverless and edge functions, and observability tooling. Vercel also ships an AI SDK and AI-oriented infrastructure for developers building AI-powered apps.",
+  "source_urls": [
+    "https://vercel.com",
+    "https://en.wikipedia.org/wiki/Vercel"
+  ]
+}

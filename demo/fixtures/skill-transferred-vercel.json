@@ -1,0 +1,21 @@
+{
+  "id": "research-company",
+  "name": "Research Company",
+  "status": "transferred",
+  "teacher": {
+    "id": "qm-thread-sanitized-teacher",
+    "name": "Scout (teacher)",
+    "harness": "qm"
+  },
+  "artifactType": "company.json",
+  "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+  "transfer": {
+    "student": {
+      "id": "qm-thread-sanitized-student",
+      "name": "Scout (fresh student)",
+      "harness": "qm"
+    },
+    "examCase": "exam-vercel",
+    "passed": true
+  }
+}
