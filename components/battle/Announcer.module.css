@@ -479,3 +479,10 @@
     opacity: 1;
   }
 }
+
+/* phones: the HUD is proportionally taller; start banners below it */
+@media (max-width: 520px) {
+  .center {
+    padding-top: max(24cqh, 92px);
+  }
+}

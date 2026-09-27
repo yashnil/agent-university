@@ -195,7 +195,7 @@ export default function Battle(): JSX.Element {
       </header>
 
       <main className={styles.main}>
-        {showFight && state.current ? (
+        {showFight && phase !== "victory" && state.current ? (
           <div className={styles.matchup}>
             <strong>
               ROUND {state.current.round}: FLOW {flowOf(state.current.left) ?? "?"} ({state.fighters[state.current.left]?.def.name ?? "?"}) VS FLOW{" "}

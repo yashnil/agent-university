@@ -506,7 +506,46 @@
     display: none;
   }
   .slot {
-    width: 22%;
+    width: 26%;
+  }
+}
+
+@media (max-width: 520px) {
+  .bar {
+    gap: 6px;
+  }
+  .brand {
+    flex: 1 1 100%;
+  }
+  .controls {
+    flex: 1 1 100%;
+  }
+  .legend {
+    display: none;
+  }
+  .matchup {
+    padding: 6px 10px;
+    margin-bottom: 8px;
+  }
+  .matchup strong {
+    font-size: 9px;
+    line-height: 1.6;
+  }
+  .controls {
+    gap: 4px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  .chip {
+    padding: 6px 5px;
+    font-size: 8px;
+  }
+  .link {
+    padding: 6px 3px;
+    font-size: 8px;
+  }
+  .link[href="/arena"] {
+    display: none;
   }
 }
 

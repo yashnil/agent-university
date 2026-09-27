@@ -217,7 +217,7 @@ function Miss({ e }: { e: Live }): JSX.Element {
           <div key={i} className={styles.dust} style={v({ "--i": i, "--dx": `${(i - 2.5) * 18}px` })} />
         ))}
       </div>
-      <div className={styles.anchor} style={v({ "--x": `${e.ax}%`, "--y": `${TORSO_Y - 22}%` })}>
+      <div className={styles.anchor} style={v({ "--x": `${e.ax}%`, "--y": `${TORSO_Y - 13}%` })}>
         <div className={styles.missText}>MISS</div>
         {rule && <div className={styles.rule}>✗ {rule}</div>}
       </div>

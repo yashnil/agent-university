@@ -401,3 +401,8 @@
   0% { opacity: 0.25; }
   100% { opacity: 0; }
 }
+
+/* phones: a taller stage so fighters are not dwarfed by the HUD */
+@media (max-width: 520px) {
+  .stage { aspect-ratio: 1 / 1; max-height: 70vh; }
+}

@@ -389,3 +389,11 @@
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
+/* phones: keep the HUD to names + bars; the failing rule is already the banner */
+@media (max-width: 520px) {
+  .flowLine,
+  .rule {
+    display: none;
+  }
+}
