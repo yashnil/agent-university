@@ -14,7 +14,7 @@ export default function ArenaPage() {
       <header className="masthead">
         <div>
           <p className="mono faint" style={{ margin: "0 0 6px" }}>
-            <a href="/">← Agent University</a>
+            <a href="/">← Agent University</a>{" · "}<a href="/battle">Flow Fighter: battle mode →</a>
           </p>
           <h1>Arena</h1>
           <p className="northStar">

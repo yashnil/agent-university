@@ -14,6 +14,7 @@ const PRODUCT_DATA = [
   "./registry/skills/**/*.json",
   "./registry/procedures/**/*.json",
 ];
+const BATTLE_DATA = [...PRODUCT_DATA, "./schemas/**/*"];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -24,6 +25,12 @@ const nextConfig = {
     "/api/skills": PRODUCT_DATA,
     "/api/exam": PRODUCT_DATA,
     "/api/run": PRODUCT_DATA,
+    // Arena and FLOW FIGHTER run whole tournaments in the request: they also validate every run
+    // against the contracts in schemas/ (lib/schema.ts) and read the fixture flows.
+    "/arena": BATTLE_DATA,
+    "/battle": BATTLE_DATA,
+    "/api/arena/**": BATTLE_DATA,
+    "/api/battle/**": BATTLE_DATA,
   },
 };
 

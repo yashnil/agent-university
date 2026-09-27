@@ -39,10 +39,17 @@ test("every product route packages the committed data it reads", () => {
   }
 });
 
+// Arena and FLOW FIGHTER run whole tournaments in the request and validate every run against the
+// contracts in schemas/ (lib/schema.ts), so only those routes may also package schemas/.
+const TOURNAMENT_ROUTES = new Set(["/arena", "/battle", "/api/arena/**", "/api/battle/**"]);
+
 test("nothing local, secret or unused is packaged", () => {
   for (const [route, globs] of Object.entries(includes))
     for (const g of globs) {
-      assert.doesNotMatch(g, /agent-university|\.env|node_modules|\.git\b|schemas|scripts|tests/, `${route}: ${g}`);
-      assert.match(g, /^\.\/(demo|registry)\//, `${route}: ${g} is outside the committed data directories`);
+      const tournament = TOURNAMENT_ROUTES.has(route);
+      assert.doesNotMatch(g, tournament ? /agent-university|\.env|node_modules|\.git\b|scripts|tests/
+        : /agent-university|\.env|node_modules|\.git\b|schemas|scripts|tests/, `${route}: ${g}`);
+      assert.match(g, tournament ? /^\.\/(demo|registry|schemas)\// : /^\.\/(demo|registry)\//,
+        `${route}: ${g} is outside the committed data directories`);
     }
 });

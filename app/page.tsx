@@ -64,7 +64,7 @@ export default async function Page({
             ) : null}
           </p>
           <p className="mono faint" style={{ margin: "6px 0 0", textAlign: "right" }}>
-            <a href="/arena">Arena: run a tournament →</a>
+            <a href="/arena">Arena: run a tournament →</a>{" · "}<a href="/battle">Flow Fighter →</a>
           </p>
         </div>
       </header>

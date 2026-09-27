@@ -1,0 +1,454 @@
+.select {
+  --pink: #ff3d7f;
+  --cyan: #2de2ff;
+  --gold: #ffd23f;
+  --green: #3ddc97;
+  --arcade: var(--font-arcade, "Press Start 2P"), ui-monospace, monospace;
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 20px 20px 28px;
+  overflow: hidden;
+  isolation: isolate;
+  color: #eae6ff;
+  background:
+    radial-gradient(60% 50% at 20% 45%, rgba(255, 61, 127, 0.22), transparent 70%),
+    radial-gradient(60% 50% at 80% 45%, rgba(45, 226, 255, 0.2), transparent 70%),
+    #07060d;
+}
+
+.bgGrid {
+  position: absolute;
+  inset: -40px;
+  z-index: -1;
+  background:
+    linear-gradient(rgba(45, 226, 255, 0.07) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(255, 61, 127, 0.07) 1px, transparent 1px) 0 0 / 40px 40px;
+  animation: drift 6s linear infinite;
+}
+
+@keyframes drift {
+  to {
+    transform: translate(40px, 40px);
+  }
+}
+
+.top {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.pick {
+  font-family: var(--arcade);
+  font-size: clamp(16px, 3vw, 30px);
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 0 8px rgba(255, 210, 63, 0.9),
+    0 0 22px rgba(255, 61, 127, 0.6),
+    3px 3px 0 #7a1034;
+  animation: pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.marquee {
+  margin: 12px auto 0;
+  max-width: 900px;
+  overflow: hidden;
+  padding: 7px 0;
+  border-block: 2px solid rgba(45, 226, 255, 0.45);
+  background: rgba(45, 226, 255, 0.05);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation: scroll 16s linear infinite;
+}
+
+.track span {
+  padding-right: 90px;
+  font-family: var(--arcade);
+  font-size: 12px;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(45, 226, 255, 0.8);
+  white-space: nowrap;
+}
+
+@keyframes scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 14px 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.35)), #0f0b1c;
+  border: 2px solid var(--accent, var(--pink));
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--aura, #ff3d7f) 55%, transparent),
+    inset 0 0 24px rgba(0, 0, 0, 0.6);
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.2, 1.2, 0.3, 1);
+  animation-fill-mode: both;
+  min-width: 0;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.18) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: shine 3.2s ease-in-out infinite;
+  animation-delay: inherit;
+}
+
+@keyframes shine {
+  0%,
+  60% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.fromLeft {
+  animation-name: inLeft;
+}
+.fromRight {
+  animation-name: inRight;
+}
+.fromBelow {
+  animation-name: inBelow;
+}
+
+@keyframes inLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-120px) skewX(12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes inRight {
+  from {
+    opacity: 0;
+    transform: translateX(120px) skewX(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes inBelow {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.big {
+  padding: 18px 16px 20px;
+}
+
+.portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  padding: 6px;
+  background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--gi, #333) 45%, transparent), transparent 70%);
+}
+
+.head {
+  display: block;
+  filter: drop-shadow(0 0 10px var(--aura, #ff3d7f));
+}
+
+.mirror {
+  transform: scaleX(-1);
+}
+
+.visor {
+  animation: visor 1.6s ease-in-out infinite;
+}
+
+@keyframes visor {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.p {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-family: var(--arcade);
+  font-size: 9px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  background: var(--accent, var(--pink));
+  color: #07060d;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--arcade);
+  font-size: 13px;
+  line-height: 1.4;
+  color: #fff;
+  text-shadow: 0 0 8px var(--aura, #ff3d7f), 2px 2px 0 #000;
+  overflow-wrap: anywhere;
+}
+
+.big .name {
+  font-size: clamp(13px, 1.8vw, 20px);
+}
+
+.meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.style,
+.id {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.style {
+  background: color-mix(in srgb, var(--accent, #ff3d7f) 25%, transparent);
+  border: 1px solid var(--accent, #ff3d7f);
+  color: #fff;
+}
+
+.id {
+  border: 1px solid rgba(234, 230, 255, 0.25);
+  color: rgba(234, 230, 255, 0.7);
+}
+
+.source {
+  font-family: var(--arcade);
+  font-size: 8px;
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(255, 210, 63, 0.7);
+  letter-spacing: 0.05em;
+}
+
+.flowTitle {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(234, 230, 255, 0.7);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.catch {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--green);
+  text-shadow: 0 0 6px rgba(61, 220, 151, 0.5);
+}
+
+.vs {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(90px, 12vw, 150px);
+  aspect-ratio: 3 / 5;
+  animation: vsIn 0.6s 0.35s cubic-bezier(0.2, 1.8, 0.4, 1) both;
+}
+
+.bolt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--gold);
+  filter: drop-shadow(0 0 10px var(--gold)) drop-shadow(0 0 24px var(--pink));
+  animation: flicker 1.4s steps(1, end) infinite 1s;
+}
+
+.vsText {
+  position: relative;
+  font-family: var(--arcade);
+  font-size: clamp(28px, 4.5vw, 54px);
+  color: #fff;
+  -webkit-text-stroke: 2px #7a1034;
+  text-shadow:
+    0 0 10px var(--pink),
+    0 0 26px var(--pink),
+    4px 4px 0 #7a1034;
+  transform: rotate(-8deg);
+}
+
+@keyframes vsIn {
+  from {
+    opacity: 0;
+    transform: scale(3) rotate(20deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  88%,
+  100% {
+    opacity: 1;
+  }
+  90%,
+  94% {
+    opacity: 0.35;
+  }
+}
+
+.nextLabel {
+  margin: 16px 0 10px;
+  text-align: center;
+  font-family: var(--arcade);
+  font-size: 11px;
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+  letter-spacing: 0.1em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 300px));
+  justify-content: center;
+  gap: 12px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* challengers: compact horizontal chips so the whole roster fits the 16:9 stage */
+.grid .card {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 10px 12px;
+}
+.grid .portrait {
+  flex: 0 0 auto;
+  padding: 2px;
+}
+.grid .portrait svg {
+  width: 64px;
+  height: auto;
+}
+.grid .info {
+  align-items: flex-start;
+  gap: 4px;
+}
+.grid .meta {
+  justify-content: flex-start;
+}
+.grid .name {
+  font-size: 11px;
+}
+.grid .catch {
+  font-size: 11px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 0;
+  font-family: var(--arcade);
+  font-size: 14px;
+  color: var(--cyan);
+  animation: flicker 1s steps(1, end) infinite;
+}
+
+@media (max-width: 640px) {
+  .versus {
+    grid-template-columns: 1fr;
+  }
+  .vs {
+    width: 80px;
+    margin: -4px auto;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bgGrid,
+  .card::after,
+  .bolt,
+  .visor,
+  .empty {
+    animation: none;
+  }
+  .card,
+  .vs,
+  .pick {
+    animation-duration: 0.01s;
+  }
+  .track {
+    animation-duration: 45s;
+  }
+}
