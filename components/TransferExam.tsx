@@ -41,11 +41,6 @@ export default function TransferExam({
             {passedIsolation}/{isolation.length}
           </span>
         </div>
-        <p className={`muted ${styles.intro}`}>
-          Certification requires all of these to hold: a different agent, only the recalled procedure, an
-          unseen case.
-        </p>
-
         {isolation.length === 0 ? (
           <p className="muted">no isolation facts recorded</p>
         ) : (
