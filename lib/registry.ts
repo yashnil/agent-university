@@ -5,10 +5,16 @@
 //   registry/skills/<id>.json   the canonical CertificationRecord of each *certified* skill
 //   registry/index.json         one summary row per certified skill (what the UI lists)
 //
+//   registry/procedures/<skillId>/<slug>.json   one ProcedureRecord per Memorable flow ever evaluated
+//
+// The unit the organization trusts is a Memorable *flow* (procedure). A tournament tests each
+// candidate flow with fresh students on unseen cases; the champion flow is promoted with
+// promoteProcedure(), which makes its best certified run the skill's canonical record.
+//
 // Only a certified record can become canonical, and a certified skill is never replaced by a
 // worse one (see rankKey). Failed exams stay in the ledger so a judge can see why.
 
-import { appendFileSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { ROOT } from "./certification.ts";
 import type { CertificationRecord, RegistryIndex } from "./certification.ts";
@@ -113,14 +119,74 @@ export function summary(record: CertificationRecord): RegistryIndex["skills"][nu
 
 /** Append the decision to the ledger; promote it if it is certified and beats the current one.
  *  Returns true when the record became the skill's canonical record. */
-export function recordDecision(record: RankedRecord): boolean {
+export function recordDecision(record: RankedRecord, opts: { promote?: boolean } = {}): boolean {
   mkdirSync(dir, { recursive: true });
   appendFileSync(p("ledger.jsonl"), JSON.stringify(record) + "\n");
-  if (!record.decision.certified) return false;
+  if (!record.decision.certified || opts.promote === false) return false;
   const current = load(record.skill.id);
   if (current && compareRecords(current, record) >= 0) return false;
   writeJson(p("skills", `${record.skill.id}.json`), record);
   const rows = index().skills.filter((s) => s.id !== record.skill.id).concat(summary(record));
   writeJson(p("index.json"), { skills: rows.sort((a, b) => a.id.localeCompare(b.id)) });
   return true;
+}
+
+/** One Memorable flow's evaluation: how fresh agents did with it on unseen cases. */
+export interface ProcedureRecord {
+  skillId: string;
+  procedureId: string; // Memorable procedure slug
+  title: string;
+  source: "recall" | "given" | "fixture";
+  flow: string; // the procedure text agents were given (memorable show), leak-checked
+  tournamentId: string;
+  evaluatedAt: string;
+  examCases: string[];
+  runs: number;
+  certified: number;
+  passRate: number; // certified / runs
+  advanced: boolean; // made the final
+  judge: { model?: string; score?: number; rationale?: string; status?: string } | null;
+  champion: boolean;
+  bestRunId: string | null;
+  runIds: (string | null)[];
+}
+
+export const procedureSlug = (procedureId: string) =>
+  procedureId.replace(/^procedures\//, "").replace(/[^A-Za-z0-9._-]+/g, "-").slice(0, 120);
+
+const procPath = (skillId: string, procedureId: string) => p("procedures", skillId, `${procedureSlug(procedureId)}.json`);
+
+export const loadProcedure = (skillId: string, procedureId: string) => readJson<ProcedureRecord>(procPath(skillId, procedureId));
+
+/** Record a flow's evaluation (every candidate, champion or not). Latest evaluation wins. */
+export function recordProcedure(proc: ProcedureRecord): string {
+  const path = procPath(proc.skillId, proc.procedureId);
+  writeJson(path, proc);
+  return path;
+}
+
+/** Make the champion flow the skill's trusted procedure: its best certified run becomes canonical
+ *  and the index row points at the flow. A tournament decides between flows, so this replaces the
+ *  previous canonical record even if an older run had better metrics. Refuses uncertified runs. */
+export function promoteProcedure(proc: ProcedureRecord, bestRun: RankedRecord): boolean {
+  if (!bestRun.decision.certified || bestRun.procedureId !== proc.procedureId) return false;
+  recordProcedure({ ...proc, champion: true });
+  writeJson(p("skills", `${bestRun.skill.id}.json`), bestRun);
+  const row = { ...summary(bestRun), procedure: {
+    procedureId: proc.procedureId, title: proc.title, passRate: proc.passRate, runs: proc.runs,
+    judgeScore: proc.judge?.score ?? null, tournamentId: proc.tournamentId,
+    record: `registry/procedures/${proc.skillId}/${procedureSlug(proc.procedureId)}.json`,
+  } };
+  const rows = index().skills.filter((s) => s.id !== bestRun.skill.id).concat(row);
+  writeJson(p("index.json"), { skills: rows.sort((a, b) => a.id.localeCompare(b.id)) });
+  return true;
+}
+
+export function procedures(skillId: string): ProcedureRecord[] {
+  try {
+    return readdirSync(p("procedures", skillId)).filter((f) => f.endsWith(".json"))
+      .map((f) => readJson<ProcedureRecord>(p("procedures", skillId, f))!).filter(Boolean);
+  } catch {
+    return [];
+  }
 }

@@ -122,6 +122,9 @@ export interface RegistryIndex {
     certifiedAt: string;
     policy: string;
     record: string; // repo path of the canonical CertificationRecord
+    // The trusted Memorable flow, when a flow tournament promoted it.
+    procedure?: { procedureId: string; title: string; passRate: number; runs: number; judgeScore: number | null;
+      tournamentId: string; record: string };
   }[];
 }
 

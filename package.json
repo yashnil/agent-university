@@ -30,7 +30,9 @@
     "conformance": "qm conformance --static",
     "test:ts": "node --test tests/*.test.ts",
     "certify": "node scripts/certify.ts",
-    "registry": "node scripts/registry.ts"
+    "registry": "node scripts/registry.ts",
+    "swarm": "node scripts/swarm.ts",
+    "tournament": "node scripts/tournament.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",

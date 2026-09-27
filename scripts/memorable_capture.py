@@ -108,7 +108,7 @@ def generalizer(artifact, slug):
             text = text.replace(title, "<Wikipedia_Title>")
         text = re.sub(rf"(?:www\.)?{re.escape(domain)}", "<company-domain>", text, flags=re.I)
         text = text.replace(f"scout/{slug}", "scout/<slug>")
-        return re.sub(rf"\b{re.escape(name)}\b", "<Company>", text, flags=re.I)
+        return re.sub(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", "<Company>", text, flags=re.I)
 
     return generalize
 
