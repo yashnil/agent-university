@@ -1,4 +1,4 @@
-// Arena (lib/arena.ts): the website's tournament runner streams progress in a usable order.
+// Arena (lib/arena.ts): the website's flow tournament runner streams progress in a usable order.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { runArena } from "../lib/arena.ts";
@@ -30,8 +30,16 @@ test("a dry arena streams a complete, ordered tournament without touching the re
     assert.ok(last < events.indexOf(h));
   }
 
+  // Flow tournament: every column is a candidate flow; its students take different exam cases.
+  const start = events[0] as Extract<ArenaEvent, { type: "tournament.started" }>;
+  assert.ok(start.heats.every((h) => h.flow && new Set(h.students.map((s) => s.examCase)).size === h.students.length));
+  for (const h of events.filter((x) => x.type === "heat.finished"))
+    assert.ok(typeof h.passRate === "number" && typeof h.advances === "boolean" && h.procedureId);
+
   const end = events.at(-1) as Extract<ArenaEvent, { type: "tournament.finished" }>;
   assert.ok(end.champion);
+  assert.equal(end.champion.procedureId, "procedures/0000aaaa-research-a-company-fixture");
+  assert.equal(end.procedure?.champion, true);
   assert.equal(end.promoted, true);
   assert.notEqual(end.registry, before); // dry runs use a throwaway registry
   assert.equal(registry.registryDir(), before); // and put the real one back

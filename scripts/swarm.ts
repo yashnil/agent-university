@@ -50,6 +50,35 @@ export function examCaseFor(company: string, cases: Case[], allowFixtureOnly: bo
 
 // ------------------------------------------------------------------ live (QM + Memorable)
 
+/** Once-per-run live facts shared by every exam: the teacher record, leak terms, a portal session. */
+export interface LiveContext { rec: any; source: any; terms: string[]; session: qm.Session; skills: string[] }
+
+/** Load the observed skill record, derive leak terms from the source answer, sign in, and check
+ *  the layer skill is unpublished. Mirrors transfer_run.main()'s guards. */
+export async function liveContext(): Promise<LiveContext> {
+  const path = join(qm.RECORD_DIR, "skills", "research-company.json");
+  let rec: any;
+  try {
+    rec = JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    throw new Error(`no skill record at ${path}; run memorable_capture.py first`);
+  }
+  if (!rec.status || !rec.teacher) throw new Error("Research Company has not been observed yet; run memorable_capture.py first");
+  const source = rec.runtime.source;
+  const src = await qm.findAndVerify(`workspace/scout/${qm.slugify(source.company)}/company.json`, [source.container]);
+  if (!src) throw new Error("source artifact is gone; cannot leak-check the student prompt");
+  const terms = leakTerms(JSON.parse(src.content));
+  const session = await qm.signIn();
+  const skills = await qm.publishedSkills(session);
+  console.log(`published skills: ${skills.join(", ") || "none"}`);
+  if (skills.includes(qm.LAYER_SKILL)) throw new Error(`${qm.LAYER_SKILL} is still published; hide it from the layer first`);
+  return { rec, source, terms, session, skills };
+}
+
+/** The recall task for a company, as transfer_run.py phrases it. */
+export const researchTask = (company: string) => `Research the company "${company}" from real public web sources and write ` +
+  `$HOME/workspace/scout/${qm.slugify(company)}/company.json with company_name, website, product_summary and source_urls`;
+
 export class LiveExam implements Exam {
   examCase = "";
   private rec: any;
@@ -63,40 +92,36 @@ export class LiveExam implements Exam {
   private slug: string;
   private company: string;
   private swarmId: string;
+  private ctx?: LiveContext;
+  private given?: { procedureId: string; text: string };
 
-  constructor(company: string, swarmId: string) {
+  /** ctx: shared live context (else set up here). procedure: the flow to hand students (else native recall). */
+  constructor(company: string, swarmId: string, opts: { ctx?: LiveContext; procedure?: { procedureId: string; text: string } } = {}) {
     this.company = company;
     this.slug = qm.slugify(company);
     this.swarmId = swarmId;
+    this.ctx = opts.ctx;
+    this.given = opts.procedure;
   }
 
   /** Once per swarm, mirroring transfer_run.main(): every guard must hold before any student starts. */
   async setup(n: number) {
-    const path = join(qm.RECORD_DIR, "skills", "research-company.json");
-    try {
-      this.rec = JSON.parse(readFileSync(path, "utf8"));
-    } catch {
-      throw new Error(`no skill record at ${path}; run memorable_capture.py first`);
-    }
-    if (!this.rec.status || !this.rec.procedureId) throw new Error("Research Company has no recalled procedure yet; run memorable_capture.py first");
-    this.source = this.rec.runtime.source;
+    const ctx = this.ctx ?? (this.ctx = await liveContext());
+    Object.assign(this, { rec: ctx.rec, source: ctx.source, terms: ctx.terms, session: ctx.session, skills: ctx.skills });
     this.examCase = examCaseFor(this.company, loadCases(), false);
     if (qm.slugify(this.source.company) === this.slug) throw new Error("the exam company must differ from the source company");
-    const src = await qm.findAndVerify(`workspace/scout/${qm.slugify(this.source.company)}/company.json`, [this.source.container]);
-    if (!src) throw new Error("source artifact is gone; cannot leak-check the student prompt");
-    this.terms = leakTerms(JSON.parse(src.content));
 
-    this.session = await qm.signIn();
-    this.skills = await qm.publishedSkills(this.session);
-    console.log(`published skills: ${this.skills.join(", ") || "none"}`);
-    if (this.skills.includes(qm.LAYER_SKILL)) throw new Error(`${qm.LAYER_SKILL} is still published; hide it from the layer first`);
-
-    const task = `Research the company "${this.company}" from real public web sources and write ` +
-      `$HOME/workspace/scout/${this.slug}/company.json with company_name, website, product_summary and source_urls`;
-    const recalled = await recall(task);
-    this.procedureId = recalled.procedureId;
-    const procedure = await show(this.procedureId);
-    console.log(`--- memorable recall ---\n${recalled.output}\n--- memorable show ${this.procedureId} ---\n${procedure}`);
+    let procedure: string;
+    if (this.given) {
+      this.procedureId = this.given.procedureId;
+      procedure = this.given.text;
+    } else {
+      if (!this.rec.procedureId) throw new Error("Research Company has no recalled procedure yet; run memorable_capture.py first");
+      const recalled = await recall(researchTask(this.company));
+      this.procedureId = recalled.procedureId;
+      procedure = await show(this.procedureId);
+      console.log(`--- memorable recall ---\n${recalled.output}\n--- memorable show ${this.procedureId} ---\n${procedure}`);
+    }
     this.prompt = `Research the company "${this.company}". Fetch real public sources with curl, write the artifact to ` +
       `$HOME/workspace/scout/${this.slug}/company.json as a JSON object with exactly these keys: ` +
       "company_name, website (http(s) URL), product_summary (2-3 sentences), and source_urls " +
@@ -110,8 +135,9 @@ export class LiveExam implements Exam {
     for (let i = 1; i <= n; i++) this.threadRefs.set(i, `web:${user}:${crypto.randomUUID()}`);
   }
 
+  /** The skill as certified: its procedureId is the flow these students were given. */
   skill() {
-    return this.rec as CandidateSkill;
+    return { ...this.rec, procedureId: this.procedureId } as CandidateSkill;
   }
 
   student(i: number) {

@@ -3,7 +3,7 @@ import Arena from "@/components/arena/Arena";
 
 export const metadata: Metadata = {
   title: "Arena · Agent University",
-  description: "Run an agent tournament: fresh students take unseen exams, certification decides, Jev judges the finalists.",
+  description: "Memorable flows compete on unseen companies; certification decides which runs pass; Jev judges the flows that mostly pass.",
 };
 
 export const dynamic = "force-dynamic";
@@ -18,8 +18,10 @@ export default function ArenaPage() {
           </p>
           <h1>Arena</h1>
           <p className="northStar">
-            Fresh agents take an unseen exam from the recalled procedure. The certification engine decides who
-            passes — <strong>deterministically</strong>. Jev only judges the finalists.
+            Memorable flows compete: each flow is handed to fresh agents on unseen companies. The certification
+            engine decides <strong>deterministically</strong> which runs pass; flows that mostly pass reach the
+            final, where Jev judges the flows themselves. The champion flow becomes the company&apos;s trusted
+            procedure.
           </p>
         </div>
       </header>

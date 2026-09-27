@@ -119,10 +119,10 @@ export function summary(record: CertificationRecord): RegistryIndex["skills"][nu
 
 /** Append the decision to the ledger; promote it if it is certified and beats the current one.
  *  Returns true when the record became the skill's canonical record. */
-export function recordDecision(record: RankedRecord): boolean {
+export function recordDecision(record: RankedRecord, opts: { promote?: boolean } = {}): boolean {
   mkdirSync(dir, { recursive: true });
   appendFileSync(p("ledger.jsonl"), JSON.stringify(record) + "\n");
-  if (!record.decision.certified) return false;
+  if (!record.decision.certified || opts.promote === false) return false;
   const current = load(record.skill.id);
   if (current && compareRecords(current, record) >= 0) return false;
   writeJson(p("skills", `${record.skill.id}.json`), record);

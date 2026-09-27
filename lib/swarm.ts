@@ -19,6 +19,7 @@ import type { JudgeFn, JudgedRecord } from "./jev.ts";
 import { agentIdentity, RECORD_DIR } from "./qm.ts";
 import { errorsAgainst } from "./schema.ts";
 import * as registry from "./registry.ts";
+import type { ProcedureRecord } from "./registry.ts";
 import type { AgentIdentity, AgentUniversityEvent, ArtifactType, TransferResult } from "./types.ts";
 
 export type Metrics = { durationMs?: number; toolCalls?: number; turns?: number; costUsd?: number };
@@ -45,28 +46,40 @@ export interface SwarmOptions {
   judge?: JudgeFn | null;
   onEvent?: (e: ArenaEvent) => void; // live progress (the website's Arena); must not throw
   heat?: number; // heat number reported in events (default 1)
+  caseFor?: (i: number) => string; // student i's exam case when students take different cases (default: examCase)
   limiter?: Limiter; // shared slot pool, e.g. across concurrent tournament heats (acquired before a student starts)
 }
 
 type Id = AgentIdentity;
 
-/** Live progress of a swarm or tournament, in order. Consumed by the website's Arena (SSE). */
+/** A candidate Memorable flow (procedure) in a tournament. */
+export interface FlowRef { procedureId: string; title: string; source: "recall" | "given" | "fixture"; rank: number | null }
+type Where = { examCase: string; examCompany: string | null };
+type FlowFields = { procedureId: string; title: string; passRate: number };
+
+/** Live progress of a swarm or tournament, in order. Consumed by the website's Arena (SSE).
+ *  In a flow tournament each "heat" is one candidate flow; its students take different exam cases. */
 export type ArenaEvent =
-  | { type: "tournament.started"; at: string; tournamentId: string; dry: boolean; perHeat: number; judgeModel: string | null;
-      heats: { heat: number; examCase: string; examCompany: string | null; students: { i: number; student: Id }[] }[] }
-  | { type: "student.started"; at: string; heat: number; i: number; student: Id }
-  | { type: "student.finished"; at: string; heat: number; i: number; student: Id; runId: string | null; certified: boolean;
-      status: "observed" | "transferred" | "certified"; summary: string; failedRules: string[]; failedChecks: string[];
-      metrics: Metrics; error: string | null; rulings: { rule: string; passed: boolean; reason: string }[] }
-  | { type: "heat.finished"; at: string; heat: number; examCase: string; certifiedCount: number;
-      winner: { i: number; student: Id; runId: string | null } | null }
+  | { type: "tournament.started"; at: string; tournamentId: string; dry: boolean; perHeat: number; perFlow: number;
+      judgeModel: string | null; threshold: number;
+      heats: ({ heat: number; flow: FlowRef | null; students: ({ i: number; student: Id } & Where)[] } & Where)[];
+      rejected: { procedureId: string; title: string; reason: string }[] }
+  | ({ type: "student.started"; at: string; heat: number; i: number; student: Id; procedureId: string | null } & Where)
+  | ({ type: "student.finished"; at: string; heat: number; i: number; student: Id; procedureId: string | null;
+      runId: string | null; certified: boolean; status: "observed" | "transferred" | "certified"; summary: string;
+      failedRules: string[]; failedChecks: string[]; metrics: Metrics; error: string | null;
+      rulings: { rule: string; passed: boolean; reason: string }[] } & Where)
+  | { type: "heat.finished"; at: string; heat: number; examCase: string; examCases: string[]; certifiedCount: number;
+      procedureId: string | null; passRate: number; runs: number; advances: boolean;
+      winner: { i: number; student: Id; runId: string | null; examCase: string } | null }
   | { type: "final.started"; at: string; judgeModel: string | null;
-      finalists: { heat: number; i: number; student: Id; runId: string | null; examCase: string }[] }
+      finalists: ({ heat: number; i: number; student: Id; runId: string | null; examCase: string } & FlowFields)[] }
   | { type: "final.finished"; at: string; judge: { status: string; model?: string; reason?: string };
-      ranking: { place: number; heat: number; i: number; student: Id; runId: string | null; examCase: string;
-        score: number | null; rationale: string | null }[] }
-  | { type: "tournament.finished"; at: string; champion: { heat: number; i: number; student: Id; runId: string | null;
-      examCase: string; summary: string; score: number | null } | null; promoted: boolean | null; registry: string; record: unknown }
+      ranking: ({ place: number; heat: number; i: number; student: Id; runId: string | null; examCase: string;
+        score: number | null; rationale: string | null } & FlowFields)[] }
+  | { type: "tournament.finished"; at: string; champion: ({ heat: number; i: number; student: Id; runId: string | null;
+      examCase: string; summary: string; score: number | null } & FlowFields) | null;
+      promoted: boolean | null; registry: string; record: unknown; procedure: ProcedureRecord | null }
   | { type: "error"; at: string; message: string };
 
 /** Call a progress listener without letting it break the run. */
@@ -235,9 +248,11 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
   const studentFor = opts.studentFor ?? ((i: number) => defaultStudent(i, swarmId));
   const isolationFor = opts.isolationFor ?? ((_i, _t, facts) => facts);
   const startedAt = opts.decidedAt ?? now();
+  const caseOf = (i: number) => opts.caseFor?.(i) ?? examCase;
+  const where = (c: string) => ({ examCase: c, examCompany: cases.find((x) => x.id === c)?.company ?? null });
 
   const fail = (i: number, msg: string, t0: number, student?: AgentIdentity, runId?: string | null): Outcome => ({
-    transfer: failedTransfer(skill, examCase, student ?? studentFor(i), msg, runId),
+    transfer: failedTransfer(skill, caseOf(i), student ?? studentFor(i), msg, runId),
     metrics: { durationMs: Date.now() - t0, toolCalls: 0, turns: 0 }, isolation: {}, error: msg, artifact: null,
   });
 
@@ -283,7 +298,8 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
     record.swarm = { swarmId, student: i }; // extra key; consumers ignore unknown keys
     decided[i] = record;
     emit(opts.onEvent, {
-      type: "student.finished", at: now(), heat, i, student: record.transfer.student, runId: record.transfer.runId ?? null,
+      type: "student.finished", at: now(), heat, i, student: record.transfer.student, ...where(record.transfer.examCase),
+      procedureId: record.procedureId ?? null, runId: record.transfer.runId ?? null,
       certified: record.decision.certified, status: record.decision.status, summary: record.decision.summary,
       failedRules: record.decision.failedRules, failedChecks: record.verification.checks.filter((c) => !c.passed).map((c) => c.name),
       metrics: record.metrics ?? {}, error: o.error,
@@ -298,7 +314,8 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
       const i = next++;
       const release = opts.limiter ? await opts.limiter.acquire() : null;
       try {
-        emit(opts.onEvent, { type: "student.started", at: now(), heat, i, student: studentFor(i) });
+        emit(opts.onEvent, { type: "student.started", at: now(), heat, i, student: studentFor(i), ...where(caseOf(i)),
+          procedureId: skill.procedureId ?? null });
         outcomes[i] = await attempt(i);
       } finally {
         release?.();

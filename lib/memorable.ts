@@ -32,6 +32,27 @@ export async function recall(task: string): Promise<{ procedureId: string; outpu
   return { procedureId: m[0], output };
 }
 
+/** Native recall WITHOUT --single: up to k distinct procedure ids in Memorable's rank order. */
+export async function recallMany(task: string, k: number): Promise<{ procedureIds: string[]; output: string }> {
+  const { output } = await memorable("recall", task);
+  const ids: string[] = [];
+  for (const m of output.matchAll(/procedures\/[A-Za-z0-9._-]+/g)) {
+    const id = m[0].replace(/[.]+$/, "");
+    if (!ids.includes(id)) ids.push(id);
+    if (ids.length >= k) break;
+  }
+  if (!ids.length) throw new Error(`memorable recall found no procedure:\n${output}`);
+  return { procedureIds: ids, output };
+}
+
+/** A flow's display title: its first Markdown heading, else the slug without its hash prefix. */
+export function flowTitle(procedureId: string, text: string): string {
+  const h = /^\s*#+\s+(.+?)\s*$/m.exec(text);
+  if (h) return h[1];
+  const slug = procedureId.replace(/^procedures\//, "").replace(/^[0-9a-f]{6,}-/, "");
+  return slug.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+
 /** Native show: the rendered procedure, which is the only procedural knowledge a student gets. */
 export async function show(procedureId: string): Promise<string> {
   const { code, output } = await memorable("show", procedureId);

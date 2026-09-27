@@ -21,3 +21,5 @@
 .record { margin-top: 14px; }
 .record summary { cursor: pointer; user-select: none; }
 .record pre { margin-top: 8px; max-height: 360px; overflow: auto; }
+
+.flowText { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }

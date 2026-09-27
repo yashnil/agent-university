@@ -200,3 +200,58 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
+
+.flowTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.colAdvances { border-color: color-mix(in srgb, var(--certified) 40%, transparent); }
+.colOut { opacity: 0.85; }
+
+.heatStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.rateBar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.rateFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.ratePass { background: var(--certified); }
+.rateFail { background: var(--fail); }
+
+.rateMark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--text-faint);
+}
+
+.exam {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+
+.exam strong { color: var(--text); font-weight: 600; }
+.card > .exam { padding-inline: 12px; }
