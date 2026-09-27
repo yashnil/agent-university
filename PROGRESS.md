@@ -32,7 +32,8 @@ status `transferred` and hands certification a contract `TransferResult`. Runtim
   homepage, /about and Wikipedia live with curl and wrote `/root/workspace/scout/linear/company.json`
   in the admin's personal sandbox.
 - Re-verified in place at capture time: `verify_company.py` **PASS 6/6**.
-- Teacher identity `qm-thread-0d71aaa58b37` (scope `personal:<admin>`).
+- Teacher: the admin's default web thread (scope `personal:<admin>`). The real `qm-thread-…` id stays in
+  the local record because it hashes a threadRef that contains an email.
 
 **Memorable** (CLI 0.5.19, logged in, extraction API configured, local encrypted store)
 - Capture: **stored** by native `memorable ingest` from the generalized trace (4 tool calls).
@@ -47,7 +48,7 @@ status `transferred` and hands certification a contract `TransferResult`. Runtim
 
 **Transfer**
 - Case `exam-vercel` (Vercel). QM run `5e30ec98-4e35-48eb-9460-d40b8ded3bc3`.
-- Fresh student `qm-thread-e4d284b28658`: new project → scope
+- Fresh student (a new `qm-thread-…` id, from a random threadRef): new project → scope
   `group:web-project-23b7fd8b-aaf5-452f-b56b-6265135e7aa9`, new threadRef and session, new
   sandbox container and home volume.
 - Freshness: before the turn the scope had no sandbox, so no artifact could exist. The student's
@@ -63,14 +64,15 @@ status `transferred` and hands certification a contract `TransferResult`. Runtim
 - Verifier: **PASS 6/6**. All 13 isolation and freshness checks hold.
 - Skill record status: `transferred`, `transfer.passed = true`.
 
-**Handoff to certification**
-- `.agent-university/transfers/5e30ec98-4e35-48eb-9460-d40b8ded3bc3.json`: a contract `TransferResult`
-  (validated against `transfer-result.schema.json`). It adds producer keys `teacher`, `sourceCase`,
-  `sourceRunId`, `examStartedAt`, `examFinishedAt` and `isolation` (13 booleans).
-- `.agent-university/skills/research-company.json`: a contract `Skill` in `transferred` with its
-  `events`.
-- Both are gitignored live output. Certification applies its policy (for example `passed` and every
-  `isolation` check → `exam.passed`, `skill.certified`, `certified`) without knowing QM internals.
+**Handoff to certification** (details: `docs/HANDOFF.md` §4, "Handoff: Milestone 2 transfer result")
+- Shared, sanitized: `demo/fixtures/transfer-result-vercel.json`, plus `skill-transferred-vercel.json`,
+  `events-vercel-transferred.json` and `company-vercel.json` (the student's artifact).
+  - They are validated against the frozen contracts and privacy-scanned by `tests/test_runtime_fixtures.py`.
+  - Agent ids are pseudonymized. No scope, container, volume, session, threadRef or URL is included.
+- Live, unsanitized, gitignored: `.agent-university/transfers/5e30ec98-4e35-48eb-9460-d40b8ded3bc3.json`
+  and `.agent-university/skills/research-company.json`.
+- Certification applies its policy (for example `passed` and every `isolation` check → `exam.passed`,
+  `skill.certified`, `certified`) without knowing QM internals.
 
 **Commands**
 ```bash
@@ -117,11 +119,11 @@ mv .agent-university/hidden-skills/scout-research-company sandbox/skills/ && npm
 
 - **Runtime:** the run API (`lib/qm.ts`, `app/api/run/**`) returning these `TransferResult`s and
   `Event`s. It could also automate hiding and restoring the skill.
-- **Certification:** consume `.agent-university/transfers/5e30ec98-….json` (the shape above) and
-  decide `certified`. Also the next verifiers and failing fixtures.
-- **UI/demo:** the lifecycle, exam, composition and GAP views from fixtures, then from live output.
-- **Shared doc to update at the checkpoint:** HANDOFF §4 still says `transfer_run.py` "must end
-  `certified`". Runtime now ends at `transferred` by design.
+- **Certification:** consume `demo/fixtures/transfer-result-vercel.json` and decide `certified`.
+  Also the next verifiers and failing fixtures.
+- **UI/demo:** the lifecycle, exam, composition and GAP views from fixtures, including the live
+  Vercel set (`*-vercel*.json`, which stops at `transferred`) next to the fictional full lifecycle.
+  Then from live output.
 
 ---
 

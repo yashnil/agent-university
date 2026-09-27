@@ -1,0 +1,92 @@
+[
+  {
+    "type": "skill.observed",
+    "at": "2026-09-27T21:04:05Z",
+    "payload": {
+      "skillId": "research-company",
+      "teacher": {
+        "id": "qm-thread-sanitized-teacher",
+        "name": "Scout (teacher)",
+        "harness": "qm"
+      },
+      "artifactType": "company.json",
+      "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+      "artifactPath": "$HOME/workspace/scout/linear/company.json",
+      "verification": {
+        "passed": true,
+        "checks": [
+          {
+            "name": "file_exists",
+            "passed": true,
+            "message": "file exists"
+          },
+          {
+            "name": "valid_json_object",
+            "passed": true,
+            "message": "valid JSON object"
+          },
+          {
+            "name": "company_name_present",
+            "passed": true,
+            "message": "company_name present"
+          },
+          {
+            "name": "website_valid_url",
+            "passed": true,
+            "message": "website present (http(s) URL)"
+          },
+          {
+            "name": "product_summary_present",
+            "passed": true,
+            "message": "product_summary present"
+          },
+          {
+            "name": "source_urls_min_two",
+            "passed": true,
+            "message": "at least two valid source URLs (3 distinct valid)"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "skill.recalled",
+    "at": "2026-09-27T21:04:06Z",
+    "payload": {
+      "skillId": "research-company",
+      "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+      "query": "Research the company \"Acme Robotics\" from real public web sources and write $HOME/workspace/scout/acme-robotics/company.json with company_name, website, product_summary and source_urls",
+      "rank": 1
+    }
+  },
+  {
+    "type": "skill.recalled",
+    "at": "2026-09-27T21:04:49Z",
+    "payload": {
+      "skillId": "research-company",
+      "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+      "query": "Research the company \"Vercel\" from real public web sources and write $HOME/workspace/scout/vercel/company.json with company_name, website, product_summary and source_urls",
+      "rank": 1,
+      "agent": {
+        "id": "qm-thread-sanitized-student",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      }
+    }
+  },
+  {
+    "type": "exam.started",
+    "at": "2026-09-27T21:04:49Z",
+    "payload": {
+      "skillId": "research-company",
+      "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+      "examCase": "exam-vercel",
+      "student": {
+        "id": "qm-thread-sanitized-student",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3"
+    }
+  }
+]
