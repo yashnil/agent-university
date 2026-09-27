@@ -3,6 +3,8 @@
   "cases": [
     { "id": "teach-linear", "role": "teacher", "skillId": "research-company", "company": "Linear", "artifactType": "company.json" },
     { "id": "exam-vercel", "role": "exam", "skillId": "research-company", "company": "Vercel", "artifactType": "company.json" },
+    { "id": "exam-stripe", "role": "exam", "skillId": "research-company", "company": "Stripe", "artifactType": "company.json" },
+    { "id": "exam-supabase", "role": "exam", "skillId": "research-company", "company": "Supabase", "artifactType": "company.json" },
     { "id": "exam-northwind", "role": "exam", "skillId": "research-company", "company": "Northwind Labs", "artifactType": "company.json", "fixtureOnly": true }
   ]
 }

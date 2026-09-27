@@ -23,7 +23,8 @@
     "test:ts": "node --test tests/*.test.ts",
     "certify": "node scripts/certify.ts",
     "registry": "node scripts/registry.ts",
-    "swarm": "node scripts/swarm.ts"
+    "swarm": "node scripts/swarm.ts",
+    "tournament": "node scripts/tournament.ts"
   },
   "type": "module"
 }

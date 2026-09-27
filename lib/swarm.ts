@@ -42,7 +42,32 @@ export interface SwarmOptions {
   timeoutMs?: number; // per student
   promote?: boolean; // recordDecision() for every record (default true)
   judge?: JudgeFn | null;
+  limiter?: Limiter; // shared slot pool, e.g. across concurrent tournament heats (acquired before a student starts)
 }
+
+/** A counting semaphore: at most n holders at once. acquire() resolves to a release function. */
+export interface Limiter { acquire(): Promise<() => void> }
+
+export function createLimiter(n: number): Limiter {
+  let free = Math.max(1, n);
+  const waiting: (() => void)[] = [];
+  const release = () => {
+    const next = waiting.shift();
+    if (next) next();
+    else free++;
+  };
+  return {
+    acquire: () => new Promise((resolve) => {
+      const grant = () => resolve(once(release));
+      if (free > 0) { free--; grant(); } else waiting.push(grant);
+    }),
+  };
+}
+
+const once = (f: () => void) => {
+  let done = false;
+  return () => { if (!done) { done = true; f(); } };
+};
 
 export interface JudgeInfo { status: "ok" | "unavailable" | "skipped" | "disabled"; model?: string; reason?: string; judged?: number; certified?: number; promptDigest?: string }
 
@@ -61,6 +86,7 @@ export interface SwarmSummary {
   leaderboard: LeaderboardRow[];
   students: { student: number; transfer: TransferResult; isolation: Record<string, boolean>; events: AgentUniversityEvent[] }[];
   records: JudgedRecord[];
+  artifacts: Record<string, string | null>; // judgeKey -> artifact content (not saved to disk)
 }
 
 export const RANKED_BY = "certified > Jev judge score (certified only, advisory) > registry rankKey " +
@@ -205,7 +231,12 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
   const workers = Array.from({ length: Math.max(1, Math.min(opts.maxParallel ?? 10, n)) }, async () => {
     while (next <= n) {
       const i = next++;
-      outcomes[i] = await attempt(i);
+      const release = opts.limiter ? await opts.limiter.acquire() : null;
+      try {
+        outcomes[i] = await attempt(i);
+      } finally {
+        release?.();
+      }
     }
   });
   await Promise.all(workers);
@@ -261,7 +292,7 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
       failedChecks: r.verification.checks.filter((c) => !c.passed).map((c) => c.name),
       error: errors[r.swarm!.student], metrics: r.metrics ?? {}, judge: r.judge ?? null,
     })),
-    students, records,
+    students, records, artifacts,
   };
 }
 
@@ -270,25 +301,36 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
 export function saveSummary(s: SwarmSummary, outDir = join(RECORD_DIR, "swarms")): string {
   mkdirSync(outDir, { recursive: true });
   const path = join(outDir, `${s.swarmId}.json`);
-  const { records: _full, ...lean } = s; // full records live in the registry ledger
+  const { records: _full, artifacts: _a, ...lean } = s; // full records live in the registry ledger
   writeFileSync(path, JSON.stringify(lean, null, 2) + "\n");
   return path;
 }
 
-export function leaderboardTable(s: SwarmSummary): string {
+/** Plain-text table; the last column is left unpadded. */
+export function textTable(head: string[], rows: string[][]): string {
+  const widths = head.slice(0, -1).map((_, c) => Math.max(...[head, ...rows].map((r) => r[c].length)));
+  const fmt = (r: string[]) => r.slice(0, -1).map((v, c) => v.padEnd(widths[c])).join("  ") + "  " + r[r.length - 1];
+  return [fmt(head), fmt([...widths.map((w) => "-".repeat(w)), "-".repeat(Math.max(3, head[head.length - 1].length))]),
+    ...rows.map(fmt)].join("\n");
+}
+
+export const fmtMetrics = (m: Metrics) => [String(m.toolCalls ?? "-"), String(m.turns ?? "-"),
+  m.durationMs != null ? `${(m.durationMs / 1000).toFixed(1)}s` : "-", m.costUsd != null ? `$${m.costUsd.toFixed(3)}` : "-"];
+
+/** The per-student rows of a swarm leaderboard (with the jev column). */
+export function boardTable(board: LeaderboardRow[]): string {
   const head = ["#", "student", "run", "cert", "status", "jev", "tools", "turns", "time", "cost", "why not"];
-  const rows = s.leaderboard.map((e) => {
-    const m = e.metrics;
+  const rows = board.map((e) => {
     let why = e.failedRules.join(", ");
     if (e.failedChecks.length && e.failedRules.includes("verifier_checks_passed")) why += ` [${e.failedChecks.join(", ")}]`;
     return [String(e.rank), e.student ?? "?", e.runId ?? "-", e.certified ? "YES" : "no", e.status,
-      e.judge ? String(e.judge.score) : "-", String(m.toolCalls ?? "-"), String(m.turns ?? "-"),
-      m.durationMs != null ? `${(m.durationMs / 1000).toFixed(1)}s` : "-",
-      m.costUsd != null ? `$${m.costUsd.toFixed(3)}` : "-", why || "-"];
+      e.judge ? String(e.judge.score) : "-", ...fmtMetrics(e.metrics), why || "-"];
   });
-  const widths = head.slice(0, -1).map((_, c) => Math.max(...[head, ...rows].map((r) => r[c].length)));
-  const fmt = (r: string[]) => r.slice(0, -1).map((v, c) => v.padEnd(widths[c])).join("  ") + "  " + r[r.length - 1];
-  const lines = [fmt(head), fmt([...widths.map((w) => "-".repeat(w)), "-------"]), ...rows.map(fmt), ""];
+  return textTable(head, rows);
+}
+
+export function leaderboardTable(s: SwarmSummary): string {
+  const lines = [boardTable(s.leaderboard), ""];
   const { winner: w, judge: j, canonical: c } = s;
   lines.push(`${s.certifiedCount}/${s.n} students certified (pass rate ${Math.round(s.passRate * 100)}%); ` +
     "certification is deterministic, the judge only orders certified records");

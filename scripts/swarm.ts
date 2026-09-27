@@ -34,14 +34,14 @@ import type { AgentIdentity, TransferResult, VerificationResult } from "../lib/t
 const FIXTURES = join(qm.ROOT, "demo", "fixtures");
 const fixture = (name: string) => JSON.parse(readFileSync(join(FIXTURES, name), "utf8"));
 
-interface Exam {
+export interface Exam {
   examCase: string;
   skill(): CandidateSkill;
   student(i: number): AgentIdentity;
   launch(i: number, signal: AbortSignal): Promise<StudentOutcome>;
 }
 
-function examCaseFor(company: string, cases: Case[], allowFixtureOnly: boolean): string {
+export function examCaseFor(company: string, cases: Case[], allowFixtureOnly: boolean): string {
   const c = cases.find((c) => c.role === "exam" && c.company.toLowerCase() === company.toLowerCase()
     && (allowFixtureOnly || !c.fixtureOnly));
   if (!c) throw new Error(`${company} is not an exam case in demo/cases.json`);
@@ -50,7 +50,7 @@ function examCaseFor(company: string, cases: Case[], allowFixtureOnly: boolean):
 
 // ------------------------------------------------------------------ live (QM + Memorable)
 
-class LiveExam implements Exam {
+export class LiveExam implements Exam {
   examCase = "";
   private rec: any;
   private source: any;
@@ -192,8 +192,11 @@ export class DryExam implements Exam {
   private base: TransferResult;
   private company: any;
   private swarmId: string;
+  private profiles: typeof DRY_PROFILES;
 
-  constructor(company: string, swarmId: string, skill?: CandidateSkill) {
+  /** profiles: the student profiles to cycle through (default DRY_PROFILES); tournaments vary them per heat. */
+  constructor(company: string, swarmId: string, skill?: CandidateSkill, profiles: typeof DRY_PROFILES = DRY_PROFILES) {
+    this.profiles = profiles;
     this.skillRec = skill ?? drySkill();
     this.examCase = examCaseFor(company, loadCases(), true);
     this.swarmId = swarmId;
@@ -221,7 +224,7 @@ export class DryExam implements Exam {
   }
 
   async launch(i: number): Promise<StudentOutcome> {
-    const [kind, toolCalls, turns, secs, cost, sources, sentences] = DRY_PROFILES[(i - 1) % DRY_PROFILES.length];
+    const [kind, toolCalls, turns, secs, cost, sources, sentences] = this.profiles[(i - 1) % this.profiles.length];
     await new Promise((r) => setTimeout(r, 5 * (i % 3))); // a little real concurrency
     if (kind === "crash") throw new Error("sandbox container exited before the first turn");
     if (kind === "timeout") throw Object.assign(new Error(`run dry-${i} did not finish within 900s`), { name: "TimeoutError" });
@@ -300,7 +303,7 @@ export async function main(argv = process.argv.slice(2)): Promise<{ code: number
   });
   const path = saveSummary(s, a["out-dir"]);
   if (a.json) {
-    const { records: _r, ...lean } = s;
+    const { records: _r, artifacts: _a, ...lean } = s;
     console.log(JSON.stringify(lean, null, 2));
   } else console.log("\n" + leaderboardTable(s));
   log(`\nsummary: ${path}\nledger:  ${join(registry.registryDir(), "ledger.jsonl")}`);
