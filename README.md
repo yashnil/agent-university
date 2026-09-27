@@ -13,6 +13,32 @@ fresh-agent composition → visible **GAP**
 - The teacher case is **Linear** and the unseen exam case is **Vercel** (`demo/cases.json`).
 - The skill is **Research Company**, which produces `company.json`.
 
+## Final demo path
+
+```
+Teacher / Linear → Memorable → Student / Vercel → deterministic verification → Certified Research Company
+  → Fresh Intern → composite of certified skills → FIND TECHNICAL CONTACT GAP → new candidate
+```
+
+- **Truly live (real QM + Memorable runs, recorded):**
+  - the teacher's Linear run and the Memorable capture;
+  - the fresh student's Vercel run from the recalled procedure. It is sanitized into
+    `demo/fixtures/*-vercel*.json`.
+- **Registry-backed:**
+  - the certification decision: strict, all 8 rules, 6/6 checks;
+  - the certified Research Company skill (`registry/`, `GET /api/skills`);
+  - the Intern's first step, which reuses that certified, re-verified output.
+- **Fixture-backed, labelled in the UI and the API:**
+  - Analyze Repository and Evaluate Opportunity (hand-written stand-ins, uncertified);
+  - the whole composite run, which is orchestration only: no agent is executed.
+- **GAP:** Find Technical Contact has no skill at all. `POST /api/run` emits `gap.discovered`, and
+  it becomes a candidate that is never certified. Draft Outreach is blocked.
+- **Known limitations:** see `docs/REPO_OVERVIEW.md` §15–16. The composite task is fixed to Vercel,
+  candidates are not persisted, and certification is still a manual CLI step.
+- **Run it:** `npm run dev`, then open `http://localhost:3001/`. Click **Assign the diligence task**,
+  then switch **Live**/**Demo** at the top right. The click-by-click script is in
+  `docs/REPO_OVERVIEW.md` §20.
+
 ## Architecture
 
 ```
@@ -64,6 +90,9 @@ distinct http(s) URLs).
 - **Certification of the real transfer: complete.** `scripts/certify.ts --reverify
   --require-isolation` certifies it on all 8 rules of `au-transfer-v1`. The canonical record is
   `registry/skills/research-company.json`, and `tests/integration.test.ts` replays the whole handoff.
+- **Final demo layer: complete.** A fresh Intern composes a diligence task from the certified skill
+  (`POST /api/run`), surfaces the Find Technical Contact GAP, and creates a candidate. Covered by
+  `tests/product.test.ts`.
 - The whole system in one page: [`docs/REPO_OVERVIEW.md`](docs/REPO_OVERVIEW.md). Runtime details
   are in `PROGRESS.md`.
 

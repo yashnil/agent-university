@@ -10,7 +10,16 @@ const OPTIONS: { mode: Mode; label: string }[] = [
   { mode: "live", label: "Live (runtime)" },
 ];
 
-export default function ModeSwitch({ mode, source }: { mode: Mode; source: string }): JSX.Element {
+export default function ModeSwitch({
+  mode,
+  source,
+  query = {},
+}: {
+  mode: Mode;
+  source: string;
+  /** Other query params to keep, so switching mode never changes which story is on screen. */
+  query?: Record<string, string>;
+}): JSX.Element {
   return (
     <div className={styles.wrap}>
       <div className={styles.switch} role="group" aria-label="Data mode">
@@ -19,7 +28,7 @@ export default function ModeSwitch({ mode, source }: { mode: Mode; source: strin
           return (
             <a
               key={option.mode}
-              href={`?mode=${option.mode}`}
+              href={`?${new URLSearchParams({ ...query, mode: option.mode }).toString()}`}
               className={active ? `${styles.option} ${styles.active}` : styles.option}
               aria-current={active ? "page" : undefined}
             >

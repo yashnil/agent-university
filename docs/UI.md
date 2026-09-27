@@ -86,6 +86,18 @@ One scrolling page, `app/page.tsx`, in the demo's order:
 Everything is derived from contract data. Nothing about the lifecycle is hardcoded in the UI,
 so live data replaces fixtures without component changes.
 
+## Final demo layer (Fresh Intern, GAP, candidate)
+
+- The default case is now the real Linear → Vercel story (`?case=vercel`), and the mode switch
+  keeps the case.
+- Section 04 renders `components/CompositeRun.tsx` in both modes. It shows:
+  - the Intern (0 prior runs, 0 personal skills) and its inherited certified skills;
+  - "Assign the diligence task", which POSTs `/api/run` and reveals the labelled steps;
+  - the yellow GAP (`GapBanner`), the new candidate, and `components/MetricsPanel.tsx`.
+- Data comes from `lib/product.ts`, the same functions behind `/api/skills`, `/api/exam` and
+  `/api/run`. Demo mode serves `demo/fixtures/final-demo.json`; live mode reads `registry/`.
+- `?case=northwind` keeps the older fictional lifecycle and its composition section.
+
 ## Demo mode / live mode / outcome
 
 The mode is a URL query param, so it needs no client JS and is safe to drive from a keyboard

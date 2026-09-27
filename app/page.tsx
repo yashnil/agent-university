@@ -1,4 +1,5 @@
 import ArtifactCard from "@/components/ArtifactCard";
+import CompositeRun from "@/components/CompositeRun";
 import GapBanner from "@/components/GapBanner";
 import LifecycleTimeline from "@/components/LifecycleTimeline";
 import ModeSwitch from "@/components/ModeSwitch";
@@ -15,12 +16,13 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; outcome?: string; case?: string }>;
+  searchParams: Promise<{ mode?: string; outcome?: string; case?: string; run?: string }>;
 }) {
   const params = await searchParams;
   const mode: Mode = params.mode === "live" ? "live" : "demo";
   const requestedOutcome: Outcome = params.outcome === "failed" ? "failed" : "certified";
-  const requestedCase: DemoCaseId = params.case === "vercel" ? "vercel" : "northwind";
+  // The real Linear -> Vercel story is the default; the fictional Northwind lifecycle stays one click away.
+  const requestedCase: DemoCaseId = params.case === "northwind" ? "northwind" : "vercel";
   const data = await loadLifecycle(mode, requestedOutcome, requestedCase);
   const q = (next: Record<string, string>) =>
     "?" + new URLSearchParams({ mode: data.mode, outcome: requestedOutcome, case: requestedCase, ...next }).toString();
@@ -62,7 +64,7 @@ export default async function Page({
           </p>
         </div>
         <div>
-          <ModeSwitch mode={data.mode} source={data.source} />
+          <ModeSwitch mode={data.mode} source={data.source} query={{ case: requestedCase }} />
           <p className="mono faint" style={{ margin: "8px 0 0", textAlign: "right" }}>
             case:{" "}
             <a href={q({ case: "vercel" })}>real run (Linear → Vercel)</a>
@@ -107,11 +109,13 @@ export default async function Page({
         <div className="sectionHead">
           <span className="sectionNum">02</span>
           <h2>Transfer trial</h2>
-          <span className="mono faint">
-            <a href={q({ outcome: "certified" })}>certified run</a>
-            {" · "}
-            <a href={q({ outcome: "failed" })}>failed trial</a>
-          </span>
+          {data.demoCase === "northwind" ? (
+            <span className="mono faint">
+              <a href={q({ outcome: "certified" })}>certified run</a>
+              {" · "}
+              <a href={q({ outcome: "failed" })}>failed trial</a>
+            </span>
+          ) : null}
         </div>
         <p className="sectionSub">
           The origin agent&apos;s procedure was captured, then recalled by a different agent in a new
@@ -253,39 +257,64 @@ export default async function Page({
         <RegistryPanel
           rows={data.registry?.rows ?? []}
           source={data.registry?.source ?? "registry/index.json (not present)"}
+          note={data.registry?.note}
         />
       </section>
 
-      <section className="section">
-        <div className="sectionHead">
-          <span className="sectionNum">05</span>
-          <h2>Composition, and the gap</h2>
-        </div>
-        <p className="sectionSub">
-          A fresh agent plans the full pipeline from certified skills alone — {certifiedSteps} of{" "}
-          {steps.length} steps are backed by one. Where none exists, the system reports a gap instead of
-          improvising: the honest edge of what the organization can actually trust.
-        </p>
-        <PipelineStrip steps={steps} missingArtifactType={data.gap?.missingArtifactType} />
-        {data.gap ? <GapBanner gap={data.gap} /> : null}
-        <div className="grid2" style={{ marginTop: 16 }}>
-          <ArtifactCard
-            title="repo_analysis.json"
-            json={data.artifacts.repoAnalysis}
-            badge={<span className="badge badge--fail">uncertified</span>}
-          />
-          <ArtifactCard
-            title="score.json"
-            json={data.artifacts.score}
-            badge={<span className="badge badge--fail">uncertified</span>}
-          />
-          <ArtifactCard
-            title="outreach.md"
-            markdown={data.artifacts.outreach}
-            badge={<span className="badge badge--fail">uncertified</span>}
-          />
-        </div>
-      </section>
+      {data.composite ? (
+        <section className="section">
+          <div className="sectionHead">
+            <span className="sectionNum">05</span>
+            <h2>A fresh Intern inherits it, and finds the edge</h2>
+          </div>
+          <p className="sectionSub">
+            A brand-new agent with no prior runs and no personal skills gets a larger diligence task. It recalls
+            only what the organization certified —{" "}
+            {data.skills?.skills.length
+              ? data.skills.skills.map((sk, i) => (
+                  <span key={sk.id}>
+                    {i ? ", " : ""}
+                    <code className="mono">{sk.id}</code> ({sk.verification} on {sk.examCase})
+                  </span>
+                ))
+              : "nothing yet"}{" "}
+            — and composes the task in order. Steps without a certified skill are labelled, and the capability nobody
+            has is reported as a GAP and becomes a candidate, never silently trusted.
+          </p>
+          <CompositeRun mode={data.mode} fallback={data.composite} autoRun={params.run === "1"} />
+        </section>
+      ) : (
+        <section className="section">
+          <div className="sectionHead">
+            <span className="sectionNum">05</span>
+            <h2>Composition, and the gap</h2>
+          </div>
+          <p className="sectionSub">
+            A fresh agent plans the full pipeline from certified skills alone — {certifiedSteps} of{" "}
+            {steps.length} steps are backed by one. Where none exists, the system reports a gap instead of
+            improvising: the honest edge of what the organization can actually trust.
+          </p>
+          <PipelineStrip steps={steps} missingArtifactType={data.gap?.missingArtifactType} />
+          {data.gap ? <GapBanner gap={data.gap} /> : null}
+          <div className="grid2" style={{ marginTop: 16 }}>
+            <ArtifactCard
+              title="repo_analysis.json"
+              json={data.artifacts.repoAnalysis}
+              badge={<span className="badge badge--fail">uncertified</span>}
+            />
+            <ArtifactCard
+              title="score.json"
+              json={data.artifacts.score}
+              badge={<span className="badge badge--fail">uncertified</span>}
+            />
+            <ArtifactCard
+              title="outreach.md"
+              markdown={data.artifacts.outreach}
+              badge={<span className="badge badge--fail">uncertified</span>}
+            />
+          </div>
+        </section>
+      )}
 
       <footer className="footer">
         Data source: <span className="mono">{data.source}</span>

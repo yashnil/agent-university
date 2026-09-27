@@ -100,10 +100,12 @@ function describeEvent(event: AgentUniversityEvent): RowDescription {
       };
     }
     case "gap.discovered": {
-      const p = event.payload as EventPayloads["gap.discovered"];
+      const p = event.payload as EventPayloads["gap.discovered"] & { skillName?: string; status?: string };
       const neededByPart = p.neededBy ? `needed by ${p.neededBy}` : "no downstream artifact recorded";
       return {
-        summary: `GAP: ${p.missingArtifactType} has no certified skill (${neededByPart}: ${p.reason}).`,
+        summary: p.skillName
+          ? `GAP: no certified capability for ${p.skillName}, so ${p.missingArtifactType} cannot be produced from trusted skills. New ${p.status ?? "candidate"}: ${p.reason}`
+          : `GAP: ${p.missingArtifactType} has no certified skill (${neededByPart}: ${p.reason}).`,
         details: [
           ["planId", p.planId],
           ["missingArtifactType", p.missingArtifactType],
