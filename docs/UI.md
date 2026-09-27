@@ -75,7 +75,7 @@ sources in this order:
 
 | Order | Source | Written by |
 |---|---|---|
-| 1 | `registry/skills/<id>.json` (`CertificationRecord`) | `feat/certification`, `certify.py --promote` |
+| 1 | `registry/skills/<id>.json` (`CertificationRecord`) | `feat/certification`, `certify.ts --promote` |
 | 2 | `.agent-university/skills/<id>.json` (`Skill` + `events[]`) | `feat/runtime`, `au_record.py` |
 | 3 | `demo/fixtures/**` | committed fixtures |
 
