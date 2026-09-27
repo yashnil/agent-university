@@ -67,6 +67,25 @@ class LeakDetection(unittest.TestCase):
         self.assertNotIn("hosted workflow", blob)  # the leaking assistant text was dropped
         self.assertEqual(len(trace["tool_calls"]), 2)
 
+    def test_generalizer_handles_a_non_heredoc_write_and_the_rest_summary_api(self):
+        # A python-dict write, a Wikipedia REST summary URL and a grep for proper nouns of the answer.
+        generalize = mc.generalizer(ARTIFACT, "northwind-labs")
+        cmd = ('curl -sL "https://en.wikipedia.example.org/api/rest_v1/page/summary/Northwind_Labs"; '
+               "grep -oiE '(Free|Labs)' p.html; python3 - <<'PY'\nimport json\nd = " + json.dumps(ARTIFACT)
+               + "\njson.dump(d, open('$HOME/workspace/scout/northwind-labs/company.json', 'w'))\nPY")
+        self.assertTrue(mc.leaks(cmd, TERMS))
+        out = generalize(cmd)
+        self.assertEqual(mc.leaks(out, TERMS), [])
+        self.assertIn("page/summary/<Wikipedia_Title>", out)
+        self.assertIn(mc.SUMMARY_PLACEHOLDER, out)
+        self.assertIn("(Free|<summary-term>)", out)
+
+    def test_a_wikipedia_title_equal_to_the_name_stays_a_company_placeholder_outside_urls(self):
+        artifact = dict(ARTIFACT, source_urls=[ARTIFACT["website"], "https://en.wikipedia.example.org/wiki/Northwind"],
+                        company_name="Northwind")
+        out = mc.generalizer(artifact, "northwind")('{"company_name":"Northwind"} /wiki/Northwind')
+        self.assertEqual(out, '{"company_name":"<Company>"} /wiki/<Wikipedia_Title>')
+
 
 if __name__ == "__main__":
     unittest.main()
