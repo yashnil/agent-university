@@ -51,7 +51,9 @@ export function flowTitle(procedureId: string, text: string): string {
   // heading; name the revision so two flows never share a title.
   const rev = /--(r\d+)$/.exec(procedureId)?.[1];
   const h = /^\s*#+\s+(.+?)\s*$/m.exec(text);
-  if (h) return rev ? `${h[1]} (${rev})` : h[1];
+  // Memorable's rendering prefixes the task: "A previous session solved a near-identical task: <title>".
+  const heading = h?.[1].replace(/^A previous session solved (?:a|an) [^:]*task:\s*/i, "");
+  if (heading) return rev ? `${heading} (${rev})` : heading;
   const slug = procedureId.replace(/^procedures\//, "").replace(/^[0-9a-f]{6,}-/, "");
   return slug.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
