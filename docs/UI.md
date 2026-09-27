@@ -56,13 +56,21 @@ during a demo:
   page falls back to fixtures and says so in a banner. **The demo can never break because the
   runtime is mid-flight.**
 
+`?case=vercel` presents the **real** transfer exam instead of the fictional one: the sanitized
+Linear → Vercel run `feat/runtime` produced (`demo/fixtures/*-vercel*.json`), including the 13
+isolation checks the runtime actually performed, which the UI renders in place of its own derived
+ones (`TransferResult.isolation`, a producer-added key per `docs/HANDOFF.md` §2). That run stops at
+`transferred` by design — runtime proves, certification promotes — so the page says so instead of
+claiming certification. `?case=northwind` (default) is the fictional end-to-end lifecycle with the
+certified decision and the composition GAP.
+
 `?outcome=failed` presents the recorded **failed** exam instead of the certified one
 (`demo/fixtures/certification-record-failed.json`): the timeline drops `exam.passed` and
 `skill.certified`, the failing verifier check is shown, the failed rule's evidence is expanded, and
 section 03 becomes "Capability withheld". A failed exam is a `TransferResult` with
 `passed: false` — there is no `exam.failed` event and the skill stays `transferred`.
 
-All of that lives in one file: `app/_lib/data.ts` (`loadLifecycle(mode, outcome)`), which resolves
+All of that lives in one file: `app/_lib/data.ts` (`loadLifecycle(mode, outcome, case)`), which resolves
 sources in this order:
 
 | Order | Source | Written by |
@@ -129,6 +137,30 @@ bash scripts/ui_merge_check.sh
 It (1) checks every changed file against the UI ownership list in `docs/HANDOFF.md` §1,
 (2) trial-merges `origin/main`, `origin/feat/runtime` and `origin/feat/certification` and prints
 any conflicting paths, and (3) runs `npm test`.
+
+`package.json` conflicts with `feat/certification` while both PRs are open (both sides edit the
+`scripts` block). The check reports that as WARN, not a failure. The resolution is a union — keep
+every script from both sides, keep `"type": "module"` from certification and the UI dependencies:
+
+```jsonc
+"type": "module",                                   // certification (Node 24 native TS engine)
+"scripts": {
+  "dev": "next dev -p 3001",                        // UI
+  "build": "next build",                            // UI
+  "start": "next start -p 3001",                    // UI
+  "typecheck": "tsc --noEmit",                      // UI
+  "test": "npm run test:contracts && npm run test:unit && npm run test:ts && npm run test:compile",
+  "test:ts": "node --test tests/*.test.ts",         // certification
+  "certify": "node scripts/certify.ts",             // certification
+  "registry": "node scripts/registry.ts",           // certification
+  // ... existing qm scripts unchanged
+}
+```
+
+Verified: with both sibling branches merged in, `npm test` passes (31 tests) and `npm run build`
+succeeds. One UI-side fix was needed for that and is already in `tsconfig.json`:
+`allowImportingTsExtensions`, because certification's engine imports with explicit `.ts`
+extensions and Next type-checks the whole project.
 
 Shared files this branch touches, all allowed by `docs/HANDOFF.md` §1 for the scaffold PR only:
 

@@ -6,7 +6,7 @@ import PipelineStrip from "@/components/PipelineStrip";
 import RulingsPanel from "@/components/RulingsPanel";
 import SkillStatusChip from "@/components/SkillStatusChip";
 import TransferExam from "@/components/TransferExam";
-import { isolationFacts, loadLifecycle, type Mode, type Outcome } from "./_lib/data";
+import { isolationFacts, loadLifecycle, type DemoCaseId, type Mode, type Outcome } from "./_lib/data";
 
 // The page reads fixtures (and, in live mode, the registry or runtime record) from disk per request.
 export const dynamic = "force-dynamic";
@@ -14,12 +14,15 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; outcome?: string }>;
+  searchParams: Promise<{ mode?: string; outcome?: string; case?: string }>;
 }) {
   const params = await searchParams;
   const mode: Mode = params.mode === "live" ? "live" : "demo";
   const requestedOutcome: Outcome = params.outcome === "failed" ? "failed" : "certified";
-  const data = await loadLifecycle(mode, requestedOutcome);
+  const requestedCase: DemoCaseId = params.case === "vercel" ? "vercel" : "northwind";
+  const data = await loadLifecycle(mode, requestedOutcome, requestedCase);
+  const q = (next: Record<string, string>) =>
+    "?" + new URLSearchParams({ mode: data.mode, outcome: requestedOutcome, case: requestedCase, ...next }).toString();
 
   const skill = data.skillCertified ?? data.skillObserved;
   const certified = data.certification ? data.certification.certified : data.transfer.passed;
@@ -39,7 +42,21 @@ export default async function Page({
             reproduced it on an unseen task and a deterministic verifier has signed off.
           </p>
         </div>
-        <ModeSwitch mode={data.mode} source={data.source} />
+        <div>
+          <ModeSwitch mode={data.mode} source={data.source} />
+          <p className="mono faint" style={{ margin: "8px 0 0", textAlign: "right" }}>
+            case:{" "}
+            <a href={q({ case: "vercel" })}>real run (Linear → Vercel)</a>
+            {" · "}
+            <a href={q({ case: "northwind" })}>fictional lifecycle</a>
+            {data.fromRealRun ? (
+              <>
+                {" "}
+                <span className="badge badge--info">real QM run</span>
+              </>
+            ) : null}
+          </p>
+        </div>
       </header>
 
       {data.liveNote ? (
@@ -69,15 +86,18 @@ export default async function Page({
           <span className="sectionNum">02</span>
           <h2>Transfer exam</h2>
           <span className="mono faint">
-            <a href={`?mode=${data.mode}&outcome=certified`}>certified run</a>
+            <a href={q({ outcome: "certified" })}>certified run</a>
             {" · "}
-            <a href={`?mode=${data.mode}&outcome=failed`}>failed exam</a>
+            <a href={q({ outcome: "failed" })}>failed exam</a>
           </span>
         </div>
         <p className="sectionSub">
           The teacher&apos;s procedure was captured, then recalled by a fresh agent in a new scope,
           session and sandbox. The student never saw the teacher&apos;s answer — it only got the
           generalized procedure and an unseen company.
+          {data.fromRealRun
+            ? " Every fact below comes from the real QM exam run, sanitized: the isolation checks are the ones the runtime actually performed."
+            : null}
         </p>
         <TransferExam
           transfer={data.transfer}

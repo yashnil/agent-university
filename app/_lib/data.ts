@@ -22,6 +22,12 @@ import type {
 } from "@/lib/types";
 
 export type Mode = "demo" | "live";
+/**
+ * Which recorded story to present. `northwind` is the fictional end-to-end lifecycle (certified,
+ * with the composition GAP). `vercel` is the real, sanitized Linear -> Vercel transfer exam that
+ * feat/runtime produced, which stops at `transferred` until certification promotes it.
+ */
+export type DemoCaseId = "northwind" | "vercel";
 /** Demo mode can present either recorded outcome. Live mode shows whatever the record says. */
 export type Outcome = "certified" | "failed";
 
@@ -65,6 +71,9 @@ export interface CertificationView {
 export interface LifecycleData {
   mode: Mode;
   outcome: Outcome;
+  demoCase: DemoCaseId;
+  /** True when the data on screen came from a real QM run (sanitized), not invented fixtures. */
+  fromRealRun: boolean;
   /** What actually produced the data on screen. */
   source: string;
   /** Set when the requested source was unavailable or incomplete. */
@@ -208,6 +217,7 @@ function eventsForOutcome(events: AgentUniversityEvent[], certified: boolean): A
 export async function loadLifecycle(
   mode: Mode,
   outcome: Outcome = "certified",
+  demoCase: DemoCaseId = "northwind",
   skillId = "research-company",
 ): Promise<LifecycleData> {
   const [events, skillObserved, skillCertified, transfer, casesFile, company, repoAnalysis, score, outreach] =
@@ -226,6 +236,8 @@ export async function loadLifecycle(
   const base: LifecycleData = {
     mode: "demo",
     outcome: "certified",
+    demoCase: "northwind",
+    fromRealRun: false,
     source: "demo/fixtures (committed, fictional data)",
     liveNote: null,
     events,
@@ -239,7 +251,10 @@ export async function loadLifecycle(
     gap: firstPayload(events, "gap.discovered"),
   };
 
-  if (mode === "demo") return await withDemoCertification(base, outcome);
+  if (mode === "demo") {
+    if (demoCase === "vercel") return await realTransferCase(base);
+    return await withDemoCertification(base, outcome);
+  }
 
   // Live: the promoted registry record first, then the runtime's working record.
   const registryRecord = await readJsonOrNull<CertificationRecordLike>(
@@ -312,6 +327,49 @@ export async function loadLifecycle(
 }
 
 /**
+ * The real transfer exam, from the sanitized fixtures feat/runtime committed:
+ * Linear taught it, a fresh QM agent researched Vercel from the recalled Memorable procedure, and
+ * the verifier passed 6/6. Runtime ends at `transferred`; certification owns promotion, so this
+ * view shows a proven-but-not-yet-certified skill unless a registry record exists.
+ */
+async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
+  const [skill, transfer, events, company] = await Promise.all([
+    readJsonOrNull<Skill>(FIXTURES, "skill-transferred-vercel.json"),
+    readJsonOrNull<TransferResult>(FIXTURES, "transfer-result-vercel.json"),
+    readJsonOrNull<AgentUniversityEvent[]>(FIXTURES, "events-vercel-transferred.json"),
+    readJsonOrNull<Record<string, unknown>>(FIXTURES, "company-vercel.json"),
+  ]);
+
+  if (!skill || !transfer) {
+    return {
+      ...base,
+      liveNote:
+        "The real Linear → Vercel transfer fixtures (demo/fixtures/*-vercel*.json) are not in this " +
+        "branch yet; they arrive with feat/runtime's Milestone 2. Showing the fictional lifecycle.",
+    };
+  }
+
+  return {
+    ...base,
+    demoCase: "vercel",
+    fromRealRun: true,
+    outcome: transfer.passed ? "certified" : "failed",
+    source: "demo/fixtures/*-vercel*.json (real QM transfer exam, sanitized)",
+    liveNote:
+      skill.status === "certified"
+        ? null
+        : "This is the real run, and it stops at `transferred` on purpose: runtime proves the " +
+          "transfer, certification decides. Promote it with the certification engine (or open live " +
+          "mode once registry/skills/research-company.json exists) to see it certified.",
+    events: events?.length ? events : base.events,
+    skillObserved: skill,
+    skillCertified: skill.status === "certified" ? skill : null,
+    transfer,
+    artifacts: { ...base.artifacts, company: company ?? base.artifacts.company },
+  };
+}
+
+/**
  * Demo mode prefers the committed certification fixtures, so the 8 policy rulings are real engine
  * output rather than UI prose. They arrive with feat/certification; until then the page falls back
  * to derived isolation facts.
@@ -364,7 +422,27 @@ function emptyVerification(): VerificationResult {
  * Isolation facts, derived from the data on screen rather than asserted. Used only when no
  * certification record is available; the engine's rulings supersede these.
  */
+/**
+ * Runtime reports the isolation facts it actually checked as `TransferResult.isolation`, a
+ * producer-added key (docs/HANDOFF.md §2). Those beat anything the UI can derive, so prefer them.
+ */
+function reportedIsolation(transfer: TransferResult): { name: string; passed: boolean; detail: string }[] | null {
+  const reported = (transfer as TransferResult & { isolation?: Record<string, unknown> }).isolation;
+  if (!reported || typeof reported !== "object") return null;
+  const rows = Object.entries(reported)
+    .filter(([, value]) => typeof value === "boolean")
+    .map(([name, value]) => ({
+      name,
+      passed: value === true,
+      detail: value === true ? "checked by the runtime during the exam" : "runtime reported this as false",
+    }));
+  return rows.length > 0 ? rows : null;
+}
+
 export function isolationFacts(data: LifecycleData) {
+  const reported = reportedIsolation(data.transfer);
+  if (reported) return reported;
+
   const teacher = data.skillObserved.teacher;
   const student = data.transfer.student;
   const recalled = firstPayload(data.events, "skill.recalled");

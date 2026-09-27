@@ -58,10 +58,24 @@ for ref in "${SIBLINGS[@]}"; do
   short=$(git rev-parse --short "$ref")
   if out=$(git merge-tree --write-tree HEAD "$ref" 2>&1); then
     echo "  clean      $ref @ $short"
-  else
+    continue
+  fi
+  conflicted=$(printf '%s\n' "$out" | sed -n 's/^CONFLICT ([^)]*): [Mm]erge conflict in \(.*\)$/\1/p' | sort -u)
+  unexpected=""
+  for c in $conflicted; do
+    known=0
+    for s in $shared_exceptions; do [ "$c" = "$s" ] && known=1; done
+    [ "$known" = 0 ] && unexpected="$unexpected $c"
+  done
+  if [ -n "$unexpected" ]; then
     echo "  CONFLICT   $ref @ $short"
-    printf '%s\n' "$out" | sed -n 's/^CONFLICT (\(.*\)): \(.*\)$/             \2/p' | sort -u
+    for c in $unexpected; do echo "             $c  (unexpected: coordinate with its owner)"; done
     fail=1
+  else
+    echo "  WARN       $ref @ $short: conflicts only in shared files:"
+    for c in $conflicted; do echo "             $c"; done
+    echo "             expected while the scaffold PR is open. Resolution is recorded in docs/UI.md"
+    echo "             (\"Merge safety\"): keep both sides' scripts, keep the UI deps."
   fi
 done
 

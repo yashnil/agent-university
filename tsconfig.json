@@ -6,6 +6,12 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    // feat/certification's engine runs under Node 24 native TS and imports with explicit .ts
+    // extensions. Next type-checks the whole project, so those imports must be allowed.
+    "allowImportingTsExtensions": true,
+    // feat/certification's engine runs under Node 24 native TS, so it imports with explicit
+    // .ts extensions. Next type-checks the whole project, so allow them.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
