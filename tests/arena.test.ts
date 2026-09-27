@@ -26,7 +26,7 @@ test("a dry arena streams a complete, ordered tournament without touching the re
     assert.ok(started >= 0 && started < events.indexOf(e));
   }
   for (const h of events.filter((x) => x.type === "heat.finished")) {
-    const last = events.findLastIndex((x) => x.type === "student.finished" && x.heat === h.heat);
+    const last = Math.max(...events.map((x, k) => (x.type === "student.finished" && x.heat === h.heat ? k : -1)));
     assert.ok(last < events.indexOf(h));
   }
 
