@@ -34,7 +34,10 @@ shared_exceptions="package.json package-lock.json .gitignore"
 # Files outside UI ownership that the repo owner directed the UI branch to change: the swarmem
 # rename, which retires the "Freshman #N" student naming. Display strings only, no behaviour.
 # Remove these once the rename has merged.
-rename_exceptions="lib/swarm.ts scripts/swarm.ts tests/swarm.test.ts tests/tournament.test.ts tests/certification.test.ts"
+rename_exceptions="lib/swarm.ts scripts/swarm.ts tests/swarm.test.ts tests/tournament.test.ts tests/certification.test.ts \
+demo/fixtures/events.json demo/fixtures/skill-observed.json demo/fixtures/skill-certified.json \
+demo/fixtures/transfer-result.json demo/fixtures/transfer-result-failed.json \
+demo/fixtures/certification-record.json demo/fixtures/certification-record-failed.json"
 
 while IFS= read -r f; do
   [ -n "$f" ] || continue
