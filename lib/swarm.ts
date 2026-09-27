@@ -41,6 +41,7 @@ export interface SwarmOptions {
   swarmId?: string;
   timeoutMs?: number; // per student
   promote?: boolean; // recordDecision() for every record (default true)
+  artifactsDir?: string; // when set, a newly canonical winner's artifact is copied to <dir>/<examCase>/<type> for the UI
   judge?: JudgeFn | null;
   limiter?: Limiter; // shared slot pool, e.g. across concurrent tournament heats (acquired before a student starts)
 }
@@ -153,6 +154,17 @@ export function compareSwarm(a: JudgedRecord, b: JudgedRecord): number {
 }
 
 /** Ask the judge to score certified records only and attach record.judge. Never throws. */
+/** Copy a canonical record's artifact onto the host where the UI reads it:
+ *  <dir>/<examCase>/<artifactType> (the UI's .agent-university/artifacts convention). */
+export function publishArtifact(dir: string, record: CertificationRecord, content: string | null | undefined): string | null {
+  const type = record.transfer.artifact.type;
+  if (!content || !type) return null;
+  const path = join(dir, record.transfer.examCase, type);
+  mkdirSync(join(dir, record.transfer.examCase), { recursive: true });
+  writeFileSync(path, content.endsWith("\n") ? content : content + "\n");
+  return path;
+}
+
 export async function applyJudge(judge: JudgeFn, certified: JudgedRecord[], artifacts: Record<string, string | null>): Promise<JudgeInfo> {
   const model = judge.model ?? (judge.name || "judge");
   if (!certified.length) return { status: "skipped", model, reason: "no certified record to rank" };
@@ -269,6 +281,7 @@ export async function runSwarm(skill: CandidateSkill, n: number, launchStudent: 
     promoted = false;
     for (const r of [...records.filter((r) => r !== winner), winner])
       if (registry.recordDecision(r) && r === winner) promoted = true;
+    if (promoted && opts.artifactsDir) publishArtifact(opts.artifactsDir, winner, artifacts[judgeKey(winner)]);
     const current = registry.load(skill.id) as CertificationRecord | null;
     if (current) canonical = {
       runId: current.transfer.runId ?? null, student: current.transfer.student.name,

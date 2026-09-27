@@ -21,6 +21,7 @@ import type { Case } from "../lib/certification.ts";
 import { loadCases } from "../lib/certification.ts";
 import { fixtureJudge } from "../lib/jev.ts";
 import type { JudgeFn } from "../lib/jev.ts";
+import { RECORD_DIR } from "../lib/qm.ts";
 import * as registry from "../lib/registry.ts";
 import { caseForHeat, makeFinalJudge, newTournamentId, runTournament, saveTournament, tournamentReport, withFinalPrompt } from "../lib/tournament.ts";
 import type { HeatSpec, TournamentSummary } from "../lib/tournament.ts";
@@ -105,6 +106,9 @@ export async function main(argv = process.argv.slice(2)): Promise<{ code: number
     `final judge: ${judge ? judge.model : "off (--no-judge)"}\n`);
 
   const t = await runTournament(specs, perHeat, {
+    // The UI shows the canonical artifact from .agent-university/artifacts; a throwaway dry-run
+    // registry must not overwrite it.
+    artifactsDir: dry && !a["registry-dir"] ? undefined : join(RECORD_DIR, "artifacts"),
     judge, maxParallel, tournamentId, cases, timeoutMs: a.timeout ? Number(a.timeout) * 1000 : undefined });
   const path = saveTournament(t, a["out-dir"]);
   if (a.json) {

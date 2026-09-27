@@ -85,6 +85,15 @@ describe("swarm", () => {
     assert.deepEqual(s.leaderboard[0].metrics, { durationMs: 90000, toolCalls: 8, turns: 4, costUsd: 0.2 });
   });
 
+  test("a newly canonical winner's artifact is published for the UI; a failed swarm publishes nothing", async () => {
+    const dir = join(tmp, "artifacts");
+    await swarm(launcher(metrics(4)).launch, 4, { artifactsDir: dir });
+    assert.deepEqual(JSON.parse(readFileSync(join(dir, "exam-vercel", "company.json"), "utf8")), { run: 4 }); // the cheapest certified run
+    const dir2 = join(tmp, "artifacts-none");
+    await swarm(launcher(metrics(2), { fail: [1, 2] }).launch, 2, { artifactsDir: dir2 });
+    assert.throws(() => readdirSync(dir2));
+  });
+
   test("a crashing student does not kill the swarm and appears as failed", async () => {
     const s = await swarm(launcher(metrics(4), { crash: [2] }).launch, 4);
     assert.equal(s.leaderboard.length, 4);

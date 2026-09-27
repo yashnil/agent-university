@@ -18,7 +18,7 @@ import { JEV_MODEL, judgeKey, OPENROUTER_URL, openrouterKey, parseRankings } fro
 import type { JevOptions, JudgeFn, JudgedRecord, JudgeVerdict } from "./jev.ts";
 import { RECORD_DIR } from "./qm.ts";
 import * as registry from "./registry.ts";
-import { applyJudge, boardTable, compareSwarm, createLimiter, fmtMetrics, runSwarm, textTable } from "./swarm.ts";
+import { applyJudge, boardTable, publishArtifact, compareSwarm, createLimiter, fmtMetrics, runSwarm, textTable } from "./swarm.ts";
 import type { JudgeInfo, LaunchStudent, LeaderboardRow, Metrics, SwarmSummary } from "./swarm.ts";
 import type { AgentIdentity, AgentUniversityEvent } from "./types.ts";
 
@@ -44,6 +44,7 @@ export interface TournamentOptions {
   cases?: Case[];
   events?: AgentUniversityEvent[];
   promote?: boolean; // record every decision in the registry (default true)
+  artifactsDir?: string; // when set, a newly canonical champion's artifact is copied here for the UI
 }
 
 export interface HeatResult {
@@ -130,6 +131,7 @@ export async function runTournament(heats: HeatSpec[], perHeat: number, opts: To
     promoted = false;
     const order = [...all.filter((r) => !finalists.includes(r)), ...ranking.slice(1).reverse(), ...(champion ? [champion] : [])];
     for (const r of order) if (registry.recordDecision(r) && r === champion) promoted = true;
+    if (promoted && champion && opts.artifactsDir) publishArtifact(opts.artifactsDir, champion, artifacts[judgeKey(champion)]);
     const skillId = heats[0].skill.id;
     const current = registry.load(skillId) as CertificationRecord | null;
     if (current) canonical = {

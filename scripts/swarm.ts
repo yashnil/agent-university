@@ -298,6 +298,9 @@ export async function main(argv = process.argv.slice(2)): Promise<{ code: number
     `${dry ? " [dry run]" : ""}\nregistry: ${registry.registryDir()}\njudge: ${judge ? judge.model : "off (--no-judge)"}`);
 
   const s = await runSwarm(exam.skill(), n, (i, signal) => exam.launch(i, signal), {
+    // The UI shows the canonical artifact from .agent-university/artifacts; a throwaway dry-run
+    // registry must not overwrite it.
+    artifactsDir: dry && !a["registry-dir"] ? undefined : join(qm.RECORD_DIR, "artifacts"),
     maxParallel: Number(a["max-parallel"]), examCase: exam.examCase, studentFor: (i) => exam.student(i), swarmId,
     timeoutMs: a.timeout ? Number(a.timeout) * 1000 : undefined, judge,
   });
