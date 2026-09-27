@@ -28,3 +28,9 @@ __pycache__/
 *.log
 .vscode/
 .idea/
+
+# Next.js (UI)
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo

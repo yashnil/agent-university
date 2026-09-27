@@ -1,0 +1,77 @@
+/* ArtifactCard: <details>/<summary> collapsible built on the shared .card look.
+   :global(.card) is combined with the local .details class so this file's rules win the
+   cascade regardless of stylesheet load order, letting us reset .card's default padding and
+   hand layout to the summary/body rows below. */
+
+:global(.card).details {
+  padding: 0;
+  overflow: hidden;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background-color 0.15s ease;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.disclosure {
+  flex: 0 0 auto;
+  width: 1em;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.disclosure::before {
+  content: "▸";
+}
+
+:global(.card).details[open] > .summary .disclosure::before {
+  content: "▾";
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  flex: 0 0 auto;
+}
+
+.path {
+  flex: 0 0 auto;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body {
+  padding: 0 18px 16px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.empty {
+  margin: 0;
+  font-size: 12.5px;
+}

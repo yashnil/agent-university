@@ -1,0 +1,39 @@
+/* TransferExam: composes the whole "02 Transfer exam" section body. */
+
+.exam {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.verdict {
+  margin: 4px 0 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.verdictPass {
+  color: var(--pass);
+}
+
+.verdictFail {
+  color: var(--fail);
+}
