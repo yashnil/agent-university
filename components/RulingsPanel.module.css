@@ -1,0 +1,95 @@
+/* RulingsPanel: certification decision header + one row per named rule. */
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.summary {
+  margin: 0 0 18px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.summaryPass { color: var(--pass); }
+.summaryFail { color: var(--fail); }
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+}
+
+.row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.rowFail {
+  border-left-color: var(--fail);
+  background: color-mix(in srgb, var(--fail) 7%, transparent);
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.reason {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+  max-width: 90ch;
+}
+
+.details {
+  margin-top: 8px;
+}
+
+.summaryToggle {
+  cursor: pointer;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+
+.evidence {
+  margin-top: 8px;
+  max-height: 220px;
+  overflow: auto;
+  max-width: 100%;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+}
+
+.footerValue {
+  color: var(--text-dim);
+}
