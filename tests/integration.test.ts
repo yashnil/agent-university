@@ -212,11 +212,40 @@ describe("registry", () => {
 });
 
 describe("committed registry", () => {
-  test("registry/skills/research-company.json is what the engine produces from the real fixture", () => {
-    const committed: CertificationRecord = read("registry", "skills", "research-company.json");
-    const again = certify(skill, transfer, { ...STRICT, decidedAt: committed.decision.decidedAt });
-    assert.deepEqual(committed, again, "stale: re-run the certify command in docs/REPO_OVERVIEW.md");
+  // The canonical record may be replaced by a flow tournament's champion (registry.promoteProcedure),
+  // so pin the *evidence*, not one run: the real Vercel decision stays reproducible in the ledger,
+  // and whatever is canonical must be certified, in the ledger, and consistent with its flow.
+  const ledger = () => readFileSync(join(ROOT, "registry", "ledger.jsonl"), "utf8").split("\n").filter(Boolean)
+    .map((l) => JSON.parse(l) as CertificationRecord);
+
+  test("the real Linear -> Vercel decision is in the ledger, exactly as the engine produces it", () => {
+    const real = ledger().filter((r) => r.transfer.examCase === transfer.examCase && r.transfer.runId === transfer.runId);
+    assert.ok(real.length >= 1, "the real transfer's decision is missing from registry/ledger.jsonl");
+    const again = certify(skill, transfer, { ...STRICT, decidedAt: real[0].decision.decidedAt });
+    assert.deepEqual(real[0], again, "stale: re-run the certify command in docs/REPO_OVERVIEW.md");
+  });
+
+  test("the canonical record is certified, schema-valid, in the ledger, and matches its index row and flow", () => {
+    const committed = read("registry", "skills", "research-company.json") as CertificationRecord & { procedureId?: string };
+    assert.equal(committed.decision.certified, true);
+    assert.deepEqual(errorsAgainst(committed, "certification-record.schema.json"), []);
+    assert.ok(ledger().some((r) => JSON.stringify(r) === JSON.stringify(committed)) ||
+      ledger().some((r) => r.transfer.runId === committed.transfer.runId && r.decision.inputsDigest === committed.decision.inputsDigest),
+      "the canonical record is not in the ledger");
     const row = read("registry", "index.json").skills.find((s: { id: string }) => s.id === "research-company");
-    assert.deepEqual(row, registry.summary(committed));
+    const { procedure, ...base } = row;
+    assert.deepEqual(base, registry.summary(committed));
+    if (procedure) {
+      let flow: registry.ProcedureRecord | null = null;
+      try {
+        flow = JSON.parse(readFileSync(join(ROOT, procedure.record), "utf8"));
+      } catch {
+        flow = null;
+      }
+      assert.ok(flow, `index points at ${procedure.procedureId} but its ProcedureRecord is missing`);
+      assert.equal(flow!.champion, true);
+      assert.equal(flow!.bestRunId, committed.transfer.runId);
+      assert.equal(committed.procedureId, procedure.procedureId);
+    }
   });
 });
