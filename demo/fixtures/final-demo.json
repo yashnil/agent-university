@@ -1,0 +1,1056 @@
+{
+  "description": "The final demo path, frozen: the real Vercel transfer is certified by the production engine, a fresh Intern composes a diligence task from the certified skill, and the missing capability becomes a GAP and a candidate.",
+  "generatedBy": "node scripts/final_demo.ts (lib/product.ts buildFinalDemo)",
+  "labels": {
+    "live": [
+      "teacher run 9f8d36da (Linear) and student run 5e30ec98 (Vercel) were real QM + Memorable runs, recorded"
+    ],
+    "registry": [
+      "Research Company certification: production engine, strict mode, the same decision as the real Vercel entry in registry/ledger.jsonl (the canonical record in registry/skills/ may since have been replaced by a newer certified run)"
+    ],
+    "fixture": [
+      "Analyze Repository and Evaluate Opportunity outputs are hand-written stand-ins (demo/fixtures/composite/)",
+      "the composite run is orchestration only: no agent is executed, timestamps are step order"
+    ]
+  },
+  "exam": {
+    "mode": "demo",
+    "source": "demo/fixtures/final-demo.json (frozen output of lib/product.ts)",
+    "policy": {
+      "id": "au-transfer-v1",
+      "reverify": true,
+      "requireIsolation": true
+    },
+    "statusBefore": "transferred",
+    "status": "certified",
+    "certified": true,
+    "checklist": [
+      {
+        "rule": "teacher_run_verified",
+        "passed": true,
+        "reason": "teacher run 9f8d36da-12d3-4d42-bd7d-924fce932f46 passed its verifier"
+      },
+      {
+        "rule": "procedure_recalled",
+        "passed": true,
+        "reason": "student used procedure procedures/37196e61-add-company-data-to-company-json-file"
+      },
+      {
+        "rule": "exam_case_unseen",
+        "passed": true,
+        "reason": "exam company Vercel differs from teacher case Linear"
+      },
+      {
+        "rule": "student_distinct_from_teacher",
+        "passed": true,
+        "reason": "student qm-thread-sanitized-student (qm) != teacher qm-thread-sanitized-teacher (qm)"
+      },
+      {
+        "rule": "artifact_matches_skill",
+        "passed": true,
+        "reason": "company.json at demo/fixtures/company-vercel.json"
+      },
+      {
+        "rule": "verifier_checks_complete",
+        "passed": true,
+        "reason": "all 6 required checks reported"
+      },
+      {
+        "rule": "verifier_checks_passed",
+        "passed": true,
+        "reason": "6/6 checks passed"
+      },
+      {
+        "rule": "isolation_attested",
+        "passed": true,
+        "reason": "all 13 isolation facts hold"
+      }
+    ],
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": true,
+        "message": "at least two valid source URLs (2 distinct valid)"
+      }
+    ],
+    "events": [
+      {
+        "type": "exam.passed",
+        "at": "2026-09-27T21:58:23Z",
+        "payload": {
+          "skillId": "research-company",
+          "examCase": "exam-vercel",
+          "student": {
+            "id": "qm-thread-sanitized-student",
+            "name": "Scout (fresh student)",
+            "harness": "qm"
+          },
+          "verification": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "file_exists",
+                "passed": true,
+                "message": "file exists"
+              },
+              {
+                "name": "valid_json_object",
+                "passed": true,
+                "message": "valid JSON object"
+              },
+              {
+                "name": "company_name_present",
+                "passed": true,
+                "message": "company_name present"
+              },
+              {
+                "name": "website_valid_url",
+                "passed": true,
+                "message": "website present (http(s) URL)"
+              },
+              {
+                "name": "product_summary_present",
+                "passed": true,
+                "message": "product_summary present"
+              },
+              {
+                "name": "source_urls_min_two",
+                "passed": true,
+                "message": "at least two valid source URLs (2 distinct valid)"
+              }
+            ]
+          },
+          "artifactPath": "demo/fixtures/company-vercel.json"
+        }
+      },
+      {
+        "type": "skill.certified",
+        "at": "2026-09-27T21:58:23Z",
+        "payload": {
+          "skillId": "research-company",
+          "teacher": {
+            "id": "qm-thread-sanitized-teacher",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "student": {
+            "id": "qm-thread-sanitized-student",
+            "name": "Scout (fresh student)",
+            "harness": "qm"
+          },
+          "examCase": "exam-vercel",
+          "procedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+        }
+      }
+    ],
+    "record": {
+      "recordVersion": 1,
+      "skill": {
+        "id": "research-company",
+        "name": "Research Company",
+        "status": "certified",
+        "teacher": {
+          "id": "qm-thread-sanitized-teacher",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "artifactType": "company.json",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "transfer": {
+          "student": {
+            "id": "qm-thread-sanitized-student",
+            "name": "Scout (fresh student)",
+            "harness": "qm"
+          },
+          "examCase": "exam-vercel",
+          "passed": true
+        }
+      },
+      "teacher": {
+        "id": "qm-thread-sanitized-teacher",
+        "name": "Scout (teacher)",
+        "harness": "qm"
+      },
+      "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+      "transfer": {
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "examCase": "exam-vercel",
+        "examCompany": "Vercel",
+        "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+        "artifact": {
+          "type": "company.json",
+          "path": "demo/fixtures/company-vercel.json"
+        },
+        "passed": true
+      },
+      "verification": {
+        "passed": true,
+        "checks": [
+          {
+            "name": "file_exists",
+            "passed": true,
+            "message": "file exists"
+          },
+          {
+            "name": "valid_json_object",
+            "passed": true,
+            "message": "valid JSON object"
+          },
+          {
+            "name": "company_name_present",
+            "passed": true,
+            "message": "company_name present"
+          },
+          {
+            "name": "website_valid_url",
+            "passed": true,
+            "message": "website present (http(s) URL)"
+          },
+          {
+            "name": "product_summary_present",
+            "passed": true,
+            "message": "product_summary present"
+          },
+          {
+            "name": "source_urls_min_two",
+            "passed": true,
+            "message": "at least two valid source URLs (2 distinct valid)"
+          }
+        ]
+      },
+      "decision": {
+        "certified": true,
+        "status": "certified",
+        "policy": {
+          "id": "au-transfer-v1",
+          "rules": [
+            "teacher_run_verified",
+            "procedure_recalled",
+            "exam_case_unseen",
+            "student_distinct_from_teacher",
+            "artifact_matches_skill",
+            "verifier_checks_complete",
+            "verifier_checks_passed",
+            "isolation_attested"
+          ],
+          "requireIsolation": true
+        },
+        "summary": "CERTIFIED: all 8 rules passed",
+        "failedRules": [],
+        "rulings": [
+          {
+            "rule": "teacher_run_verified",
+            "passed": true,
+            "reason": "teacher run 9f8d36da-12d3-4d42-bd7d-924fce932f46 passed its verifier",
+            "evidence": {
+              "teacher": {
+                "id": "qm-thread-sanitized-teacher",
+                "name": "Scout (teacher)",
+                "harness": "qm"
+              },
+              "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+              "artifactPath": "$HOME/workspace/scout/linear/company.json"
+            }
+          },
+          {
+            "rule": "procedure_recalled",
+            "passed": true,
+            "reason": "student used procedure procedures/37196e61-add-company-data-to-company-json-file",
+            "evidence": {
+              "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+              "skillProcedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+            }
+          },
+          {
+            "rule": "exam_case_unseen",
+            "passed": true,
+            "reason": "exam company Vercel differs from teacher case Linear",
+            "evidence": {
+              "examCase": "exam-vercel",
+              "examCompany": "Vercel",
+              "teacherCases": [
+                "Linear"
+              ]
+            }
+          },
+          {
+            "rule": "student_distinct_from_teacher",
+            "passed": true,
+            "reason": "student qm-thread-sanitized-student (qm) != teacher qm-thread-sanitized-teacher (qm)",
+            "evidence": {
+              "student": {
+                "id": "qm-thread-sanitized-student",
+                "name": "Scout (fresh student)",
+                "harness": "qm"
+              },
+              "teacher": {
+                "id": "qm-thread-sanitized-teacher",
+                "name": "Scout (teacher)",
+                "harness": "qm"
+              },
+              "crossHarness": false
+            }
+          },
+          {
+            "rule": "artifact_matches_skill",
+            "passed": true,
+            "reason": "company.json at demo/fixtures/company-vercel.json",
+            "evidence": {
+              "artifact": {
+                "type": "company.json",
+                "path": "demo/fixtures/company-vercel.json"
+              },
+              "produced": true
+            }
+          },
+          {
+            "rule": "verifier_checks_complete",
+            "passed": true,
+            "reason": "all 6 required checks reported",
+            "evidence": {
+              "required": [
+                "file_exists",
+                "valid_json_object",
+                "company_name_present",
+                "website_valid_url",
+                "product_summary_present",
+                "source_urls_min_two"
+              ],
+              "reported": [
+                "file_exists",
+                "valid_json_object",
+                "company_name_present",
+                "website_valid_url",
+                "product_summary_present",
+                "source_urls_min_two"
+              ],
+              "source": "re-run"
+            }
+          },
+          {
+            "rule": "verifier_checks_passed",
+            "passed": true,
+            "reason": "6/6 checks passed",
+            "evidence": {
+              "passedCount": 6,
+              "total": 6,
+              "failed": []
+            }
+          },
+          {
+            "rule": "isolation_attested",
+            "passed": true,
+            "reason": "all 13 isolation facts hold",
+            "evidence": {
+              "facts": {
+                "different_agent": true,
+                "different_session": true,
+                "different_scope": true,
+                "different_container": true,
+                "different_home_volume": true,
+                "different_thread_ref": true,
+                "layer_skill_unpublished": true,
+                "no_layer_skill_reads": true,
+                "no_source_artifact_in_fresh_sandbox": true,
+                "no_source_answer_in_prompt": true,
+                "student_container_new": true,
+                "student_home_volume_new": true,
+                "artifact_written_after_exam_start": true
+              }
+            }
+          }
+        ],
+        "decidedAt": "2026-09-27T21:58:23Z",
+        "inputsDigest": "sha256:20e46791fe70d9ca12c19229bde149344c879707b690eb5e4c725490d3c7d935"
+      },
+      "events": [
+        {
+          "type": "exam.passed",
+          "at": "2026-09-27T21:58:23Z",
+          "payload": {
+            "skillId": "research-company",
+            "examCase": "exam-vercel",
+            "student": {
+              "id": "qm-thread-sanitized-student",
+              "name": "Scout (fresh student)",
+              "harness": "qm"
+            },
+            "verification": {
+              "passed": true,
+              "checks": [
+                {
+                  "name": "file_exists",
+                  "passed": true,
+                  "message": "file exists"
+                },
+                {
+                  "name": "valid_json_object",
+                  "passed": true,
+                  "message": "valid JSON object"
+                },
+                {
+                  "name": "company_name_present",
+                  "passed": true,
+                  "message": "company_name present"
+                },
+                {
+                  "name": "website_valid_url",
+                  "passed": true,
+                  "message": "website present (http(s) URL)"
+                },
+                {
+                  "name": "product_summary_present",
+                  "passed": true,
+                  "message": "product_summary present"
+                },
+                {
+                  "name": "source_urls_min_two",
+                  "passed": true,
+                  "message": "at least two valid source URLs (2 distinct valid)"
+                }
+              ]
+            },
+            "artifactPath": "demo/fixtures/company-vercel.json"
+          }
+        },
+        {
+          "type": "skill.certified",
+          "at": "2026-09-27T21:58:23Z",
+          "payload": {
+            "skillId": "research-company",
+            "teacher": {
+              "id": "qm-thread-sanitized-teacher",
+              "name": "Scout (teacher)",
+              "harness": "qm"
+            },
+            "student": {
+              "id": "qm-thread-sanitized-student",
+              "name": "Scout (fresh student)",
+              "harness": "qm"
+            },
+            "examCase": "exam-vercel",
+            "procedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+          }
+        }
+      ]
+    },
+    "promoted": false
+  },
+  "skills": {
+    "mode": "demo",
+    "source": "demo/fixtures/final-demo.json (frozen output of lib/product.ts)",
+    "ledger": {
+      "decisions": 1,
+      "certified": 1
+    },
+    "skills": [
+      {
+        "id": "research-company",
+        "name": "Research Company",
+        "status": "certified",
+        "artifactType": "company.json",
+        "teacher": {
+          "id": "qm-thread-sanitized-teacher",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "examCase": "exam-vercel",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "certifiedAt": "2026-09-27T21:58:23Z",
+        "policy": "au-transfer-v1",
+        "record": "registry/ledger.jsonl",
+        "verification": "6/6",
+        "provenance": {
+          "teacherRunId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+          "examRunId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+          "examCase": "exam-vercel",
+          "examCompany": "Vercel",
+          "realRun": true,
+          "canonical": false
+        }
+      }
+    ]
+  },
+  "run": {
+    "planId": "plan-final-demo-0001",
+    "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+    "company": "Vercel",
+    "intern": {
+      "agent": {
+        "id": "intern-final-demo-0001",
+        "name": "Intern (fresh)",
+        "harness": "agent-university"
+      },
+      "priorRuns": 0,
+      "personalSkills": 0,
+      "inheritedSkills": [
+        "research-company"
+      ]
+    },
+    "recalled": [
+      {
+        "skillId": "research-company",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "record": "registry/ledger.jsonl",
+        "status": "certified"
+      }
+    ],
+    "steps": [
+      {
+        "seq": 1,
+        "skillId": "research-company",
+        "skillName": "Research Company",
+        "inputs": [],
+        "output": "company.json",
+        "startedAt": "2026-09-27T22:00:00Z",
+        "finishedAt": "2026-09-27T22:00:01Z",
+        "status": "certified",
+        "source": "certified-registry",
+        "inherited": true,
+        "certifiedSkillId": "research-company",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "record": "registry/ledger.jsonl",
+        "evidence": {
+          "examRunId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+          "examCase": "exam-vercel",
+          "policy": "au-transfer-v1",
+          "verification": "6/6"
+        },
+        "artifact": {
+          "type": "company.json",
+          "path": "demo/fixtures/company-vercel.json",
+          "content": {
+            "company_name": "Vercel",
+            "website": "https://vercel.com",
+            "product_summary": "Vercel is an American cloud platform company that provides a frontend cloud for building, deploying, and hosting web applications. It is the creator and maintainer of the open-source React framework Next.js, and its platform offers Git-based deployments, a global edge network, preview environments, serverless and edge functions, and observability tooling. Vercel also ships an AI SDK and AI-oriented infrastructure for developers building AI-powered apps.",
+            "source_urls": [
+              "https://vercel.com",
+              "https://en.wikipedia.org/wiki/Vercel"
+            ]
+          }
+        },
+        "note": "Inherited certified skill research-company. Output reused from the certified exam run 5e30ec98-4e35-48eb-9460-d40b8ded3bc3 (real QM run, recorded), re-verified now 6/6. Not re-executed."
+      },
+      {
+        "seq": 2,
+        "skillId": "analyze-repository",
+        "skillName": "Analyze Repository",
+        "inputs": [
+          "company.json"
+        ],
+        "output": "repo_analysis.json",
+        "startedAt": "2026-09-27T22:00:02Z",
+        "finishedAt": "2026-09-27T22:00:03Z",
+        "status": "uncertified",
+        "source": "fixture",
+        "inherited": false,
+        "artifact": {
+          "type": "repo_analysis.json",
+          "path": "demo/fixtures/composite/repo_analysis-vercel.json",
+          "content": {
+            "company_name": "Vercel",
+            "repo_url": "https://github.com/vercel/next.js",
+            "summary": "SEEDED DEMO FIXTURE, hand-written, not produced by an agent and not certified. It stands in for the Analyze Repository skill, which is not implemented live. It points at Next.js, which the certified company.json names as Vercel's open-source React framework.",
+            "languages": [
+              "TypeScript",
+              "JavaScript",
+              "Rust"
+            ],
+            "signals": [
+              {
+                "name": "flagship open-source project",
+                "evidence": "The certified company.json says Vercel created and maintains the open-source React framework Next.js.",
+                "source_url": "https://en.wikipedia.org/wiki/Vercel"
+              }
+            ],
+            "source_urls": [
+              "https://github.com/vercel/next.js"
+            ]
+          }
+        },
+        "note": "Not certified and not implemented live: a hand-written stand-in (demo/fixtures/composite/repo_analysis-vercel.json) produced repo_analysis.json. Not trusted, not inherited."
+      },
+      {
+        "seq": 3,
+        "skillId": "evaluate-opportunity",
+        "skillName": "Evaluate Opportunity",
+        "inputs": [
+          "company.json",
+          "repo_analysis.json"
+        ],
+        "output": "score.json",
+        "startedAt": "2026-09-27T22:00:04Z",
+        "finishedAt": "2026-09-27T22:00:05Z",
+        "status": "uncertified",
+        "source": "fixture",
+        "inherited": false,
+        "artifact": {
+          "type": "score.json",
+          "path": "demo/fixtures/composite/score-vercel.json",
+          "content": {
+            "company_name": "Vercel",
+            "score": 75,
+            "rubric": [
+              {
+                "criterion": "developer-platform fit",
+                "weight": 0.5,
+                "score": 80,
+                "rationale": "SEEDED DEMO FIXTURE, illustrative value, not produced by an agent and not certified (stands in for Evaluate Opportunity)."
+              },
+              {
+                "criterion": "open-source footprint",
+                "weight": 0.5,
+                "score": 70,
+                "rationale": "SEEDED DEMO FIXTURE, illustrative value, not produced by an agent and not certified (stands in for Evaluate Opportunity)."
+              }
+            ],
+            "inputs": [
+              "company.json",
+              "repo_analysis.json"
+            ]
+          }
+        },
+        "note": "Not certified and not implemented live: a hand-written stand-in (demo/fixtures/composite/score-vercel.json) produced score.json. Not trusted, not inherited."
+      },
+      {
+        "seq": 4,
+        "skillId": "find-technical-contact",
+        "skillName": "Find Technical Contact",
+        "inputs": [
+          "company.json",
+          "repo_analysis.json"
+        ],
+        "output": "technical_contact",
+        "startedAt": "2026-09-27T22:00:06Z",
+        "finishedAt": "2026-09-27T22:00:07Z",
+        "status": "missing",
+        "source": "gap",
+        "inherited": false,
+        "artifact": null,
+        "note": "No certified skill, and no procedure at all, produces technical_contact. Reported as a GAP; a candidate skill was created."
+      },
+      {
+        "seq": 5,
+        "skillId": "draft-outreach",
+        "skillName": "Draft Outreach",
+        "inputs": [
+          "company.json",
+          "score.json",
+          "technical_contact"
+        ],
+        "output": "outreach.md",
+        "startedAt": "2026-09-27T22:00:08Z",
+        "finishedAt": "2026-09-27T22:00:09Z",
+        "status": "blocked",
+        "source": "gap",
+        "inherited": false,
+        "artifact": null,
+        "note": "Blocked: needs technical_contact, which no capability produces. Not attempted."
+      }
+    ],
+    "events": [
+      {
+        "type": "plan.composed",
+        "at": "2026-09-27T22:00:00Z",
+        "payload": {
+          "planId": "plan-final-demo-0001",
+          "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+          "agent": {
+            "id": "intern-final-demo-0001",
+            "name": "Intern (fresh)",
+            "harness": "agent-university"
+          },
+          "steps": [
+            {
+              "artifactType": "company.json",
+              "skillId": "research-company",
+              "status": "certified"
+            },
+            {
+              "artifactType": "repo_analysis.json",
+              "skillId": "analyze-repository",
+              "status": "uncertified"
+            },
+            {
+              "artifactType": "score.json",
+              "skillId": "evaluate-opportunity",
+              "status": "uncertified"
+            },
+            {
+              "artifactType": "outreach.md",
+              "skillId": "draft-outreach",
+              "status": "uncertified"
+            }
+          ]
+        }
+      },
+      {
+        "type": "gap.discovered",
+        "at": "2026-09-27T22:00:07Z",
+        "payload": {
+          "planId": "plan-final-demo-0001",
+          "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+          "missingArtifactType": "outreach.md",
+          "reason": "outreach.md needs technical_contact, and no skill (certified or not) produces it: find-technical-contact does not exist yet.",
+          "skillId": "find-technical-contact",
+          "skillName": "Find Technical Contact",
+          "status": "candidate",
+          "message": "No certified capability for Find Technical Contact. Draft Outreach cannot complete, so outreach.md cannot be produced from trusted skills. Find Technical Contact is now a candidate skill.",
+          "missingOutput": "technical_contact",
+          "blocks": [
+            "draft-outreach"
+          ]
+        }
+      }
+    ],
+    "gaps": [
+      {
+        "type": "gap.discovered",
+        "at": "2026-09-27T22:00:07Z",
+        "payload": {
+          "planId": "plan-final-demo-0001",
+          "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+          "missingArtifactType": "outreach.md",
+          "reason": "outreach.md needs technical_contact, and no skill (certified or not) produces it: find-technical-contact does not exist yet.",
+          "skillId": "find-technical-contact",
+          "skillName": "Find Technical Contact",
+          "status": "candidate",
+          "message": "No certified capability for Find Technical Contact. Draft Outreach cannot complete, so outreach.md cannot be produced from trusted skills. Find Technical Contact is now a candidate skill.",
+          "missingOutput": "technical_contact",
+          "blocks": [
+            "draft-outreach"
+          ]
+        }
+      }
+    ],
+    "candidates": [
+      {
+        "id": "find-technical-contact",
+        "name": "Find Technical Contact",
+        "status": "candidate",
+        "certified": false,
+        "produces": "technical_contact",
+        "neededBy": [
+          "draft-outreach"
+        ],
+        "discoveredIn": "plan-final-demo-0001",
+        "discoveredAt": "2026-09-27T22:00:07Z",
+        "next": [
+          "a teacher run produces the output and passes a verifier (observed)",
+          "Memorable captures the procedure",
+          "a fresh student passes an unseen exam (transferred)",
+          "the certification engine certifies it"
+        ]
+      }
+    ],
+    "metrics": {
+      "verifiedChecks": {
+        "passed": 6,
+        "total": 6,
+        "source": "registry/ledger.jsonl"
+      },
+      "teacherChecks": {
+        "passed": 6,
+        "total": 6
+      },
+      "certifiedSkillsReused": 1,
+      "stepsFromCertified": 1,
+      "stepsFromFixtures": 2,
+      "stepsTotal": 5,
+      "gapsDiscovered": 1,
+      "candidatesCreated": 1,
+      "blockedSteps": 1,
+      "comparison": [
+        {
+          "role": "teacher",
+          "label": "Teacher · Linear",
+          "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+          "wallClockMs": 49971,
+          "shellToolCalls": 4,
+          "failedShellToolCalls": 2,
+          "toolCalls": null,
+          "note": "real QM run, recorded",
+          "tokens": null,
+          "verification": "6/6"
+        },
+        {
+          "role": "student",
+          "label": "Student · Vercel · recalled Memorable procedure",
+          "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+          "wallClockMs": 16611,
+          "shellToolCalls": 2,
+          "failedShellToolCalls": 0,
+          "toolCalls": null,
+          "note": "real QM run, recorded",
+          "tokens": null,
+          "verification": "6/6"
+        },
+        {
+          "role": "intern",
+          "label": "Intern · Vercel · certified reuse",
+          "runId": null,
+          "wallClockMs": null,
+          "shellToolCalls": 0,
+          "failedShellToolCalls": 0,
+          "toolCalls": null,
+          "tokens": null,
+          "verification": "6/6",
+          "note": "the research step was inherited, not re-run: no agent time to report"
+        }
+      ],
+      "sources": [
+        "registry/ledger.jsonl",
+        "demo/fixtures/run-metrics.json"
+      ]
+    },
+    "mode": "demo",
+    "source": "demo/fixtures/final-demo.json (frozen output of lib/product.ts)"
+  },
+  "lifecycle": [
+    {
+      "type": "skill.observed",
+      "at": "2026-09-27T21:04:05Z",
+      "payload": {
+        "skillId": "research-company",
+        "teacher": {
+          "id": "qm-thread-sanitized-teacher",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "artifactType": "company.json",
+        "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+        "artifactPath": "$HOME/workspace/scout/linear/company.json",
+        "verification": {
+          "passed": true,
+          "checks": [
+            {
+              "name": "file_exists",
+              "passed": true,
+              "message": "file exists"
+            },
+            {
+              "name": "valid_json_object",
+              "passed": true,
+              "message": "valid JSON object"
+            },
+            {
+              "name": "company_name_present",
+              "passed": true,
+              "message": "company_name present"
+            },
+            {
+              "name": "website_valid_url",
+              "passed": true,
+              "message": "website present (http(s) URL)"
+            },
+            {
+              "name": "product_summary_present",
+              "passed": true,
+              "message": "product_summary present"
+            },
+            {
+              "name": "source_urls_min_two",
+              "passed": true,
+              "message": "at least two valid source URLs (3 distinct valid)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "skill.recalled",
+      "at": "2026-09-27T21:04:06Z",
+      "payload": {
+        "skillId": "research-company",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "query": "Research the company \"Acme Robotics\" from real public web sources and write $HOME/workspace/scout/acme-robotics/company.json with company_name, website, product_summary and source_urls",
+        "rank": 1
+      }
+    },
+    {
+      "type": "skill.recalled",
+      "at": "2026-09-27T21:04:49Z",
+      "payload": {
+        "skillId": "research-company",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "query": "Research the company \"Vercel\" from real public web sources and write $HOME/workspace/scout/vercel/company.json with company_name, website, product_summary and source_urls",
+        "rank": 1,
+        "agent": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        }
+      }
+    },
+    {
+      "type": "exam.started",
+      "at": "2026-09-27T21:04:49Z",
+      "payload": {
+        "skillId": "research-company",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
+        "examCase": "exam-vercel",
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3"
+      }
+    },
+    {
+      "type": "exam.passed",
+      "at": "2026-09-27T21:58:23Z",
+      "payload": {
+        "skillId": "research-company",
+        "examCase": "exam-vercel",
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "verification": {
+          "passed": true,
+          "checks": [
+            {
+              "name": "file_exists",
+              "passed": true,
+              "message": "file exists"
+            },
+            {
+              "name": "valid_json_object",
+              "passed": true,
+              "message": "valid JSON object"
+            },
+            {
+              "name": "company_name_present",
+              "passed": true,
+              "message": "company_name present"
+            },
+            {
+              "name": "website_valid_url",
+              "passed": true,
+              "message": "website present (http(s) URL)"
+            },
+            {
+              "name": "product_summary_present",
+              "passed": true,
+              "message": "product_summary present"
+            },
+            {
+              "name": "source_urls_min_two",
+              "passed": true,
+              "message": "at least two valid source URLs (2 distinct valid)"
+            }
+          ]
+        },
+        "artifactPath": "demo/fixtures/company-vercel.json"
+      }
+    },
+    {
+      "type": "skill.certified",
+      "at": "2026-09-27T21:58:23Z",
+      "payload": {
+        "skillId": "research-company",
+        "teacher": {
+          "id": "qm-thread-sanitized-teacher",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "student": {
+          "id": "qm-thread-sanitized-student",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "examCase": "exam-vercel",
+        "procedureId": "procedures/37196e61-add-company-data-to-company-json-file"
+      }
+    },
+    {
+      "type": "plan.composed",
+      "at": "2026-09-27T22:00:00Z",
+      "payload": {
+        "planId": "plan-final-demo-0001",
+        "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+        "agent": {
+          "id": "intern-final-demo-0001",
+          "name": "Intern (fresh)",
+          "harness": "agent-university"
+        },
+        "steps": [
+          {
+            "artifactType": "company.json",
+            "skillId": "research-company",
+            "status": "certified"
+          },
+          {
+            "artifactType": "repo_analysis.json",
+            "skillId": "analyze-repository",
+            "status": "uncertified"
+          },
+          {
+            "artifactType": "score.json",
+            "skillId": "evaluate-opportunity",
+            "status": "uncertified"
+          },
+          {
+            "artifactType": "outreach.md",
+            "skillId": "draft-outreach",
+            "status": "uncertified"
+          }
+        ]
+      }
+    },
+    {
+      "type": "gap.discovered",
+      "at": "2026-09-27T22:00:07Z",
+      "payload": {
+        "planId": "plan-final-demo-0001",
+        "goal": "Diligence on Vercel: research the company, analyze its repository, evaluate the opportunity, find a technical contact, and draft outreach",
+        "missingArtifactType": "outreach.md",
+        "reason": "outreach.md needs technical_contact, and no skill (certified or not) produces it: find-technical-contact does not exist yet.",
+        "skillId": "find-technical-contact",
+        "skillName": "Find Technical Contact",
+        "status": "candidate",
+        "message": "No certified capability for Find Technical Contact. Draft Outreach cannot complete, so outreach.md cannot be produced from trusted skills. Find Technical Contact is now a candidate skill.",
+        "missingOutput": "technical_contact",
+        "blocks": [
+          "draft-outreach"
+        ]
+      }
+    }
+  ]
+}

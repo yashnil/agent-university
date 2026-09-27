@@ -1,0 +1,19 @@
+{
+  "company_name": "Vercel",
+  "score": 75,
+  "rubric": [
+    {
+      "criterion": "developer-platform fit",
+      "weight": 0.5,
+      "score": 80,
+      "rationale": "SEEDED DEMO FIXTURE, illustrative value, not produced by an agent and not certified (stands in for Evaluate Opportunity)."
+    },
+    {
+      "criterion": "open-source footprint",
+      "weight": 0.5,
+      "score": 70,
+      "rationale": "SEEDED DEMO FIXTURE, illustrative value, not produced by an agent and not certified (stands in for Evaluate Opportunity)."
+    }
+  ],
+  "inputs": ["company.json", "repo_analysis.json"]
+}
