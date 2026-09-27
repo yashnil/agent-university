@@ -13,7 +13,7 @@
     "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
     "transfer": {
       "student": {
-        "id": "qm-thread-7402ffde17ac",
+        "id": "qm-thread-a7b68ada28a8",
         "name": "Freshman #2",
         "harness": "qm"
       },
@@ -29,13 +29,13 @@
   "procedureId": "procedures/37196e61-add-company-data-to-company-json-file",
   "transfer": {
     "student": {
-      "id": "qm-thread-7402ffde17ac",
+      "id": "qm-thread-a7b68ada28a8",
       "name": "Freshman #2",
       "harness": "qm"
     },
     "examCase": "exam-stripe",
     "examCompany": "Stripe",
-    "runId": "966d85d9-f76c-4d1e-a4e3-49005fda2333",
+    "runId": "372b7ea1-29a6-427c-8c03-55aa3eb305a8",
     "artifact": {
       "type": "company.json",
       "path": "/root/workspace/scout/stripe/company.json"
@@ -135,10 +135,10 @@
       {
         "rule": "student_distinct_from_teacher",
         "passed": true,
-        "reason": "student qm-thread-7402ffde17ac (qm) != teacher qm-thread-16c17979fd84 (qm)",
+        "reason": "student qm-thread-a7b68ada28a8 (qm) != teacher qm-thread-16c17979fd84 (qm)",
         "evidence": {
           "student": {
-            "id": "qm-thread-7402ffde17ac",
+            "id": "qm-thread-a7b68ada28a8",
             "name": "Freshman #2",
             "harness": "qm"
           },
@@ -216,18 +216,18 @@
         }
       }
     ],
-    "decidedAt": "2026-09-27T22:14:06Z",
-    "inputsDigest": "sha256:2b90e57bc64a9a4091cb2395dd52057a986d55769fde85a424cc8e37bf314c76"
+    "decidedAt": "2026-09-27T22:54:15Z",
+    "inputsDigest": "sha256:144bb28dd79cb2ea5e90145baeda81bf11c50245102c7d4e9e3634bb51185a4d"
   },
   "events": [
     {
       "type": "exam.passed",
-      "at": "2026-09-27T22:14:06Z",
+      "at": "2026-09-27T22:54:15Z",
       "payload": {
         "skillId": "research-company",
         "examCase": "exam-stripe",
         "student": {
-          "id": "qm-thread-7402ffde17ac",
+          "id": "qm-thread-a7b68ada28a8",
           "name": "Freshman #2",
           "harness": "qm"
         },
@@ -271,7 +271,7 @@
     },
     {
       "type": "skill.certified",
-      "at": "2026-09-27T22:14:06Z",
+      "at": "2026-09-27T22:54:15Z",
       "payload": {
         "skillId": "research-company",
         "teacher": {
@@ -280,7 +280,7 @@
           "harness": "qm"
         },
         "student": {
-          "id": "qm-thread-7402ffde17ac",
+          "id": "qm-thread-a7b68ada28a8",
           "name": "Freshman #2",
           "harness": "qm"
         },
@@ -290,16 +290,16 @@
     }
   ],
   "metrics": {
-    "durationMs": 17188,
+    "durationMs": 25629,
     "toolCalls": 3,
     "turns": 3
   },
   "swarm": {
-    "swarmId": "tournament-20260927T221336Z-46971a-h1",
+    "swarmId": "tournament-20260927T225336Z-f494e8-h1",
     "student": 2
   },
   "tournament": {
-    "tournamentId": "tournament-20260927T221336Z-46971a",
+    "tournamentId": "tournament-20260927T225336Z-f494e8",
     "heat": 1,
     "round": "final",
     "place": 1
