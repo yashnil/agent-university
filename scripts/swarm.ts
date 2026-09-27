@@ -5,7 +5,7 @@
 //                         [--live-judge] [--no-judge] [--registry-dir DIR] [--out-dir DIR] [--json]
 //
 // Live: each student is a fresh QM agent (new QM project -> own scope, sandbox and home volume;
-// new threadRef -> own session and AgentIdentity "Freshman #<i>") given only the procedure that
+// new threadRef -> own session and AgentIdentity "Student #<i>") given only the procedure that
 // native `memorable recall` + `memorable show` returns, exactly like scripts/transfer_run.py.
 // Every outcome is certified by the deterministic engine (lib/certification.ts); the Jev judge
 // (lib/jev.ts, OpenRouter typesafe/jev-router) only orders the certified ones; every decision
@@ -141,7 +141,7 @@ export class LiveExam implements Exam {
   }
 
   student(i: number) {
-    return qm.agentIdentity(this.threadRefs.get(i) ?? `swarm:${this.swarmId}:${i}`, `Freshman #${i}`);
+    return qm.agentIdentity(this.threadRefs.get(i) ?? `swarm:${this.swarmId}:${i}`, `Student #${i}`);
   }
 
   async launch(i: number, signal: AbortSignal): Promise<StudentOutcome> {
@@ -150,7 +150,7 @@ export class LiveExam implements Exam {
     const threadRef = this.threadRefs.get(i)!;
     const project = await qm.createProject(this.session, `au-swarm-${this.slug}-${this.swarmId.slice(-6)}-${i}`);
     const runId = await qm.startTurn(this.session, { text: this.prompt, threadRef, scopeId: project.scope });
-    console.log(`[Freshman #${i}] project ${project.id}  scope ${project.scope}  run ${runId}`);
+    console.log(`[Student #${i}] project ${project.id}  scope ${project.scope}  run ${runId}`);
     const run = await qm.poll(this.session, runId, { signal });
     qm.saveRun(runId, run);
     const wallMs = Date.now() - t0;
@@ -235,7 +235,7 @@ export class DryExam implements Exam {
   }
 
   student(i: number) {
-    return qm.agentIdentity(`dry-run:${this.swarmId}:${i}`, `Freshman #${i}`);
+    return qm.agentIdentity(`dry-run:${this.swarmId}:${i}`, `Student #${i}`);
   }
 
   private artifact(kind: Outcome, sources: string, sentences: number): string {

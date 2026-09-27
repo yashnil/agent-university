@@ -23,7 +23,7 @@ const CASES = ["exam-vercel", "exam-stripe", "exam-supabase"];
 const base: TransferResult = JSON.parse(readFileSync(join(ROOT, "demo", "fixtures", "transfer-result.json"), "utf8"));
 const P = (x: string) => `procedures/0000${x}-flow-${x}`;
 const run = (h: number, i: number) => `h${h}-run-${i}`;
-const student = (h: number, i: number) => agentIdentity(`web:test:h${h}:${i}`, `Freshman #${i}`);
+const student = (h: number, i: number) => agentIdentity(`web:test:h${h}:${i}`, `Student #${i}`);
 const flow = (x: string, rank: number): Flow => ({ procedureId: P(x), title: `Flow ${x}`, source: "recall", rank,
   text: `# Flow ${x}\n1. Fetch sources.\n2. Write company.json.` });
 

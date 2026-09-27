@@ -141,7 +141,7 @@ export const RANKED_BY = "certified > Jev judge score (certified only, advisory)
 
 const now = () => new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
-export const defaultStudent = (i: number, swarmId = "swarm") => agentIdentity(`swarm:${swarmId}:${i}`, `Freshman #${i}`);
+export const defaultStudent = (i: number, swarmId = "swarm") => agentIdentity(`swarm:${swarmId}:${i}`, `Student #${i}`);
 
 export function newSwarmId(tag: string) {
   const ts = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");

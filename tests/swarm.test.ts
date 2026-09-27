@@ -19,7 +19,7 @@ import { drySkill, main } from "../scripts/swarm.ts";
 
 const AT = "2026-01-02T00:00:00Z";
 const fixture = (name: string) => JSON.parse(readFileSync(join(ROOT, "demo", "fixtures", name), "utf8"));
-const studentOf = (i: number) => agentIdentity(`web:test:${i}`, `Freshman #${i}`);
+const studentOf = (i: number) => agentIdentity(`web:test:${i}`, `Student #${i}`);
 
 /** Fake launcher: passing students with the given metrics; some crash, fail a check, or hang. */
 function launcher(metrics: Record<number, Metrics>, o: { crash?: number[]; fail?: number[]; hang?: number[] } = {}) {
@@ -97,11 +97,11 @@ describe("swarm", () => {
   test("a crashing student does not kill the swarm and appears as failed", async () => {
     const s = await swarm(launcher(metrics(4), { crash: [2] }).launch, 4);
     assert.equal(s.leaderboard.length, 4);
-    const crashed = s.leaderboard.find((e) => e.student === "Freshman #2")!;
+    const crashed = s.leaderboard.find((e) => e.student === "Student #2")!;
     assert.equal(crashed.certified, false);
     assert.ok(crashed.failedChecks.includes("run_completed"));
     assert.match(crashed.error ?? "", /sandbox exploded/);
-    assert.equal(s.leaderboard[3].student, "Freshman #2");
+    assert.equal(s.leaderboard[3].student, "Student #2");
     const t = s.students.find((x) => x.student === 2)!.transfer;
     assert.deepEqual(contractErrors(t, "contracts/transfer-result.schema.json"), []);
     assert.equal(t.passed, false);
@@ -111,7 +111,7 @@ describe("swarm", () => {
 
   test("a student past its timeout is aborted and fails run_completed", async () => {
     const s = await swarm(launcher(metrics(3), { hang: [1] }).launch, 3, { timeoutMs: 200 });
-    const straggler = s.leaderboard.find((e) => e.student === "Freshman #1")!;
+    const straggler = s.leaderboard.find((e) => e.student === "Student #1")!;
     assert.equal(straggler.certified, false);
     assert.ok(straggler.failedChecks.includes("run_completed"));
     assert.match(straggler.error ?? "", /timed out/);
@@ -287,7 +287,7 @@ describe("swarm", () => {
     }
     assert.equal(res.code, 0);
     const text = out.join("\n");
-    assert.match(text, /winner: Freshman #9/);
+    assert.match(text, /winner: Student #9/);
     assert.match(text, /jev/);
     assert.equal(registry.ledger().length, 10);
     const [file] = readdirSync(join(tmp, "swarms"));

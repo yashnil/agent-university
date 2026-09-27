@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Arena from "@/components/arena/Arena";
 
 export const metadata: Metadata = {
-  title: "Arena · Agent University",
+  title: "Arena · swarmem",
   description: "Memorable flows compete on unseen companies; certification decides which runs pass; Jev judges the flows that mostly pass.",
 };
 
@@ -14,7 +14,7 @@ export default function ArenaPage() {
       <header className="masthead">
         <div>
           <p className="mono faint" style={{ margin: "0 0 6px" }}>
-            <a href="/">← Agent University</a>
+            <a href="/">← swar<em className="brandMem">mem</em></a>
           </p>
           <h1>Arena</h1>
           <p className="northStar">

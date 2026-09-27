@@ -67,7 +67,7 @@
   font-size: 13.5px;
   font-weight: 600;
   padding: 8px 18px;
-  color: #06120c;
+  color: var(--bg);
   background: var(--certified);
   border: none;
   border-radius: 8px;
