@@ -16,7 +16,7 @@ export default function RulingsPanel({
   decidedAt,
   inputsDigest,
 }: {
-  /** Optional so other surfaces (e.g. the arena bracket) can reuse this panel per student. */
+  /** Optional so other surfaces (e.g. the arena bracket) can reuse this panel per agent. */
   policyId?: string;
   summary: string;
   certified: boolean;

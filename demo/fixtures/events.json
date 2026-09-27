@@ -6,7 +6,7 @@
       "skillId": "research-company",
       "teacher": {
         "id": "agent-teacher-0001",
-        "name": "Scout (teacher)",
+        "name": "Scout (origin)",
         "harness": "qm"
       },
       "artifactType": "company.json",
@@ -59,7 +59,7 @@
       "rank": 1,
       "agent": {
         "id": "agent-student-0002",
-        "name": "Scout (fresh student)",
+        "name": "Scout (replica)",
         "harness": "qm"
       }
     }
@@ -73,7 +73,7 @@
       "examCase": "exam-northwind",
       "student": {
         "id": "agent-student-0002",
-        "name": "Scout (fresh student)",
+        "name": "Scout (replica)",
         "harness": "qm"
       },
       "runId": "run-fixture-0002"
@@ -87,7 +87,7 @@
       "examCase": "exam-northwind",
       "student": {
         "id": "agent-student-0002",
-        "name": "Scout (fresh student)",
+        "name": "Scout (replica)",
         "harness": "qm"
       },
       "artifactPath": "demo/fixtures/company.json",
@@ -135,12 +135,12 @@
       "skillId": "research-company",
       "teacher": {
         "id": "agent-teacher-0001",
-        "name": "Scout (teacher)",
+        "name": "Scout (origin)",
         "harness": "qm"
       },
       "student": {
         "id": "agent-student-0002",
-        "name": "Scout (fresh student)",
+        "name": "Scout (replica)",
         "harness": "qm"
       },
       "examCase": "exam-northwind",

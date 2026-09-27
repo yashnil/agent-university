@@ -21,7 +21,7 @@ export default function TransferExam({
   teacherCase: string;
   isolation: IsolationFact[];
 }): JSX.Element {
-  const studentNote = `Never saw the teacher's answer — worked only from the recalled procedure${
+  const replicatingNote = `The replicating agent never saw the origin agent's answer — worked only from the recalled procedure${
     transfer.procedureId ? ` (${transfer.procedureId})` : ""
   }.`;
 
@@ -29,7 +29,7 @@ export default function TransferExam({
     <div className={styles.exam}>
       <div className="grid2">
         <AgentCard role="teacher" agent={teacher} caseLabel={teacherCase} />
-        <AgentCard role="student" agent={transfer.student} caseLabel={transfer.examCase} note={studentNote} />
+        <AgentCard role="student" agent={transfer.student} caseLabel={transfer.examCase} note={replicatingNote} />
       </div>
 
       <div className="card">
@@ -71,8 +71,8 @@ export default function TransferExam({
 
       <p className={`${styles.verdict} ${transfer.passed ? styles.verdictPass : styles.verdictFail}`}>
         {transfer.passed
-          ? "EXAM PASSED — the procedure transferred"
-          : "EXAM FAILED — the skill stays `transferred`, not certified"}
+          ? "TRIAL PASSED — the procedure transferred"
+          : "TRIAL FAILED — the skill stays `transferred`, not certified"}
       </p>
     </div>
   );

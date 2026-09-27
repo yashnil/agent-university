@@ -3,8 +3,8 @@ import type { AgentIdentity } from "@/lib/types";
 import styles from "./AgentCard.module.css";
 
 const ROLE_LABEL: Record<"teacher" | "student", string> = {
-  teacher: "TEACHER",
-  student: "FRESH STUDENT AGENT",
+  teacher: "ORIGIN AGENT",
+  student: "REPLICATING AGENT",
 };
 
 export default function AgentCard({

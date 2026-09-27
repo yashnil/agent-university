@@ -2,14 +2,20 @@
    Tokens + shared primitives. Component-specific styles live in *.module.css. */
 
 :root {
-  --bg: #0b0d10;
-  --bg-raised: #12161b;
-  --bg-sunken: #090b0e;
-  --border: #222a33;
-  --border-strong: #303b47;
-  --text: #e8edf3;
-  --text-dim: #9aa7b4;
-  --text-faint: #6b7886;
+  /* The dark ramp is the logo's own ground (#14161f) and ink (#f4f1ea), so the mark sits in the
+     page rather than on it. */
+  --bg: #14161f;
+  --bg-raised: #1b1e29;
+  --bg-sunken: #0f111a;
+  --border: #272b38;
+  --border-strong: #394052;
+  --text: #f4f1ea;
+  --text-dim: #a7abbb;
+  --text-faint: #767d90;
+  /* Brand, from the logo: the amber synapses and their dim trails. Used for the mark only —
+     --warn stays the signal colour, so brand never competes with a status. */
+  --brand: #f0a04b;
+  --brand-dim: #8d6237;
   --accent: #6ea8fe;
   --pass: #3ddc97;
   --fail: #ff6b6b;
@@ -57,6 +63,30 @@ a { color: var(--accent); }
   margin: 0;
   font-size: 28px;
   letter-spacing: -0.02em;
+}
+
+/* Wordmark: the mark, then "swarmem" with "mem" italicised. */
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brandMark {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  display: block;
+}
+
+.brandMark--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  vertical-align: -8px;
 }
 
 /* The brand is "swarmem" with "mem" italicised. <em> already italicises; this keeps the two

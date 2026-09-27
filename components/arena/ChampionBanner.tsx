@@ -20,8 +20,8 @@ export default function ChampionBanner({
         <p className={styles.title}>{flowMode ? "No trusted flow" : "No champion"}</p>
         <p className="muted">
           {flowMode
-            ? "No flow passed enough of its exams to reach a verdict, so nothing was promoted. The registry is unchanged."
-            : "No student produced a certified record, so nothing was promoted. The registry is unchanged."}
+            ? "No flow passed enough of its trials to reach a verdict, so nothing was promoted. The registry is unchanged."
+            : "No agent produced a certified record, so nothing was promoted. The registry is unchanged."}
         </p>
       </div>
     );
@@ -68,7 +68,7 @@ export default function ChampionBanner({
         <dt>{isFlow ? "flow" : "heat"}</dt>
         <dd>
           {c.heat}
-          {proc?.examCases?.length ? ` · exams ${proc.examCases.join(", ")}` : ` · ${heat?.examCompany ?? c.examCase} (${c.examCase})`}
+          {proc?.examCases?.length ? ` · trials ${proc.examCases.join(", ")}` : ` · ${heat?.examCompany ?? c.examCase} (${c.examCase})`}
         </dd>
         <dt>best run</dt>
         <dd>

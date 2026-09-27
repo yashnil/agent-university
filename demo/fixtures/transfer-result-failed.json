@@ -4,7 +4,7 @@
   "examCase": "exam-northwind",
   "student": {
     "id": "agent-student-0003",
-    "name": "Scout (second student)",
+    "name": "Scout (second replica)",
     "harness": "qm"
   },
   "runId": "run-fixture-0003",

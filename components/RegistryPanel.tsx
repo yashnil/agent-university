@@ -76,15 +76,15 @@ export default function RegistryPanel({
               </div>
 
               <dl className="kv">
-                <dt>taught by</dt>
+                <dt>learned from</dt>
                 <dd>
                   {row.teacher.name} ({row.teacher.id})
                 </dd>
-                <dt>proved by</dt>
+                <dt>replicated by</dt>
                 <dd>
                   {row.student.name} ({row.student.id})
                 </dd>
-                <dt>exam case</dt>
+                <dt>trial case</dt>
                 <dd>{row.examCase}</dd>
                 <dt>policy</dt>
                 <dd>{row.policy}</dd>
@@ -117,7 +117,7 @@ export default function RegistryPanel({
                 </div>
               ) : (
                 <p className={styles.noProcedure}>
-                  certified by a single exam — no flow tournament was run for this skill
+                  certified by a single trial — no flow tournament was run for this skill
                 </p>
               )}
             </li>

@@ -1,5 +1,5 @@
 // Flow tournament (lib/tournament.ts, scripts/tournament.ts): each candidate Memorable flow is
-// handed to fresh students on different unseen cases; flows that pass the bar meet in a Jev final;
+// handed to fresh agents on different unseen cases; flows that pass the bar meet in a Jev final;
 // the champion flow's best run is promoted. Offline: no QM, Docker, Memorable or network.
 
 import assert from "node:assert/strict";
@@ -23,7 +23,7 @@ const CASES = ["exam-vercel", "exam-stripe", "exam-supabase"];
 const base: TransferResult = JSON.parse(readFileSync(join(ROOT, "demo", "fixtures", "transfer-result.json"), "utf8"));
 const P = (x: string) => `procedures/0000${x}-flow-${x}`;
 const run = (h: number, i: number) => `h${h}-run-${i}`;
-const student = (h: number, i: number) => agentIdentity(`web:test:h${h}:${i}`, `Student #${i}`);
+const student = (h: number, i: number) => agentIdentity(`web:test:h${h}:${i}`, `Agent #${i}`);
 const flow = (x: string, rank: number): Flow => ({ procedureId: P(x), title: `Flow ${x}`, source: "recall", rank,
   text: `# Flow ${x}\n1. Fetch sources.\n2. Write company.json.` });
 

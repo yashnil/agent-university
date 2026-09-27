@@ -123,7 +123,7 @@ function StudentCard({ s, winner, flowMode }: { s: StudentView; winner: boolean;
       </div>
       {s.examCompany || s.examCase ? (
         <p className={`mono ${styles.exam}`}>
-          exam: <strong>{s.examCompany ?? s.examCase}</strong>
+          trial: <strong>{s.examCompany ?? s.examCase}</strong>
           {s.examCompany && s.examCase ? <span className="faint"> · {s.examCase}</span> : null}
         </p>
       ) : null}

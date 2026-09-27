@@ -14,7 +14,11 @@ export default function ArenaPage() {
       <header className="masthead">
         <div>
           <p className="mono faint" style={{ margin: "0 0 6px" }}>
-            <a href="/">← swar<em className="brandMem">mem</em></a>
+            <a href="/">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="brandMark brandMark--sm" src="/swarmem-logo.png" alt="" aria-hidden="true" /> ←
+              swar<em className="brandMem">mem</em>
+            </a>
           </p>
           <h1>Arena</h1>
           <p className="northStar">

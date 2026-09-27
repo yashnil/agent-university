@@ -39,7 +39,7 @@ function describeEvent(event: AgentUniversityEvent): RowDescription {
     }
     case "skill.recalled": {
       const p = event.payload as EventPayloads["skill.recalled"];
-      const who = p.agent ? `${p.agent.name} (${p.agent.id})` : "the student agent";
+      const who = p.agent ? `${p.agent.name} (${p.agent.id})` : "the replicating agent";
       const rankPart = p.rank !== undefined ? `, rank ${p.rank}` : "";
       return {
         summary: `${who} recalled ${p.procedureId} for the query "${p.query}"${rankPart}.`,
@@ -55,7 +55,7 @@ function describeEvent(event: AgentUniversityEvent): RowDescription {
       const fromPart = p.procedureId ? ` from ${p.procedureId}` : "";
       const runPart = p.runId ? `, run ${p.runId}` : "";
       return {
-        summary: `${p.student.name} (${p.student.id}) started exam case ${p.examCase}${fromPart}${runPart}.`,
+        summary: `${p.student.name} (${p.student.id}) started trial case ${p.examCase}${fromPart}${runPart}.`,
         details: [
           ["skillId", p.skillId],
           ["examCase", p.examCase],
@@ -78,7 +78,7 @@ function describeEvent(event: AgentUniversityEvent): RowDescription {
     case "skill.certified": {
       const p = event.payload as EventPayloads["skill.certified"];
       return {
-        summary: `${p.skillId} certified: taught by ${p.teacher.name}, proved by ${p.student.name} on ${p.examCase}.`,
+        summary: `${p.skillId} certified: learned from ${p.teacher.name}, replicated by ${p.student.name} on ${p.examCase}.`,
         details: [
           ["teacher", p.teacher.id],
           ["student", p.student.id],
@@ -127,7 +127,7 @@ function hasEvent<T extends EventType>(events: AgentUniversityEvent[], type: T):
 }
 
 // The frozen lifecycle chain (docs/HANDOFF.md, docs/REPO_OVERVIEW.md §7):
-//   observed -> recalled -> exam started -> exam passed -> transferred -> certified
+//   observed -> recalled -> trial started -> trial passed -> transferred -> certified
 // `transferred` is derived from Skill.status, not an event: runtime sets it, it never
 // appears in the event list. `exam.passed` and `skill.certified` are certification's,
 // and are absent for runs that stopped at `transferred` (e.g. the live Vercel handoff).
@@ -149,8 +149,8 @@ function buildChain(events: AgentUniversityEvent[], status: SkillStatus): ChainS
   return [
     { id: "observed", label: "observed", producer: "runtime", done: observed },
     { id: "recalled", label: "recalled", producer: "runtime", done: recalled },
-    { id: "exam-started", label: "exam started", producer: "runtime", done: examStarted },
-    { id: "exam-passed", label: "exam passed", producer: "certification", done: examPassed },
+    { id: "exam-started", label: "trial started", producer: "runtime", done: examStarted },
+    { id: "exam-passed", label: "trial passed", producer: "certification", done: examPassed },
     { id: "transferred", label: "transferred", producer: "status", done: transferred },
     { id: "certified", label: "certified", producer: "certification", done: certified },
   ];
@@ -166,7 +166,7 @@ function describeChain(steps: ChainStep[]): string {
   }
   if (transferred) {
     return examPassed
-      ? "Proven, not yet certified: the exam passed but certification has not applied its policy."
+      ? "Proven, not yet certified: the trial passed but certification has not applied its policy."
       : "Transferred: the transfer is recorded and awaiting the certification decision.";
   }
   const firstPendingIndex = done.findIndex((step) => !step);

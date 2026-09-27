@@ -22,7 +22,7 @@ export default function FinalPanel({
   const judge = finished?.judge;
   const judgeOk = judge?.status === "ok";
   const fixture = /fixture/i.test(`${judge?.status ?? ""} ${judge?.model ?? judgeModel ?? ""}`) || (dry && !judgeModel);
-  // Flow identity: prefer the event's own fields, else the column's flow, else the heat's exam.
+  // Flow identity: prefer the event's own fields, else the column's flow, else the heat's trial case.
   const ident = (r: { heat: number; examCase: string; procedureId?: string; title?: string; passRate?: number; student: { name: string } }) => {
     const h = heats.find((x) => x.heat === r.heat);
     const title = r.title ?? h?.flow?.title ?? null;
@@ -105,7 +105,7 @@ export default function FinalPanel({
           </ul>
         )
       ) : (
-        <p className="faint">{flowMode ? "Flows that pass at least half their exams appear here." : "Finalists appear as each heat closes."}</p>
+        <p className="faint">{flowMode ? "Flows that pass at least half their trials appear here." : "Finalists appear as each heat closes."}</p>
       )}
     </div>
   );

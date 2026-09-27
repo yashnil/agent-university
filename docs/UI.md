@@ -3,6 +3,42 @@
 The Next.js app that renders the swar*mem* story. New file, owned by the UI branch: it
 does not touch `README.md`, `PROGRESS.md` or `docs/HANDOFF.md`, which stay shared.
 
+## Brand and vocabulary
+
+The mark is `public/swarmem-logo.png` (and `app/icon.png`, which Next serves as the favicon),
+cropped from the source art. The dark ramp in `app/globals.css` is taken from the logo itself —
+ground `#14161f`, ink `#f4f1ea` — so the mark sits *in* the page rather than on a mismatched
+square. `--brand: #f0a04b` and `--brand-dim: #8d6237` are the logo's amber; they are used for the
+mark only, never for status, so brand never competes with `--pass` / `--fail` / `--warn`.
+
+**No education vocabulary in user-visible copy.** The product is about one agent's procedure being
+reproduced and verified by a different agent, not about school:
+
+| Not this | This |
+|---|---|
+| teacher | origin agent |
+| student / fresh student | replicating agent |
+| exam, transfer exam | trial, transfer trial |
+| exam case | trial case |
+| taught by / proved by | learned from / replicated by |
+| Freshman #N, Student #N | Agent #N |
+
+`certified`, `verified`, `skill`, `procedure`, `flow` and `registry` stay: those are quality and
+compliance words, not school words.
+
+**Contract identifiers are data and are never relabelled.** Event names (`exam.started`,
+`exam.passed`), field names (`examCase`, `student`, `teacher`), rule ids
+(`student_distinct_from_teacher`) and verifier check names render verbatim, in mono. A row can
+legitimately read **ORIGIN AGENT** beside the raw key `teacher`: the label is ours, the key is
+data. Renaming a key to match our prose would mean the page no longer shows what is on disk.
+
+The fictional Northwind fixtures were relabelled (`Scout (origin)`, `Scout (replica)`) and the
+engine-generated fixtures regenerated with `UPDATE_FIXTURES=1 npm run test:ts`. The sanitized
+real-run fixtures (`demo/fixtures/*-vercel*.json`) and `registry/` were **not** touched:
+`tests/integration.test.ts` pins the committed ledger to a recomputation from those fixtures, so
+relabelling them would force a rewrite of an audit record. Those rows still read "teacher" and
+"student" until whoever owns them re-runs the certify command in `docs/REPO_OVERVIEW.md` §9.
+
 ## Run it
 
 ```bash

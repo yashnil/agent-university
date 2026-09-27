@@ -160,8 +160,8 @@ export default function Arena(): JSX.Element {
         </button>
         <p className={`mono faint ${styles.modeNote}`}>
           {mode === "dry"
-            ? "Dry run: fixture flows and fabricated students, real certification engine, offline fixture judge. No QM, no keys."
-            : "Live: real students on QM, flows recalled from Memorable (or the ids you list). Needs QM + Memorable running and keys (OpenRouter for Jev) on the server."}
+            ? "Dry run: fixture flows and fabricated agents, real certification engine, offline fixture judge. No QM, no keys."
+            : "Live: real agents on QM, flows recalled from Memorable (or the ids you list). Needs QM + Memorable running and keys (OpenRouter for Jev) on the server."}
         </p>
       </section>
 
@@ -196,7 +196,7 @@ export default function Arena(): JSX.Element {
             <p className="sectionSub">
               {view.flowMode
                 ? `Each column is one candidate flow. Every agent in it gets only that flow and a different unseen company; the 8-rule engine certifies each run. A flow advances when at least ${Math.round(view.threshold * 100)}% of its runs are certified.`
-                : "Each heat is one unseen exam case. Every student is certified by the 8-rule engine; the best certified record in a heat advances. A heat with nobody certified sends no finalist."}
+                : "Each heat is one unseen trial case. Every agent is certified by the 8-rule engine; the best certified record in a heat advances. A heat with nobody certified sends no finalist."}
             </p>
             {view.rejected.length ? (
               <div className="notice" style={{ marginTop: 0, marginBottom: 16 }}>

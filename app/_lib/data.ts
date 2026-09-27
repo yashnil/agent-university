@@ -439,7 +439,7 @@ function reportedIsolation(transfer: TransferResult): { name: string; passed: bo
     .map(([name, value]) => ({
       name,
       passed: value === true,
-      detail: value === true ? "checked by the runtime during the exam" : "runtime reported this as false",
+      detail: value === true ? "checked by the runtime during the trial" : "runtime reported this as false",
     }));
   return rows.length > 0 ? rows : null;
 }
@@ -457,19 +457,19 @@ export function isolationFacts(data: LifecycleData) {
     {
       name: "different_agent",
       passed: teacher.id !== student.id,
-      detail: `teacher ${teacher.id} ≠ student ${student.id}`,
+      detail: `origin ${teacher.id} ≠ replica ${student.id}`,
     },
     {
       name: "recalled_procedure_only",
       passed: Boolean(recalled?.procedureId) && recalled?.procedureId === data.transfer.procedureId,
-      detail: recalled?.procedureId ? `student ran from ${recalled.procedureId}` : "no skill.recalled event",
+      detail: recalled?.procedureId ? `the replica ran from ${recalled.procedureId}` : "no skill.recalled event",
     },
     {
       name: "unseen_exam_case",
       passed: Boolean(teacherCase) && teacherCase?.id !== data.transfer.examCase,
       detail: teacherCase
-        ? `taught on ${teacherCase.id}, examined on ${data.transfer.examCase}`
-        : `examined on ${data.transfer.examCase}`,
+        ? `learned on ${teacherCase.id}, retried on ${data.transfer.examCase}`
+        : `retried on ${data.transfer.examCase}`,
     },
   ];
 }
