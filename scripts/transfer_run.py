@@ -18,11 +18,15 @@ Needs scripts/memorable_capture.py first (status observed, with a recalled proce
    - `skill.recalled` and `exam.started` are emitted before the turn.
    - Status becomes `transferred` when the run is done and <slug>/company.json exists in
      the fresh sandbox. Skill.transfer = {student, examCase, passed}.
-   - `exam.passed` is emitted when verify_company.py reports PASS.
-   - Status becomes `certified` and `skill.certified` is emitted when, in addition, every
-     separation check holds: different scope, container, volume, session and threadRef; no
-     read of the skill; no source artifact in the fresh sandbox; no leak in the prompt.
-   The contract TransferResult goes to .agent-university/transfers/<runId>.json.
+   - Runtime stops there. `exam.passed`, `skill.certified` and status `certified` belong to
+     certification (docs/HANDOFF.md section 2).
+5. Freshness: before the turn the new scope has no sandbox, and the student's container and home
+   volume must not be among those that existed before the exam; the artifact's mtime must be after
+   the exam started.
+   The contract TransferResult goes to .agent-university/transfers/<runId>.json, with producer-added
+   keys certification needs: teacher, sourceCase, sourceRunId, exam timestamps, and `isolation`
+   (every separation and freshness check: different scope, container, volume, session and threadRef;
+   no read of the skill; no source artifact in the fresh sandbox; no leak in the prompt).
 """
 import json
 import os
@@ -79,7 +83,7 @@ def main():
     if not rec.get("status") or not rec.get("procedureId"):
         sys.exit(f"{SKILL_NAME} has no recalled procedure yet; run memorable_capture.py first")
     source = rec["runtime"]["source"]
-    exam_case = exam_case_id(company)
+    exam_case = case_id("exam", company)
     if scout_run.slugify(source["company"]) == slug:
         sys.exit("the transfer company must differ from the source company")
     terms = leak_terms(json.loads(source_artifact_json(rec)))
@@ -121,6 +125,18 @@ def main():
     thread_ref = f"web:{scout_run_user()}:{uuid.uuid4()}"
     print(f"fresh agent: project {project['id']}  scope {scope}  thread {thread_ref}")
 
+    # Freshness: before the turn, the new scope has no sandbox (so no artifact can pre-exist), and
+    # every existing sandbox container and home volume is recorded so the student's must be new.
+    pre_containers = set(scout_run.sandboxes())
+    pre_volumes = home_volumes()
+    if any(scope_of(n) == scope for n in pre_containers):
+        sys.exit(f"a sandbox for {scope} already exists; the student would not start fresh")
+    exam_start = time.time()
+    freshness = {"exam_start": au_record.now(), "scope_had_sandbox_before_exam": False,
+                 "sandboxes_before_exam": len(pre_containers), "home_volumes_before_exam": len(pre_volumes)}
+    print(f"freshness: no sandbox for {scope} before the exam ({len(pre_containers)} sandboxes, "
+          f"{len(pre_volumes)} home volumes recorded)")
+
     status, turn = scout_run.call(opener, "POST", "/api/turn", {
         "text": prompt, "clientTurnId": str(uuid.uuid4()), "threadRef": thread_ref, "scopeId": scope})
     if status not in (200, 201, 202) or not isinstance(turn, dict) or not turn.get("runId"):
@@ -138,9 +154,12 @@ def main():
     result = run.get("result") or {}
     print(f"run {run_id} status: {run.get('status')}\n--- agent reply ---\n{result.get('reply') or run.get('error')}\n---")
 
-    names = [n for n in scout_run.sandboxes()
-             if scout_run.docker("inspect", "-f", '{{index .Config.Labels "qm.scope"}}', n).stdout.strip() == scope]
+    names = [n for n in scout_run.sandboxes() if scope_of(n) == scope]
     found = scout_run.find_and_verify(f"workspace/scout/{slug}/company.json", names) if names else None
+    written_at = artifact_mtime(found) if found else None
+    freshness.update({"student_container_new": bool(found) and found["container"] not in pre_containers,
+                      "student_home_volume_new": bool(found) and volume_name(found) not in pre_volumes,
+                      "artifact_written_after_exam_start": written_at is not None and written_at >= exam_start - 5})
     source_in_fresh = scout_run.find_and_verify(
         f"workspace/scout/{scout_run.slugify(source['company'])}/company.json", names) if names else None
     reads = skill_reads(run)
@@ -155,19 +174,28 @@ def main():
         "no_layer_skill_reads": not reads,
         "no_source_artifact_in_fresh_sandbox": source_in_fresh is None,
         "no_source_answer_in_prompt": not leaks(prompt, terms),
+        "student_container_new": freshness["student_container_new"],
+        "student_home_volume_new": freshness["student_home_volume_new"],
+        "artifact_written_after_exam_start": freshness["artifact_written_after_exam_start"],
     }
     for k, v in checks.items():
         print(f"  [{'ok' if v else 'FAIL'}] {k}")
     verification = found["verification"] if found else {
         "passed": False, "checks": [{"name": "file_exists", "passed": False, "message": "no artifact in the fresh sandbox"}]}
+    # Contract TransferResult (schemas/contracts/transfer-result.schema.json). The keys after `passed` are
+    # producer additions, which contract consumers ignore: what certification needs to decide without QM.
     transfer_result = {
         "skillId": SKILL_ID, "procedureId": proc, "examCase": exam_case, "student": student, "runId": run_id,
         "artifact": {"type": ARTIFACT_TYPE, "path": found["path"] if found else f"$HOME/workspace/scout/{slug}/company.json"},
         "verification": verification, "passed": verification["passed"],
+        "teacher": rec["teacher"], "sourceCase": case_id("teacher", source["company"]), "sourceRunId": source["run_id"],
+        "examStartedAt": freshness["exam_start"], "examFinishedAt": au_record.now(),
+        "isolation": checks,
     }
     tdir = os.path.join(au_record.RECORD_DIR, "transfers")
     os.makedirs(tdir, exist_ok=True)
-    with open(os.path.join(tdir, f"{run_id}.json"), "w") as f:
+    result_path = os.path.join(tdir, f"{run_id}.json")
+    with open(result_path, "w") as f:
         json.dump(transfer_result, f, indent=2)
     rec["runtime"]["transfer"] = {
         "company": company, "run_id": run_id, "run_status": run.get("status"), "session_id": result.get("sessionId"),
@@ -175,36 +203,61 @@ def main():
         "thread_ref": thread_ref, "scope": scope, "project_id": project["id"],
         "container": found and found["container"], "home_volume": found and found["volume"],
         "recall_query": task, "recall_output": recalled, "prompt": prompt,
-        "separation_checks": checks, "layer_skill_reads": reads,
+        "separation_checks": checks, "layer_skill_reads": reads, "freshness": freshness,
+        "result_path": os.path.relpath(result_path, au_record.DEPLOY_DIR),
     }
 
+    # Runtime stops at `transferred`. exam.passed, skill.certified and status `certified` belong to
+    # certification (docs/HANDOFF.md section 2), which decides from the TransferResult above.
     if run.get("status") != "done" or not found:
         au_record.save(rec)
-        sys.exit("not transferred: the fresh run did not produce the artifact")
+        sys.exit(f"not transferred: the fresh run did not produce the artifact  ({result_path})")
     rec["transfer"] = {"student": student, "examCase": exam_case, "passed": transfer_result["passed"]}
     au_record.set_status(rec, "transferred")
-    if transfer_result["passed"]:
-        au_record.emit(rec, "exam.passed", {"skillId": SKILL_ID, "examCase": exam_case, "student": student,
-                                            "artifactPath": found["path"], "verification": verification})
-    if transfer_result["passed"] and all(checks.values()):
-        au_record.set_status(rec, "certified")
-        au_record.emit(rec, "skill.certified", {"skillId": SKILL_ID, "teacher": rec["teacher"], "student": student,
-                                                "examCase": exam_case, "procedureId": proc})
     au_record.save(rec)
-    print(f"\n{SKILL_NAME}: {rec['status']}")
+    print(f"\n{SKILL_NAME}: {rec['status']}, exam {'PASSED' if transfer_result['passed'] else 'FAILED'}, "
+          f"isolation {'clean' if all(checks.values()) else 'NOT clean'}")
     for e in rec["events"]:
         print(f"  {e['at']}  {e['type']}")
-    print(f"record: {au_record.path(SKILL_ID)}")
-    return 0 if rec["status"] == "certified" else 1
+    print(f"record: {au_record.path(SKILL_ID)}\ntransfer result: {result_path}")
+    return 0 if transfer_result["passed"] and all(checks.values()) else 1
 
-def exam_case_id(company):
-    """The demo/cases.json exam case for this company."""
+def scope_of(container):
+    return scout_run.docker("inspect", "-f", '{{index .Config.Labels "qm.scope"}}', container).stdout.strip()
+
+
+def home_volumes():
+    r = scout_run.docker("volume", "ls", "--format", "{{.Name}}")
+    return {v for v in r.stdout.split() if v.startswith("qm-home-")}
+
+
+def volume_name(found):
+    """The home volume's name from find_and_verify's "<name>:<dest> ..." mount list."""
+    return next((m.split(":", 1)[0] for m in found["volume"].split() if m.endswith(":/root")), found["volume"])
+
+
+def artifact_mtime(found):
+    """The artifact's mtime (epoch seconds) inside its sandbox, or None. The sandbox is parked again after."""
+    name = found["container"]
+    parked = not scout_run.running(name)
+    if parked and scout_run.docker("start", name).returncode != 0:
+        return None
+    try:
+        out = scout_run.docker("exec", name, "stat", "-c", "%Y", found["path"]).stdout.strip()
+        return int(out) if out.isdigit() else None
+    finally:
+        if parked:
+            scout_run.docker("stop", "-t", "2", name)
+
+
+def case_id(role, company):
+    """The live demo/cases.json case with this role for this company."""
     with open(os.path.join(au_record.DEPLOY_DIR, "demo", "cases.json")) as f:
         cases = json.load(f)["cases"]
     for c in cases:
-        if c["role"] == "exam" and c["company"].lower() == company.lower() and not c.get("fixtureOnly"):
+        if c["role"] == role and c["company"].lower() == company.lower() and not c.get("fixtureOnly"):
             return c["id"]
-    sys.exit(f"{company} is not an exam case in demo/cases.json")
+    sys.exit(f"{company} is not a {role} case in demo/cases.json")
 
 
 def source_artifact_json(rec):

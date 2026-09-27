@@ -84,16 +84,21 @@ def leak_terms(artifact):
     terms = {artifact["company_name"], domain, *artifact["source_urls"]}
     terms |= {w for w in re.findall(r"\b[A-Z][A-Za-z]+\b", artifact["product_summary"]) if w not in GENERIC}
     terms |= set(re.findall(r"\b\d[\d,]*\d\b", artifact["product_summary"]))
+    # Any run of 4 consecutive summary words: catches a copied answer phrase even when it is all lowercase.
+    words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'-]*", artifact["product_summary"])
+    terms |= {" ".join(words[i:i + 4]) for i in range(len(words) - 3)}
     return sorted(t for t in terms if t)
 
 
 def leaks(text, terms):
-    return [t for t in terms if re.search(rf"(?<![A-Za-z0-9]){re.escape(t)}(?![A-Za-z0-9])", text, re.I)]
+    """The terms found in `text`, case-insensitive, on word boundaries, any whitespace between words."""
+    return [t for t in terms
+            if re.search(r"(?<![A-Za-z0-9])" + r"\s+".join(map(re.escape, t.split())) + r"(?![A-Za-z0-9])", text, re.I)]
 
 
 def generalizer(artifact, slug):
     domain = urllib.parse.urlparse(artifact["website"]).netloc.removeprefix("www.")
-    wiki = [u.split("/wiki/", 1)[1] for u in artifact["source_urls"] if "wikipedia.org/wiki/" in u]
+    wiki = [u.split("/wiki/", 1)[1] for u in artifact["source_urls"] if "/wiki/" in u]
     name = artifact["company_name"]
 
     def generalize(text):
