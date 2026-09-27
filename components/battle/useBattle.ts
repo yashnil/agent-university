@@ -206,11 +206,23 @@ export function useBattle(): UseBattle {
 
   // ---------------------------------------------------------------- SSE
   const attach = useCallback(
-    (id: string, gen: number, attempt = 0) => {
+    (id: string, gen: number, attempt = 0, streamUrl?: string) => {
       if (genRef.current !== gen || typeof EventSource === "undefined") return;
       closeStream();
-      const es = new EventSource(`/api/arena/${encodeURIComponent(id)}`);
+      // streamUrl: /api/battle/stream runs the whole battle inside this one request (works on
+      // serverless hosts). Otherwise attach to a job started by POST /api/battle.
+      const es = new EventSource(streamUrl ?? `/api/arena/${encodeURIComponent(id)}`);
       esRef.current = es;
+      if (streamUrl)
+        es.addEventListener("spec", (msg) => {
+          if (genRef.current !== gen) return;
+          try {
+            const spec = JSON.parse((msg as MessageEvent<string>).data) as BattleSpec;
+            commit({ ...stateRef.current, spec, jobId: "stream", dry: spec.options.mode !== "live" });
+          } catch {
+            /* ignore a malformed spec; the fight still plays */
+          }
+        });
       es.addEventListener("arena", (msg) => {
         if (genRef.current !== gen) return;
         let e: ArenaEvent;
@@ -251,9 +263,11 @@ export function useBattle(): UseBattle {
       });
       es.onerror = () => {
         if (genRef.current !== gen || terminalRef.current) return;
+        // A streamed battle cannot be resumed: reconnecting would start a new battle.
+        if (streamUrl) es.close();
         if (es.readyState === EventSource.CLOSED) {
           if (esRef.current === es) esRef.current = null;
-          if (attempt < MAX_RECONNECTS) {
+          if (!streamUrl && attempt < MAX_RECONNECTS) {
             later(() => attach(id, gen, attempt + 1), 3000);
           } else {
             terminalRef.current = true;
@@ -272,7 +286,7 @@ export function useBattle(): UseBattle {
         // readyState CONNECTING: the browser reconnects on its own; duplicates are dropped by key.
       };
     },
-    [closeStream, enqueue, later],
+    [closeStream, commit, enqueue, later],
   );
 
   // ---------------------------------------------------------------- public API
@@ -304,36 +318,9 @@ export function useBattle(): UseBattle {
       const gen = genRef.current;
       getSfx(); // create the AudioContext inside the user gesture
       commit({ ...initialBattleState, phase: "starting" });
-      let id: string | null = null;
-      let spec: BattleSpec | null = null;
-      try {
-        const r = await fetch("/api/battle", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
-        });
-        const body = (await r.json().catch(() => ({}))) as { id?: string; spec?: BattleSpec; running?: string; error?: string };
-        if (genRef.current !== gen) return;
-        if (r.ok && body.id) {
-          id = body.id;
-          spec = body.spec ?? null;
-        } else if (r.status === 409 && body.running) {
-          id = body.running; // a tournament is already running: watch that one
-          spec = body.spec ?? null;
-        } else {
-          throw new Error(body.error || `battle request failed (${r.status})`);
-        }
-      } catch (err) {
-        if (genRef.current !== gen) return;
-        const message = err instanceof Error ? err.message : String(err);
-        commit({ ...initialBattleState, phase: "error", error: message, banner: { text: "ERROR", sub: message, tone: "error" } });
-        play("miss");
-        return;
-      }
       choreoRef.current = createChoreographer();
-      commit({ ...stateRef.current, phase: "starting", spec, jobId: id, dry: spec ? spec.options.mode !== "live" : stateRef.current.dry });
       idleSinceRef.current = Date.now();
-      attach(id, gen);
+      attach("stream", gen, 0, `/api/battle/stream?prompt=${encodeURIComponent(prompt)}`);
     },
     [attach, commit, getSfx, hardReset, play],
   );

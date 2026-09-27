@@ -20,7 +20,7 @@
 //   demo/fixtures/certification-record{,-failed}.json   demo mode
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
@@ -34,7 +34,11 @@ import type {
 } from "./types.ts";
 import { COMPANY_CHECKS, verifyCompanyFile } from "./verifiers/company.ts";
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+// The repo root. Resolved from this file, except when bundled (Next on Vercel runs from
+// .next/server/...), where the file-relative path is wrong and the project root is process.cwd().
+// AU_ROOT overrides both.
+const FILE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const ROOT = process.env.AU_ROOT || (existsSync(join(FILE_ROOT, "demo", "cases.json")) ? FILE_ROOT : process.cwd());
 export const POLICY_ID = "au-transfer-v1";
 export const RECORD_VERSION = 1;
 
