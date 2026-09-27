@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "company.schema.json",
+  "title": "company.json",
+  "description": "Pipeline stage 1 (Research Company). FROZEN: this is the shape scripts/verify_company.py certifies and the QM Scout run produced. The verifier is authoritative for certification: it additionally requires at least two DISTINCT valid source URLs whose host contains a dot.",
+  "type": "object",
+  "required": ["company_name", "website", "product_summary", "source_urls"],
+  "properties": {
+    "company_name": { "type": "string", "minLength": 1 },
+    "website": { "type": "string", "pattern": "^https?://[^\\s/]+\\.[^\\s/]+" },
+    "product_summary": { "type": "string", "minLength": 1 },
+    "source_urls": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^https?://[^\\s/]+\\.[^\\s/]+" }
+    }
+  }
+}

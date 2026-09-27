@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repo_analysis.schema.json",
+  "title": "repo_analysis.json",
+  "description": "Pipeline stage 2 (Analyze Repo). v0 PLACEHOLDER, owned by feat/certification: build against it; change it only at a merge checkpoint. Input: company.json. Joined to it by company_name.",
+  "type": "object",
+  "required": ["company_name", "repo_url", "summary", "languages", "signals", "source_urls"],
+  "properties": {
+    "company_name": { "type": "string", "minLength": 1 },
+    "repo_url": { "type": "string", "pattern": "^https?://[^\\s/]+\\.[^\\s/]+" },
+    "summary": { "type": "string", "minLength": 1 },
+    "languages": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "signals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "evidence"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "source_url": { "type": "string", "pattern": "^https?://" }
+        }
+      }
+    },
+    "source_urls": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^https?://[^\\s/]+\\.[^\\s/]+" }
+    }
+  }
+}

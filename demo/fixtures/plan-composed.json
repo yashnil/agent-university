@@ -1,0 +1,32 @@
+{
+  "type": "plan.composed",
+  "at": "2026-01-01T00:06:00Z",
+  "payload": {
+    "planId": "plan-fixture-0001",
+    "goal": "Draft outreach to Northwind Labs",
+    "agent": {
+      "id": "agent-planner-0003",
+      "name": "Fresh agent (planner)",
+      "harness": "qm"
+    },
+    "steps": [
+      {
+        "artifactType": "company.json",
+        "skillId": "research-company",
+        "status": "certified"
+      },
+      {
+        "artifactType": "repo_analysis.json",
+        "status": "missing"
+      },
+      {
+        "artifactType": "score.json",
+        "status": "missing"
+      },
+      {
+        "artifactType": "outreach.md",
+        "status": "missing"
+      }
+    ]
+  }
+}

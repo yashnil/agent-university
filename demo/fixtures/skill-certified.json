@@ -1,0 +1,13 @@
+{
+  "id": "research-company",
+  "name": "Research Company",
+  "status": "certified",
+  "teacher": { "id": "agent-teacher-0001", "name": "Scout (teacher)", "harness": "qm" },
+  "artifactType": "company.json",
+  "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+  "transfer": {
+    "student": { "id": "agent-student-0002", "name": "Scout (fresh student)", "harness": "qm" },
+    "examCase": "exam-northwind",
+    "passed": true
+  }
+}

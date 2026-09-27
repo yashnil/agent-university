@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "outreach.schema.json",
+  "title": "outreach.md (parsed)",
+  "description": "Pipeline stage 4 (Draft Outreach). v0 PLACEHOLDER, owned by feat/certification. outreach.md is Markdown: an H1 '# Outreach: <company_name>' followed by the H2 sections below, in any order. This schema validates the parsed form produced by scripts/check_contracts.py parse_outreach(): {company_name, sections: {<h2 heading lowercased, spaces to _>: <body>}}. Inputs: company.json, repo_analysis.json, score.json.",
+  "type": "object",
+  "required": ["company_name", "sections"],
+  "properties": {
+    "company_name": { "type": "string", "minLength": 1 },
+    "sections": {
+      "type": "object",
+      "required": ["why_now", "message", "sources"],
+      "properties": {
+        "why_now": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "sources": { "type": "string", "pattern": "https?://" }
+      }
+    }
+  }
+}

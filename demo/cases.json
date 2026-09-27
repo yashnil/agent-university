@@ -1,0 +1,8 @@
+{
+  "description": "Demo cases. The teacher case is what the skill is learned from; exam cases are unseen companies a different agent must handle using only the recalled procedure. fixtureOnly cases back demo/fixtures and are never run live.",
+  "cases": [
+    { "id": "teach-linear", "role": "teacher", "skillId": "research-company", "company": "Linear", "artifactType": "company.json" },
+    { "id": "exam-vercel", "role": "exam", "skillId": "research-company", "company": "Vercel", "artifactType": "company.json" },
+    { "id": "exam-northwind", "role": "exam", "skillId": "research-company", "company": "Northwind Labs", "artifactType": "company.json", "fixtureOnly": true }
+  ]
+}

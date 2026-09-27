@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "transfer-result.schema.json",
+  "title": "TransferResult",
+  "description": "The outcome of one transfer exam: a student agent, given only the recalled procedure, attempts an unseen case. passed equals verification.passed. This is what the exam API returns and what Skill.transfer summarizes.",
+  "type": "object",
+  "required": ["skillId", "examCase", "student", "artifact", "verification", "passed"],
+  "properties": {
+    "skillId": { "type": "string", "minLength": 1 },
+    "procedureId": { "type": "string", "minLength": 1 },
+    "examCase": { "type": "string", "minLength": 1 },
+    "student": { "$ref": "agent-identity.schema.json" },
+    "runId": { "type": "string", "minLength": 1 },
+    "artifact": {
+      "type": "object",
+      "required": ["type", "path"],
+      "properties": {
+        "type": { "$ref": "skill.schema.json#/$defs/ArtifactType" },
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "verification": { "$ref": "verification-result.schema.json" },
+    "passed": { "type": "boolean" }
+  }
+}

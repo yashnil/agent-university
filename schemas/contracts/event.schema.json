@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event.schema.json",
+  "title": "Event",
+  "description": "A lifecycle event. There is no event bus yet: producers append events to a list (a record's events array or a JSON Lines file) and consumers read them. The payload shape is fixed per type by x-payloadByType, which scripts/check_contracts.py enforces. Payloads may carry extra keys; consumers must ignore unknown keys.",
+  "type": "object",
+  "required": ["type", "at", "payload"],
+  "properties": {
+    "type": {
+      "enum": [
+        "skill.observed",
+        "skill.recalled",
+        "exam.started",
+        "exam.passed",
+        "skill.certified",
+        "plan.composed",
+        "gap.discovered"
+      ]
+    },
+    "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}" },
+    "payload": { "type": "object" }
+  },
+  "x-payloadByType": {
+    "skill.observed": { "$ref": "#/$defs/SkillObserved" },
+    "skill.recalled": { "$ref": "#/$defs/SkillRecalled" },
+    "exam.started": { "$ref": "#/$defs/ExamStarted" },
+    "exam.passed": { "$ref": "#/$defs/ExamPassed" },
+    "skill.certified": { "$ref": "#/$defs/SkillCertified" },
+    "plan.composed": { "$ref": "#/$defs/PlanComposed" },
+    "gap.discovered": { "$ref": "#/$defs/GapDiscovered" }
+  },
+  "$defs": {
+    "SkillObserved": {
+      "description": "A teacher produced an artifact that passed its verifier. Emitted by runtime.",
+      "type": "object",
+      "required": ["skillId", "teacher", "artifactType", "runId", "artifactPath", "verification"],
+      "properties": {
+        "skillId": { "type": "string" },
+        "teacher": { "$ref": "agent-identity.schema.json" },
+        "artifactType": { "$ref": "skill.schema.json#/$defs/ArtifactType" },
+        "runId": { "type": "string" },
+        "artifactPath": { "type": "string" },
+        "verification": { "$ref": "verification-result.schema.json" }
+      }
+    },
+    "SkillRecalled": {
+      "description": "Memorable returned the skill's procedure for a task. Emitted by runtime at capture time (proof the stored procedure is retrievable) and before each exam.",
+      "type": "object",
+      "required": ["skillId", "procedureId", "query"],
+      "properties": {
+        "skillId": { "type": "string" },
+        "procedureId": { "type": "string" },
+        "query": { "type": "string" },
+        "rank": { "type": "integer", "minimum": 1 },
+        "agent": { "$ref": "agent-identity.schema.json" }
+      }
+    },
+    "ExamStarted": {
+      "description": "A student agent was given an unseen exam case and the recalled procedure. Emitted by runtime.",
+      "type": "object",
+      "required": ["skillId", "examCase", "student"],
+      "properties": {
+        "skillId": { "type": "string" },
+        "procedureId": { "type": "string" },
+        "examCase": { "type": "string" },
+        "student": { "$ref": "agent-identity.schema.json" },
+        "runId": { "type": "string" }
+      }
+    },
+    "ExamPassed": {
+      "description": "The student's artifact passed the deterministic verifier. Emitted by certification.",
+      "type": "object",
+      "required": ["skillId", "examCase", "student", "verification"],
+      "properties": {
+        "skillId": { "type": "string" },
+        "examCase": { "type": "string" },
+        "student": { "$ref": "agent-identity.schema.json" },
+        "artifactPath": { "type": "string" },
+        "verification": { "$ref": "verification-result.schema.json" }
+      }
+    },
+    "SkillCertified": {
+      "description": "The skill passed a transfer exam by an agent other than its teacher and is now trusted. Emitted by certification.",
+      "type": "object",
+      "required": ["skillId", "teacher", "student", "examCase"],
+      "properties": {
+        "skillId": { "type": "string" },
+        "teacher": { "$ref": "agent-identity.schema.json" },
+        "student": { "$ref": "agent-identity.schema.json" },
+        "examCase": { "type": "string" },
+        "procedureId": { "type": "string" }
+      }
+    },
+    "PlanComposed": {
+      "description": "A fresh agent assembled a plan for a goal from certified skills along the artifact pipeline.",
+      "type": "object",
+      "required": ["planId", "goal", "steps"],
+      "properties": {
+        "planId": { "type": "string" },
+        "goal": { "type": "string" },
+        "agent": { "$ref": "agent-identity.schema.json" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["artifactType", "status"],
+            "properties": {
+              "artifactType": { "$ref": "skill.schema.json#/$defs/ArtifactType" },
+              "skillId": { "type": "string" },
+              "status": { "enum": ["certified", "uncertified", "missing"] }
+            }
+          }
+        }
+      }
+    },
+    "GapDiscovered": {
+      "description": "A plan needs an artifact that no certified skill produces. This is the visible GAP in the demo.",
+      "type": "object",
+      "required": ["planId", "goal", "missingArtifactType", "reason"],
+      "properties": {
+        "planId": { "type": "string" },
+        "goal": { "type": "string" },
+        "missingArtifactType": { "$ref": "skill.schema.json#/$defs/ArtifactType" },
+        "neededBy": { "$ref": "skill.schema.json#/$defs/ArtifactType" },
+        "reason": { "type": "string" }
+      }
+    }
+  }
+}

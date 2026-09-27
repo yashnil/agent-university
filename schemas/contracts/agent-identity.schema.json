@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-identity.schema.json",
+  "title": "AgentIdentity",
+  "description": "An agent that teaches, takes an exam, or composes a plan. For QM agents, id is the QM session id and harness is \"qm\".",
+  "type": "object",
+  "required": ["id", "name", "harness"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "harness": { "type": "string", "minLength": 1 }
+  }
+}

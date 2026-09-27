@@ -1,0 +1,11 @@
+{
+  "type": "gap.discovered",
+  "at": "2026-01-01T00:06:01Z",
+  "payload": {
+    "planId": "plan-fixture-0001",
+    "goal": "Draft outreach to Northwind Labs",
+    "missingArtifactType": "repo_analysis.json",
+    "neededBy": "score.json",
+    "reason": "No certified skill produces repo_analysis.json, so score.json and outreach.md cannot be produced by certified skills."
+  }
+}

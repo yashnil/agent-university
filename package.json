@@ -1,0 +1,24 @@
+{
+  "name": "agent-university-qm-deployment",
+  "version": "0.0.0",
+  "dependencies": {
+    "@yc-software/qm": "0.1.12"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test": "npm run test:contracts && npm run test:unit && npm run test:compile",
+    "test:contracts": "python3 scripts/check_contracts.py",
+    "test:unit": "python3 -m unittest discover -s tests",
+    "test:compile": "python3 -m py_compile scripts/*.py tests/*.py",
+    "verify:fixture": "python3 scripts/verify_company.py demo/fixtures/company.json",
+    "qm": "qm",
+    "check": "qm check",
+    "plan": "qm plan",
+    "deploy": "qm up",
+    "status": "qm status",
+    "conformance": "qm conformance --static"
+  }
+}

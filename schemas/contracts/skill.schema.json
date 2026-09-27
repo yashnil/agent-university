@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill.schema.json",
+  "title": "Skill",
+  "description": "A procedure one agent learned. observed: the teacher produced a verified artifact. transferred: a different agent (the student) ran the exam case from the recalled procedure and produced the artifact. certified: the student's artifact passed the deterministic verifier and the transfer was isolated (different agent, no access to the teacher's answer). Consumers must ignore unknown keys.",
+  "type": "object",
+  "required": ["id", "name", "status", "teacher", "artifactType"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "status": { "$ref": "#/$defs/SkillStatus" },
+    "teacher": { "$ref": "agent-identity.schema.json" },
+    "artifactType": { "$ref": "#/$defs/ArtifactType" },
+    "procedureId": { "type": "string", "minLength": 1, "description": "Memorable procedure slug, e.g. procedures/<hash>-<title>." },
+    "transfer": {
+      "type": "object",
+      "required": ["student", "examCase", "passed"],
+      "properties": {
+        "student": { "$ref": "agent-identity.schema.json" },
+        "examCase": { "type": "string", "minLength": 1, "description": "Id of a case in demo/cases.json." },
+        "passed": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "SkillStatus": { "enum": ["observed", "transferred", "certified"] },
+    "ArtifactType": { "enum": ["company.json", "repo_analysis.json", "score.json", "outreach.md"] }
+  }
+}

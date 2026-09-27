@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    { "name": "file_exists", "passed": true, "message": "file exists" },
+    { "name": "valid_json_object", "passed": true, "message": "valid JSON object" },
+    { "name": "company_name_present", "passed": true, "message": "company_name present" },
+    { "name": "website_valid_url", "passed": true, "message": "website present (http(s) URL)" },
+    { "name": "product_summary_present", "passed": true, "message": "product_summary present" },
+    { "name": "source_urls_min_two", "passed": true, "message": "at least two valid source URLs (3 distinct valid)" }
+  ]
+}

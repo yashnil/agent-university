@@ -1,0 +1,23 @@
+{
+  "company_name": "Northwind Labs",
+  "repo_url": "https://code.example.com/northwind-labs/router",
+  "summary": "Fixture data. Public TypeScript monorepo for the order-routing engine; active weekly releases and an open plugin API.",
+  "languages": [
+    "TypeScript",
+    "Go"
+  ],
+  "signals": [
+    {
+      "name": "plugin_api",
+      "evidence": "README documents a public plugin interface for carrier integrations.",
+      "source_url": "https://code.example.com/northwind-labs/router#plugins"
+    },
+    {
+      "name": "release_cadence",
+      "evidence": "Tagged releases roughly weekly over the last quarter."
+    }
+  ],
+  "source_urls": [
+    "https://code.example.com/northwind-labs/router"
+  ]
+}

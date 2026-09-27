@@ -1,0 +1,28 @@
+{
+  "company_name": "Northwind Labs",
+  "score": 72,
+  "rubric": [
+    {
+      "criterion": "product_fit",
+      "weight": 0.5,
+      "score": 80,
+      "rationale": "Workflow automation buyer matches the ideal customer profile."
+    },
+    {
+      "criterion": "technical_signal",
+      "weight": 0.3,
+      "score": 60,
+      "rationale": "Open plugin API suggests integration appetite; small team."
+    },
+    {
+      "criterion": "timing",
+      "weight": 0.2,
+      "score": 70,
+      "rationale": "Weekly releases indicate an active roadmap."
+    }
+  ],
+  "inputs": [
+    "company.json",
+    "repo_analysis.json"
+  ]
+}

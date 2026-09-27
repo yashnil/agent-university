@@ -1,0 +1,30 @@
+# Secrets. .env.example (names only) IS committed.
+.env
+.env.*
+!.env.example
+
+# Dependencies and QM-generated output
+node_modules/
+.generated/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Live runtime output. Holds raw QM run traces (source answers, personal scope names,
+# session ids), Memorable traces derived from them, and live skill/transfer records.
+# Commit sanitized examples under demo/fixtures instead.
+.agent-university/runs/
+.agent-university/memorable/
+.agent-university/skills/
+.agent-university/transfers/
+.agent-university/
+
+# Local Memorable store, if it is ever pointed inside the repo (MEMORABLE_HOME)
+.memorable/
+
+# OS and editor noise, logs
+.DS_Store
+*.log
+.vscode/
+.idea/

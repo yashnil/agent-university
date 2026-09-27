@@ -1,0 +1,193 @@
+[
+  {
+    "type": "skill.observed",
+    "at": "2026-01-01T00:00:00Z",
+    "payload": {
+      "skillId": "research-company",
+      "teacher": {
+        "id": "agent-teacher-0001",
+        "name": "Scout (teacher)",
+        "harness": "qm"
+      },
+      "artifactType": "company.json",
+      "runId": "run-fixture-0001",
+      "artifactPath": "/root/workspace/scout/<slug>/company.json",
+      "verification": {
+        "passed": true,
+        "checks": [
+          {
+            "name": "file_exists",
+            "passed": true,
+            "message": "file exists"
+          },
+          {
+            "name": "valid_json_object",
+            "passed": true,
+            "message": "valid JSON object"
+          },
+          {
+            "name": "company_name_present",
+            "passed": true,
+            "message": "company_name present"
+          },
+          {
+            "name": "website_valid_url",
+            "passed": true,
+            "message": "website present (http(s) URL)"
+          },
+          {
+            "name": "product_summary_present",
+            "passed": true,
+            "message": "product_summary present"
+          },
+          {
+            "name": "source_urls_min_two",
+            "passed": true,
+            "message": "at least two valid source URLs (3 distinct valid)"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "skill.recalled",
+    "at": "2026-01-01T00:01:00Z",
+    "payload": {
+      "skillId": "research-company",
+      "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+      "query": "Research the company \"Northwind Labs\" and write company.json",
+      "rank": 1,
+      "agent": {
+        "id": "agent-student-0002",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      }
+    }
+  },
+  {
+    "type": "exam.started",
+    "at": "2026-01-01T00:02:00Z",
+    "payload": {
+      "skillId": "research-company",
+      "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+      "examCase": "exam-northwind",
+      "student": {
+        "id": "agent-student-0002",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "runId": "run-fixture-0002"
+    }
+  },
+  {
+    "type": "exam.passed",
+    "at": "2026-01-01T00:04:00Z",
+    "payload": {
+      "skillId": "research-company",
+      "examCase": "exam-northwind",
+      "student": {
+        "id": "agent-student-0002",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "artifactPath": "demo/fixtures/company.json",
+      "verification": {
+        "passed": true,
+        "checks": [
+          {
+            "name": "file_exists",
+            "passed": true,
+            "message": "file exists"
+          },
+          {
+            "name": "valid_json_object",
+            "passed": true,
+            "message": "valid JSON object"
+          },
+          {
+            "name": "company_name_present",
+            "passed": true,
+            "message": "company_name present"
+          },
+          {
+            "name": "website_valid_url",
+            "passed": true,
+            "message": "website present (http(s) URL)"
+          },
+          {
+            "name": "product_summary_present",
+            "passed": true,
+            "message": "product_summary present"
+          },
+          {
+            "name": "source_urls_min_two",
+            "passed": true,
+            "message": "at least two valid source URLs (3 distinct valid)"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "skill.certified",
+    "at": "2026-01-01T00:04:01Z",
+    "payload": {
+      "skillId": "research-company",
+      "teacher": {
+        "id": "agent-teacher-0001",
+        "name": "Scout (teacher)",
+        "harness": "qm"
+      },
+      "student": {
+        "id": "agent-student-0002",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "examCase": "exam-northwind",
+      "procedureId": "procedures/0000aaaa-research-a-company-fixture"
+    }
+  },
+  {
+    "type": "plan.composed",
+    "at": "2026-01-01T00:06:00Z",
+    "payload": {
+      "planId": "plan-fixture-0001",
+      "goal": "Draft outreach to Northwind Labs",
+      "agent": {
+        "id": "agent-planner-0003",
+        "name": "Fresh agent (planner)",
+        "harness": "qm"
+      },
+      "steps": [
+        {
+          "artifactType": "company.json",
+          "skillId": "research-company",
+          "status": "certified"
+        },
+        {
+          "artifactType": "repo_analysis.json",
+          "status": "missing"
+        },
+        {
+          "artifactType": "score.json",
+          "status": "missing"
+        },
+        {
+          "artifactType": "outreach.md",
+          "status": "missing"
+        }
+      ]
+    }
+  },
+  {
+    "type": "gap.discovered",
+    "at": "2026-01-01T00:06:01Z",
+    "payload": {
+      "planId": "plan-fixture-0001",
+      "goal": "Draft outreach to Northwind Labs",
+      "missingArtifactType": "repo_analysis.json",
+      "neededBy": "score.json",
+      "reason": "No certified skill produces repo_analysis.json, so score.json and outreach.md cannot be produced by certified skills."
+    }
+  }
+]
