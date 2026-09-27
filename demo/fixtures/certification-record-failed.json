@@ -1,0 +1,221 @@
+{
+  "recordVersion": 1,
+  "skill": {
+    "id": "research-company",
+    "name": "Research Company",
+    "teacher": {
+      "id": "agent-teacher-0001",
+      "name": "Scout (teacher)",
+      "harness": "qm"
+    },
+    "artifactType": "company.json",
+    "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+    "status": "transferred",
+    "transfer": {
+      "student": {
+        "id": "agent-student-0003",
+        "name": "Scout (second student)",
+        "harness": "qm"
+      },
+      "examCase": "exam-northwind",
+      "passed": false
+    }
+  },
+  "teacher": {
+    "id": "agent-teacher-0001",
+    "name": "Scout (teacher)",
+    "harness": "qm"
+  },
+  "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+  "transfer": {
+    "student": {
+      "id": "agent-student-0003",
+      "name": "Scout (second student)",
+      "harness": "qm"
+    },
+    "examCase": "exam-northwind",
+    "examCompany": "Northwind Labs",
+    "runId": "run-fixture-0003",
+    "artifact": {
+      "type": "company.json",
+      "path": "demo/fixtures/company-invalid.json"
+    },
+    "passed": false
+  },
+  "verification": {
+    "passed": false,
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": false,
+        "message": "at least two valid source URLs (1 distinct valid)"
+      }
+    ]
+  },
+  "decision": {
+    "certified": false,
+    "status": "transferred",
+    "policy": {
+      "id": "au-transfer-v1",
+      "rules": [
+        "teacher_run_verified",
+        "procedure_recalled",
+        "exam_case_unseen",
+        "student_distinct_from_teacher",
+        "artifact_matches_skill",
+        "verifier_checks_complete",
+        "verifier_checks_passed",
+        "isolation_attested"
+      ],
+      "requireIsolation": false
+    },
+    "summary": "NOT CERTIFIED (transferred): failed verifier_checks_passed",
+    "failedRules": [
+      "verifier_checks_passed"
+    ],
+    "rulings": [
+      {
+        "rule": "teacher_run_verified",
+        "passed": true,
+        "reason": "teacher run run-fixture-0001 passed its verifier",
+        "evidence": {
+          "teacher": {
+            "id": "agent-teacher-0001",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "runId": "run-fixture-0001",
+          "artifactPath": "/root/workspace/scout/<slug>/company.json"
+        }
+      },
+      {
+        "rule": "procedure_recalled",
+        "passed": true,
+        "reason": "student used procedure procedures/0000aaaa-research-a-company-fixture",
+        "evidence": {
+          "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+          "skillProcedureId": "procedures/0000aaaa-research-a-company-fixture"
+        }
+      },
+      {
+        "rule": "exam_case_unseen",
+        "passed": true,
+        "reason": "exam company Northwind Labs differs from teacher case Linear",
+        "evidence": {
+          "examCase": "exam-northwind",
+          "examCompany": "Northwind Labs",
+          "teacherCases": [
+            "Linear"
+          ]
+        }
+      },
+      {
+        "rule": "student_distinct_from_teacher",
+        "passed": true,
+        "reason": "student agent-student-0003 (qm) != teacher agent-teacher-0001 (qm)",
+        "evidence": {
+          "student": {
+            "id": "agent-student-0003",
+            "name": "Scout (second student)",
+            "harness": "qm"
+          },
+          "teacher": {
+            "id": "agent-teacher-0001",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "crossHarness": false
+        }
+      },
+      {
+        "rule": "artifact_matches_skill",
+        "passed": true,
+        "reason": "company.json at demo/fixtures/company-invalid.json",
+        "evidence": {
+          "artifact": {
+            "type": "company.json",
+            "path": "demo/fixtures/company-invalid.json"
+          }
+        }
+      },
+      {
+        "rule": "verifier_checks_complete",
+        "passed": true,
+        "reason": "all 6 required checks reported",
+        "evidence": {
+          "required": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "reported": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "source": "reported"
+        }
+      },
+      {
+        "rule": "verifier_checks_passed",
+        "passed": false,
+        "reason": "failed checks: source_urls_min_two",
+        "evidence": {
+          "passedCount": 5,
+          "total": 6,
+          "failed": [
+            "source_urls_min_two"
+          ]
+        }
+      },
+      {
+        "rule": "isolation_attested",
+        "passed": true,
+        "reason": "all 5 isolation facts hold",
+        "evidence": {
+          "facts": {
+            "different_scope": true,
+            "different_sandbox": true,
+            "different_session": true,
+            "no_teacher_artifact_in_sandbox": true,
+            "no_answer_leak_in_prompt": true
+          }
+        }
+      }
+    ],
+    "decidedAt": "2026-01-01T00:05:01Z",
+    "inputsDigest": "sha256:9b8ddd202d9391b66b53834fccafaf2ffe895341967396397de7654d0e63bea9"
+  },
+  "events": []
+}

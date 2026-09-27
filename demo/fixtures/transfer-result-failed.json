@@ -1,0 +1,51 @@
+{
+  "skillId": "research-company",
+  "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+  "examCase": "exam-northwind",
+  "student": {
+    "id": "agent-student-0003",
+    "name": "Scout (second student)",
+    "harness": "qm"
+  },
+  "runId": "run-fixture-0003",
+  "artifact": {
+    "type": "company.json",
+    "path": "demo/fixtures/company-invalid.json"
+  },
+  "verification": {
+    "passed": false,
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": false,
+        "message": "at least two valid source URLs (1 distinct valid)"
+      }
+    ]
+  },
+  "passed": false
+}

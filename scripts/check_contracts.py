@@ -33,6 +33,9 @@ FIXTURES = {
     "skill-observed.json": "contracts/skill.schema.json",
     "skill-certified.json": "contracts/skill.schema.json",
     "transfer-result.json": "contracts/transfer-result.schema.json",
+    "transfer-result-failed.json": "contracts/transfer-result.schema.json",
+    "certification-record.json": "certification-record.schema.json",
+    "certification-record-failed.json": "certification-record.schema.json",
     "verification-result.json": "contracts/verification-result.schema.json",
     "gap-discovered.json": "contracts/event.schema.json",
     "plan-composed.json": "contracts/event.schema.json",
@@ -213,6 +216,12 @@ def check_types():
     for name, (rel, frag) in TS_UNIONS.items():
         want = sorted(pointer(load_schema(rel), frag)["enum"])
         report(f"types.ts {name} matches {rel}{frag}", union(src, name) == want, f"ts={union(src, name)} schema={want}")
+    cert_src = strip_comments(open(os.path.join(ROOT, "lib", "certification.ts")).read())
+    body = block(cert_src, "CertificationRecord")
+    ts = {k: opt for k, (opt, _) in split_members(body).items()} if body is not None else None
+    want = fields(load_schema("certification-record.schema.json"))
+    report("certification.ts CertificationRecord matches certification-record.schema.json", ts == want,
+           f"ts={ts} schema={want}")
     event = load_schema("contracts/event.schema.json")
     payloads = split_members(block(src, "EventPayloads") or "")
     report("types.ts EventPayloads covers every event type",
@@ -277,6 +286,25 @@ def main():
     for name, want in (("gap-discovered.json", "gap.discovered"), ("plan-composed.json", "plan.composed")):
         if data.get(name):
             report(f"{name} has type {want}", data[name]["type"] == want)
+
+    print("certification records")
+    rec, bad = data.get("certification-record.json"), data.get("certification-record-failed.json")
+    if rec and bad and cert:
+        report("certification-record is certified and its skill equals skill-certified",
+               rec["decision"]["certified"] and rec["skill"] == cert)
+        report("certification-record-failed is not certified and stays transferred",
+               not bad["decision"]["certified"] and bad["skill"]["status"] == "transferred"
+               and bad["decision"]["failedRules"] == ["verifier_checks_passed"])
+        sys.path.insert(0, os.path.join(ROOT, "scripts"))
+        import certify
+        events = data.get("events.json")
+        for name, tname in (("certification-record.json", "transfer-result.json"),
+                            ("certification-record-failed.json", "transfer-result-failed.json")):
+            fx = data[name]
+            iso = next(r for r in fx["decision"]["rulings"] if r["rule"] == "isolation_attested")["evidence"].get("facts")
+            again = certify.certify(obs, data[tname], events=events, isolation=iso, decided_at=fx["decision"]["decidedAt"])
+            report(f"{name} is what scripts/certify.py produces today", again == fx,
+                   "regenerate it (see tests/test_certify.py)")
 
     print("verifier on fixture")
     r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "verify_company.py"), "--json",
