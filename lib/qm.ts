@@ -6,13 +6,17 @@
 
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AgentIdentity, VerificationResult } from "./types.ts";
 import { verifyCompany } from "./verifiers/company.ts";
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+// The repo root. Resolved from this file, except when bundled (Next on Vercel runs from
+// .next/server/...), where the file-relative path is wrong and the project root is process.cwd().
+// AU_ROOT overrides both.
+const FILE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const ROOT = process.env.AU_ROOT || (existsSync(join(FILE_ROOT, "demo", "cases.json")) ? FILE_ROOT : process.cwd());
 export const RECORD_DIR = join(ROOT, ".agent-university");
 export const PORTAL = process.env.QM_PORTAL ?? "http://localhost:8081";
 export const ORG = "agent-university";

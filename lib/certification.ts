@@ -39,7 +39,7 @@ import { COMPANY_CHECKS, verifyCompanyFile } from "./verifiers/company.ts";
 // directory, with the traced data files beside it). Use the module's own location only when it really
 // is the repo (CLI, tests, `next dev`/`next start` in place), else the working directory.
 const MODULE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-export const ROOT = existsSync(join(MODULE_ROOT, "demo", "cases.json")) ? MODULE_ROOT : process.cwd();
+export const ROOT = process.env.AU_ROOT || (existsSync(join(MODULE_ROOT, "demo", "cases.json")) ? MODULE_ROOT : process.cwd());
 export const POLICY_ID = "au-transfer-v1";
 export const RECORD_VERSION = 1;
 

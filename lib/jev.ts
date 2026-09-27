@@ -100,7 +100,7 @@ export function makeJevJudge(opts: JevOptions = {}): JudgeFn {
     const post = async (body: Record<string, unknown>) => {
       const res = await doFetch(OPENROUTER_URL, {
         method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Agent University" },
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "Swarmem" },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(opts.timeoutMs ?? 90_000),
       });

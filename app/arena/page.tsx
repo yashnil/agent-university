@@ -19,6 +19,8 @@ export default function ArenaPage() {
               <img className="brandMark brandMark--sm" src="/swarmem-logo.png" alt="" aria-hidden="true" /> ←
               swar<em className="brandMem">mem</em>
             </a>
+            {" · "}
+            <a href="/battle">Flow Fighter: battle mode →</a>
           </p>
           <h1>Arena</h1>
           <p className="northStar">
