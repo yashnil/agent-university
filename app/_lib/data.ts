@@ -10,10 +10,10 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { CertificationRecord, RegistryIndex } from "@/lib/certification";
 import type {
   AgentIdentity,
   AgentUniversityEvent,
-  ArtifactType,
   EventPayloads,
   Skill,
   SkillStatus,
@@ -55,8 +55,15 @@ export interface RulingView {
   evidence?: Record<string, unknown>;
 }
 
+export interface RegistryView {
+  rows: RegistryIndex["skills"];
+  source: string;
+}
+
 export interface CertificationView {
   policyId: string;
+  /** From policy.requireIsolation: whether isolation facts were required, not just recorded. */
+  requireIsolation: boolean;
   summary: string;
   certified: boolean;
   status: SkillStatus;
@@ -64,6 +71,8 @@ export interface CertificationView {
   rulings: RulingView[];
   decidedAt?: string;
   inputsDigest?: string;
+  /** Optional in the contract, and absent on hand-certified records. */
+  metrics?: { durationMs?: number; toolCalls?: number; turns?: number; costUsd?: number };
   /** Where this decision was read from, for the footer. */
   from: string;
 }
@@ -83,42 +92,12 @@ export interface LifecycleData {
   skillCertified: Skill | null;
   transfer: TransferResult;
   certification: CertificationView | null;
+  /** registry/index.json: what the organization actually trusts. Null when nothing is promoted. */
+  registry: RegistryView | null;
   cases: DemoCase[];
   artifacts: Artifacts;
   plan: EventPayloads["plan.composed"] | null;
   gap: EventPayloads["gap.discovered"] | null;
-}
-
-/**
- * The certification engine's output (schemas/certification-record.schema.json, produced by
- * scripts/certify.ts). Declared structurally, and only over the fields this UI reads, so the UI
- * branch compiles before feat/certification merges. Once it does, this can become
- * `import type { CertificationRecord } from "@/lib/certification"` with no other change.
- */
-interface CertificationRecordLike {
-  skill: Skill;
-  teacher: AgentIdentity;
-  procedureId?: string;
-  transfer: {
-    student: AgentIdentity;
-    examCase: string;
-    examCompany?: string;
-    runId?: string;
-    artifact: { type?: ArtifactType; path?: string };
-    passed: boolean;
-  };
-  verification: VerificationResult;
-  decision: {
-    certified: boolean;
-    status: SkillStatus;
-    policy: { id: string; rules: string[] };
-    summary: string;
-    failedRules: string[];
-    rulings: RulingView[];
-    decidedAt?: string;
-    inputsDigest?: string;
-  };
-  events?: AgentUniversityEvent[];
 }
 
 /** A live runtime record: a Skill with the events emitted for it so far. */
@@ -178,9 +157,27 @@ async function readLiveArtifact(examCase: string, name: string): Promise<Record<
   return readJsonOrNull<Record<string, unknown>>(ROOT, ".agent-university", "artifacts", examCase, name);
 }
 
-function toCertificationView(record: CertificationRecordLike, from: string): CertificationView {
+/**
+ * A promoted record's artifact path is either a sandbox path (only readable inside the QM
+ * container) or a repo-relative path that certification committed. Read the latter, so the page
+ * shows the artifact that was actually certified rather than a stand-in.
+ */
+async function readArtifactAtPath(artifactPath: string | undefined): Promise<Record<string, unknown> | null> {
+  if (!artifactPath || artifactPath.startsWith("/") || artifactPath.includes("..")) return null;
+  return readJsonOrNull<Record<string, unknown>>(ROOT, artifactPath);
+}
+
+/** registry/index.json is committed, so it is real in every mode. */
+async function readRegistry(): Promise<RegistryView | null> {
+  const index = await readJsonOrNull<RegistryIndex>(ROOT, "registry", "index.json");
+  if (!index?.skills) return null;
+  return { rows: index.skills, source: "registry/index.json" };
+}
+
+function toCertificationView(record: CertificationRecord, from: string): CertificationView {
   return {
     policyId: record.decision.policy?.id ?? "unknown",
+    requireIsolation: record.decision.policy?.requireIsolation === true,
     summary: record.decision.summary,
     certified: record.decision.certified,
     status: record.decision.status,
@@ -188,11 +185,12 @@ function toCertificationView(record: CertificationRecordLike, from: string): Cer
     rulings: record.decision.rulings ?? [],
     decidedAt: record.decision.decidedAt,
     inputsDigest: record.decision.inputsDigest,
+    metrics: record.metrics,
     from,
   };
 }
 
-function toTransferResult(record: CertificationRecordLike, fallback: TransferResult): TransferResult {
+function toTransferResult(record: CertificationRecord, fallback: TransferResult): TransferResult {
   return {
     skillId: record.skill.id,
     procedureId: record.procedureId ?? record.skill.procedureId,
@@ -233,6 +231,8 @@ export async function loadLifecycle(
       readFile(path.join(FIXTURES, "outreach.md"), "utf8"),
     ]);
 
+  const registry = await readRegistry();
+
   const base: LifecycleData = {
     mode: "demo",
     outcome: "certified",
@@ -245,6 +245,7 @@ export async function loadLifecycle(
     skillCertified,
     transfer,
     certification: null,
+    registry,
     cases: casesFile.cases,
     artifacts: { company, repoAnalysis, score, outreach },
     plan: firstPayload(events, "plan.composed"),
@@ -257,7 +258,7 @@ export async function loadLifecycle(
   }
 
   // Live: the promoted registry record first, then the runtime's working record.
-  const registryRecord = await readJsonOrNull<CertificationRecordLike>(
+  const registryRecord = await readJsonOrNull<CertificationRecord>(
     ROOT,
     "registry",
     "skills",
@@ -265,7 +266,9 @@ export async function loadLifecycle(
   );
   if (registryRecord?.decision) {
     const liveTransfer = toTransferResult(registryRecord, base.transfer);
-    const liveCompany = await readLiveArtifact(liveTransfer.examCase, liveTransfer.artifact.type);
+    const liveCompany =
+      (await readArtifactAtPath(registryRecord.transfer.artifact.path)) ??
+      (await readLiveArtifact(liveTransfer.examCase, liveTransfer.artifact.type));
     const certification = toCertificationView(registryRecord, `registry/skills/${skillId}.json`);
     const recordEvents = registryRecord.events?.length ? registryRecord.events : base.events;
     return {
@@ -378,7 +381,7 @@ async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
  */
 async function withDemoCertification(base: LifecycleData, outcome: Outcome): Promise<LifecycleData> {
   const file = outcome === "failed" ? "certification-record-failed.json" : "certification-record.json";
-  const record = await readJsonOrNull<CertificationRecordLike>(FIXTURES, file);
+  const record = await readJsonOrNull<CertificationRecord>(FIXTURES, file);
   if (!record?.decision) {
     return {
       ...base,

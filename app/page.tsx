@@ -3,6 +3,7 @@ import GapBanner from "@/components/GapBanner";
 import LifecycleTimeline from "@/components/LifecycleTimeline";
 import ModeSwitch from "@/components/ModeSwitch";
 import PipelineStrip from "@/components/PipelineStrip";
+import RegistryPanel from "@/components/RegistryPanel";
 import RulingsPanel from "@/components/RulingsPanel";
 import SkillStatusChip from "@/components/SkillStatusChip";
 import TransferExam from "@/components/TransferExam";
@@ -88,7 +89,7 @@ export default async function Page({
           <code className="mono">exam.failed</code> event: a failed exam simply leaves the skill at{" "}
           <code className="mono">transferred</code>.
         </p>
-        <LifecycleTimeline events={data.events} />
+        <LifecycleTimeline events={data.events} status={skill.status} />
       </section>
 
       <section className="section">
@@ -123,6 +124,14 @@ export default async function Page({
               : isolationFacts(data)
           }
         />
+        {data.certification ? (
+          <p className="mono faint" style={{ margin: "16px 0 0" }}>
+            policy {data.certification.policyId} ·{" "}
+            {data.certification.requireIsolation
+              ? "isolation facts required, not just recorded"
+              : "isolation facts recorded but not required"}
+          </p>
+        ) : null}
         {data.certification ? (
           <div style={{ marginTop: 16 }}>
             <RulingsPanel
@@ -171,6 +180,34 @@ export default async function Page({
             </>
           )}
         </p>
+        {data.certification?.metrics ? (
+          <dl className="kv" style={{ marginBottom: 16 }}>
+            {data.certification.metrics.durationMs !== undefined ? (
+              <>
+                <dt>exam duration</dt>
+                <dd>{(data.certification.metrics.durationMs / 1000).toFixed(1)}s</dd>
+              </>
+            ) : null}
+            {data.certification.metrics.toolCalls !== undefined ? (
+              <>
+                <dt>tool calls</dt>
+                <dd>{data.certification.metrics.toolCalls}</dd>
+              </>
+            ) : null}
+            {data.certification.metrics.turns !== undefined ? (
+              <>
+                <dt>turns</dt>
+                <dd>{data.certification.metrics.turns}</dd>
+              </>
+            ) : null}
+            {data.certification.metrics.costUsd !== undefined ? (
+              <>
+                <dt>cost</dt>
+                <dd>${data.certification.metrics.costUsd.toFixed(3)}</dd>
+              </>
+            ) : null}
+          </dl>
+        ) : null}
         <div className="grid2">
           <ArtifactCard
             title="Skill record"
@@ -194,6 +231,22 @@ export default async function Page({
       <section className="section">
         <div className="sectionHead">
           <span className="sectionNum">04</span>
+          <h2>The registry</h2>
+        </div>
+        <p className="sectionSub">
+          Certification is only worth something if it is written down where every agent can find it.
+          This is the committed registry — the organization&apos;s answer to &ldquo;what do we actually
+          trust?&rdquo; — written only by a promotion, never by a run.
+        </p>
+        <RegistryPanel
+          rows={data.registry?.rows ?? []}
+          source={data.registry?.source ?? "registry/index.json (not present)"}
+        />
+      </section>
+
+      <section className="section">
+        <div className="sectionHead">
+          <span className="sectionNum">05</span>
           <h2>Composition, and the gap</h2>
         </div>
         <p className="sectionSub">

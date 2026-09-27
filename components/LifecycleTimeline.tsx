@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import type { JSX } from "react";
-import type { AgentUniversityEvent, EventPayloads, EventType } from "@/lib/types";
+import type { AgentUniversityEvent, EventPayloads, EventType, SkillStatus } from "@/lib/types";
 import SkillStatusChip from "./SkillStatusChip";
 import styles from "./LifecycleTimeline.module.css";
 
@@ -122,36 +122,104 @@ function describeEvent(event: AgentUniversityEvent): RowDescription {
   }
 }
 
-function reachedStatus(events: AgentUniversityEvent[], types: EventType[]): boolean {
-  return events.some((event) => types.includes(event.type));
+function hasEvent<T extends EventType>(events: AgentUniversityEvent[], type: T): boolean {
+  return events.some((event) => event.type === type);
+}
+
+// The frozen lifecycle chain (docs/HANDOFF.md, docs/REPO_OVERVIEW.md §7):
+//   observed -> recalled -> exam started -> exam passed -> transferred -> certified
+// `transferred` is derived from Skill.status, not an event: runtime sets it, it never
+// appears in the event list. `exam.passed` and `skill.certified` are certification's,
+// and are absent for runs that stopped at `transferred` (e.g. the live Vercel handoff).
+interface ChainStep {
+  id: string;
+  label: string;
+  producer: string;
+  done: boolean;
+}
+
+function buildChain(events: AgentUniversityEvent[], status: SkillStatus): ChainStep[] {
+  const observed = hasEvent(events, "skill.observed");
+  const recalled = hasEvent(events, "skill.recalled");
+  const examStarted = hasEvent(events, "exam.started");
+  const examPassed = hasEvent(events, "exam.passed");
+  const transferred = status === "transferred" || status === "certified";
+  const certified = hasEvent(events, "skill.certified") || status === "certified";
+
+  return [
+    { id: "observed", label: "observed", producer: "runtime", done: observed },
+    { id: "recalled", label: "recalled", producer: "runtime", done: recalled },
+    { id: "exam-started", label: "exam started", producer: "runtime", done: examStarted },
+    { id: "exam-passed", label: "exam passed", producer: "certification", done: examPassed },
+    { id: "transferred", label: "transferred", producer: "status", done: transferred },
+    { id: "certified", label: "certified", producer: "certification", done: certified },
+  ];
+}
+
+// Derives one line of truth from the chain: never a hardcoded, case-specific sentence.
+function describeChain(steps: ChainStep[]): string {
+  const done = steps.map((step) => step.done);
+  const [, , , examPassed, transferred, certified] = done;
+
+  if (certified) {
+    return "Certified: a different agent reproduced this procedure on an unseen case and the verifier agreed.";
+  }
+  if (transferred) {
+    return examPassed
+      ? "Proven, not yet certified: the exam passed but certification has not applied its policy."
+      : "Transferred: the transfer is recorded and awaiting the certification decision.";
+  }
+  const firstPendingIndex = done.findIndex((step) => !step);
+  const stoppedAt = steps[firstPendingIndex].label;
+  return `Not yet transferred: the chain stops at "${stoppedAt}" — that step has not happened yet.`;
 }
 
 // Renders the full skill lifecycle as a vertical timeline, one row per event,
-// in the order given, plus a compact status-progression summary above it.
+// in the order given, plus the 6-step observed -> certified chain above it.
 export default function LifecycleTimeline({
   events,
+  status,
 }: {
   events: AgentUniversityEvent[];
+  status: SkillStatus;
 }): JSX.Element {
-  const observedReached = reachedStatus(events, ["skill.observed"]);
-  const transferredReached = reachedStatus(events, ["exam.started", "exam.passed"]);
-  const certifiedReached = reachedStatus(events, ["skill.certified"]);
+  const steps = buildChain(events, status);
+  const narrative = describeChain(steps);
 
   return (
     <section className={`card ${styles.wrapper}`}>
-      <h3 className="cardTitle">Lifecycle Timeline</h3>
-
-      <div className={styles.progression}>
-        <SkillStatusChip status="observed" active={observedReached} />
-        <span className={styles.arrow} aria-hidden="true">
-          &rarr;
-        </span>
-        <SkillStatusChip status="transferred" active={transferredReached} />
-        <span className={styles.arrow} aria-hidden="true">
-          &rarr;
-        </span>
-        <SkillStatusChip status="certified" active={certifiedReached} />
+      <div className={styles.header}>
+        <h3 className="cardTitle">Lifecycle Timeline</h3>
+        <SkillStatusChip status={status} />
       </div>
+
+      <ol className={styles.chain}>
+        {steps.map((step, index) => (
+          <Fragment key={step.id}>
+            <li className={`${styles.step} ${step.done ? styles.stepDone : styles.stepPending}`}>
+              <span className={styles.stepNum}>{index + 1}</span>
+              <span className={styles.stepLabel}>{step.label}</span>
+              <span
+                className={
+                  step.producer === "status"
+                    ? `${styles.stepProducer} ${styles.stepProducerStatus}`
+                    : styles.stepProducer
+                }
+              >
+                {step.producer}
+              </span>
+              <span className={styles.stepState}>{step.done ? "done" : "pending"}</span>
+            </li>
+            {index < steps.length - 1 && (
+              <li className={styles.chainArrow} aria-hidden="true">
+                &rarr;
+              </li>
+            )}
+          </Fragment>
+        ))}
+      </ol>
+
+      <p className={styles.narrative}>{narrative}</p>
 
       <ol className={styles.timeline}>
         {events.map((event, index) => {

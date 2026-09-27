@@ -16,7 +16,8 @@ export default function RulingsPanel({
   decidedAt,
   inputsDigest,
 }: {
-  policyId: string;
+  /** Optional so other surfaces (e.g. the arena bracket) can reuse this panel per student. */
+  policyId?: string;
   summary: string;
   certified: boolean;
   rulings: RulingRow[];
@@ -33,7 +34,7 @@ export default function RulingsPanel({
         <span className={`badge ${certified ? "badge--pass" : "badge--fail"}`}>
           {certified ? "certified" : "not certified"}
         </span>
-        <span className="faint mono">{policyId}</span>
+        {policyId ? <span className="faint mono">{policyId}</span> : null}
         <span className="faint mono">
           {passedCount}/{rulings.length} rules passed
         </span>

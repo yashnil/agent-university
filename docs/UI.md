@@ -30,6 +30,12 @@ and certification can use it as the shared gate.
 
 One scrolling page, `app/page.tsx`, in the demo's order:
 
+0. **The 6-step chain** — `components/LifecycleTimeline.tsx` renders
+   `observed → recalled → exam started → exam passed → transferred → certified` per
+   `docs/HANDOFF.md`, with every unsatisfied step marked **pending**. A run that stopped at
+   `transferred` shows steps 4 and 6 pending rather than a shorter timeline: seeing where proof
+   stops is the point. Step 5 is tagged `status`, because `transferred` is a `Skill.status` and
+   there is no event for it.
 0. **Certification decision** — `components/RulingsPanel.tsx` over the 8 rulings of policy
    `au-transfer-v1`, each with its verbatim reason and its evidence JSON. This is the credibility
    centerpiece: it shows *why* a skill was or was not certified, straight from the engine.
@@ -78,6 +84,21 @@ sources in this order:
 | 1 | `registry/skills/<id>.json` (`CertificationRecord`) | `feat/certification`, `certify.ts --promote` |
 | 2 | `.agent-university/skills/<id>.json` (`Skill` + `events[]`) | `feat/runtime`, `au_record.py` |
 | 3 | `demo/fixtures/**` | committed fixtures |
+
+`registry/index.json` is read in **every** mode (it is committed, so it is real data either way) and
+rendered by `components/RegistryPanel.tsx` as section 04, "The registry" — one row per certified
+skill, with the champion-flow block (`title`, `passRate`, `runs`, `judgeScore`, `tournamentId`) when
+a flow tournament promoted it, and an explicit "certified by a single exam" line when it did not.
+Empty registry renders as "nothing is certified yet", which is a meaningful state, not an error.
+
+The UI imports `CertificationRecord` and `RegistryIndex` from `@/lib/certification` directly — the
+structural stand-in that predated that file is gone. `decision.policy.requireIsolation` and the
+optional `metrics` (`durationMs`, `toolCalls`, `turns`, `costUsd`) are rendered when present and
+omitted silently when absent, which is the common case for hand-certified records.
+
+A promoted record's `transfer.artifact.path` is either a sandbox path (unreadable from Next) or a
+repo-relative path certification committed. The UI reads the latter, so live mode shows the artifact
+that was actually certified instead of a stand-in.
 
 The UI declares the `CertificationRecord` fields it reads structurally, so it compiles before the
 certification branch merges; afterwards that block can become
