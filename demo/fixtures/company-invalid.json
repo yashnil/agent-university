@@ -1,0 +1,8 @@
+{
+  "company_name": "Northwind Labs",
+  "website": "https://northwind.example.com",
+  "product_summary": "Northwind Labs (fictional, fixture data) sells a hosted workflow tool that lets small operations teams automate order routing between storefronts and warehouses. It targets mid-size online retailers and positions itself as setup-in-a-day rather than an enterprise integration project.",
+  "source_urls": [
+    "https://northwind.example.com"
+  ]
+}

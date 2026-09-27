@@ -1,0 +1,287 @@
+{
+  "recordVersion": 1,
+  "skill": {
+    "id": "research-company",
+    "name": "Research Company",
+    "status": "certified",
+    "teacher": {
+      "id": "agent-teacher-0001",
+      "name": "Scout (teacher)",
+      "harness": "qm"
+    },
+    "artifactType": "company.json",
+    "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+    "transfer": {
+      "student": {
+        "id": "agent-student-0002",
+        "name": "Scout (fresh student)",
+        "harness": "qm"
+      },
+      "examCase": "exam-northwind",
+      "passed": true
+    }
+  },
+  "teacher": {
+    "id": "agent-teacher-0001",
+    "name": "Scout (teacher)",
+    "harness": "qm"
+  },
+  "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+  "transfer": {
+    "student": {
+      "id": "agent-student-0002",
+      "name": "Scout (fresh student)",
+      "harness": "qm"
+    },
+    "examCase": "exam-northwind",
+    "examCompany": "Northwind Labs",
+    "runId": "run-fixture-0002",
+    "artifact": {
+      "type": "company.json",
+      "path": "demo/fixtures/company.json"
+    },
+    "passed": true
+  },
+  "verification": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "file_exists",
+        "passed": true,
+        "message": "file exists"
+      },
+      {
+        "name": "valid_json_object",
+        "passed": true,
+        "message": "valid JSON object"
+      },
+      {
+        "name": "company_name_present",
+        "passed": true,
+        "message": "company_name present"
+      },
+      {
+        "name": "website_valid_url",
+        "passed": true,
+        "message": "website present (http(s) URL)"
+      },
+      {
+        "name": "product_summary_present",
+        "passed": true,
+        "message": "product_summary present"
+      },
+      {
+        "name": "source_urls_min_two",
+        "passed": true,
+        "message": "at least two valid source URLs (3 distinct valid)"
+      }
+    ]
+  },
+  "decision": {
+    "certified": true,
+    "status": "certified",
+    "policy": {
+      "id": "au-transfer-v1",
+      "rules": [
+        "teacher_run_verified",
+        "procedure_recalled",
+        "exam_case_unseen",
+        "student_distinct_from_teacher",
+        "artifact_matches_skill",
+        "verifier_checks_complete",
+        "verifier_checks_passed",
+        "isolation_attested"
+      ],
+      "requireIsolation": false
+    },
+    "summary": "CERTIFIED: all 8 rules passed",
+    "failedRules": [],
+    "rulings": [
+      {
+        "rule": "teacher_run_verified",
+        "passed": true,
+        "reason": "teacher run run-fixture-0001 passed its verifier",
+        "evidence": {
+          "teacher": {
+            "id": "agent-teacher-0001",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "runId": "run-fixture-0001",
+          "artifactPath": "/root/workspace/scout/<slug>/company.json"
+        }
+      },
+      {
+        "rule": "procedure_recalled",
+        "passed": true,
+        "reason": "student used procedure procedures/0000aaaa-research-a-company-fixture",
+        "evidence": {
+          "procedureId": "procedures/0000aaaa-research-a-company-fixture",
+          "skillProcedureId": "procedures/0000aaaa-research-a-company-fixture"
+        }
+      },
+      {
+        "rule": "exam_case_unseen",
+        "passed": true,
+        "reason": "exam company Northwind Labs differs from teacher case Linear",
+        "evidence": {
+          "examCase": "exam-northwind",
+          "examCompany": "Northwind Labs",
+          "teacherCases": [
+            "Linear"
+          ]
+        }
+      },
+      {
+        "rule": "student_distinct_from_teacher",
+        "passed": true,
+        "reason": "student agent-student-0002 (qm) != teacher agent-teacher-0001 (qm)",
+        "evidence": {
+          "student": {
+            "id": "agent-student-0002",
+            "name": "Scout (fresh student)",
+            "harness": "qm"
+          },
+          "teacher": {
+            "id": "agent-teacher-0001",
+            "name": "Scout (teacher)",
+            "harness": "qm"
+          },
+          "crossHarness": false
+        }
+      },
+      {
+        "rule": "artifact_matches_skill",
+        "passed": true,
+        "reason": "company.json at demo/fixtures/company.json",
+        "evidence": {
+          "artifact": {
+            "type": "company.json",
+            "path": "demo/fixtures/company.json"
+          },
+          "produced": true
+        }
+      },
+      {
+        "rule": "verifier_checks_complete",
+        "passed": true,
+        "reason": "all 6 required checks reported",
+        "evidence": {
+          "required": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "reported": [
+            "file_exists",
+            "valid_json_object",
+            "company_name_present",
+            "website_valid_url",
+            "product_summary_present",
+            "source_urls_min_two"
+          ],
+          "source": "reported"
+        }
+      },
+      {
+        "rule": "verifier_checks_passed",
+        "passed": true,
+        "reason": "6/6 checks passed",
+        "evidence": {
+          "passedCount": 6,
+          "total": 6,
+          "failed": []
+        }
+      },
+      {
+        "rule": "isolation_attested",
+        "passed": true,
+        "reason": "all 5 isolation facts hold",
+        "evidence": {
+          "facts": {
+            "different_scope": true,
+            "different_sandbox": true,
+            "different_session": true,
+            "no_teacher_artifact_in_sandbox": true,
+            "no_answer_leak_in_prompt": true
+          }
+        }
+      }
+    ],
+    "decidedAt": "2026-01-01T00:04:01Z",
+    "inputsDigest": "sha256:c1b788127a7170222cfad9cd37823fd4638bb89c960fc4af28fe3ab083c87f0f"
+  },
+  "events": [
+    {
+      "type": "exam.passed",
+      "at": "2026-01-01T00:04:01Z",
+      "payload": {
+        "skillId": "research-company",
+        "examCase": "exam-northwind",
+        "student": {
+          "id": "agent-student-0002",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "verification": {
+          "passed": true,
+          "checks": [
+            {
+              "name": "file_exists",
+              "passed": true,
+              "message": "file exists"
+            },
+            {
+              "name": "valid_json_object",
+              "passed": true,
+              "message": "valid JSON object"
+            },
+            {
+              "name": "company_name_present",
+              "passed": true,
+              "message": "company_name present"
+            },
+            {
+              "name": "website_valid_url",
+              "passed": true,
+              "message": "website present (http(s) URL)"
+            },
+            {
+              "name": "product_summary_present",
+              "passed": true,
+              "message": "product_summary present"
+            },
+            {
+              "name": "source_urls_min_two",
+              "passed": true,
+              "message": "at least two valid source URLs (3 distinct valid)"
+            }
+          ]
+        },
+        "artifactPath": "demo/fixtures/company.json"
+      }
+    },
+    {
+      "type": "skill.certified",
+      "at": "2026-01-01T00:04:01Z",
+      "payload": {
+        "skillId": "research-company",
+        "teacher": {
+          "id": "agent-teacher-0001",
+          "name": "Scout (teacher)",
+          "harness": "qm"
+        },
+        "student": {
+          "id": "agent-student-0002",
+          "name": "Scout (fresh student)",
+          "harness": "qm"
+        },
+        "examCase": "exam-northwind",
+        "procedureId": "procedures/0000aaaa-research-a-company-fixture"
+      }
+    }
+  ]
+}
