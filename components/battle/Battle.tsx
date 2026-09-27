@@ -7,7 +7,7 @@
 //   victory        → Victory over the stage
 //   always         → top bar (title, speed, mute, links) and the commentary Ticker
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, JSX } from "react";
 import Stage from "@/components/battle/Stage";
 import Fighter from "@/components/battle/Fighter";
@@ -148,8 +148,18 @@ export default function Battle(): JSX.Element {
   const nextUp = state.order.find((id) => !played.has(id) && !state.fighters[id]?.eliminated) ?? null;
   const showFight = phase === "fighting" || phase === "judging" || phase === "victory" || (phase === "error" && !!left);
 
+  // The prompt this tab typed: a 409 attach (another tab's run) has no spec, but REMATCH should
+  // still replay what this viewer asked for rather than dumping them back at the console.
+  const lastPrompt = useRef<string>("");
+  const startPrompt = useCallback(
+    (p: string) => {
+      lastPrompt.current = p;
+      void start(p);
+    },
+    [start],
+  );
   const onRematch = useCallback(() => {
-    const p = state.spec?.prompt;
+    const p = state.spec?.prompt || lastPrompt.current;
     if (p) void start(p);
     else reset();
   }, [reset, start, state.spec]);
@@ -239,7 +249,7 @@ export default function Battle(): JSX.Element {
 
           {attractMode ? (
             <div className={`${styles.overlay} ${styles.consoleOverlay}`}>
-              <PromptConsole onStart={(p) => void start(p)} busy={phase === "starting"} lastSpec={state.spec} />
+              <PromptConsole onStart={startPrompt} busy={phase === "starting"} lastSpec={state.spec} />
             </div>
           ) : null}
 
