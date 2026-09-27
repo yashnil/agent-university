@@ -57,6 +57,8 @@ JSON_TEMPLATE = """{
     "https://en.wikipedia.org/wiki/<Wikipedia_Title>"
   ]
 }"""
+SUMMARY_PLACEHOLDER = ("<2-3 sentences from the fetched pages: what the product is, who it is for, "
+                       "how it is positioned>")
 # Capitalized words that carry no company-specific answer.
 GENERIC = {"It", "The", "A", "An", "In", "Its", "With", "And", "For", "Inc"}
 
@@ -98,17 +100,29 @@ def leaks(text, terms):
 
 def generalizer(artifact, slug):
     domain = urllib.parse.urlparse(artifact["website"]).netloc.removeprefix("www.")
-    wiki = [u.split("/wiki/", 1)[1] for u in artifact["source_urls"] if "/wiki/" in u]
+    wiki = [re.split(r"/wiki/|/page/summary/", u, maxsplit=1)[1] for u in artifact["source_urls"]
+            if "/wiki/" in u or "/page/summary/" in u]
     name = artifact["company_name"]
+    summary = artifact["product_summary"]
+    # Proper nouns of the answer (as leak_terms finds them) that a command may still name,
+    # e.g. a grep for the pricing tiers the teacher expected to see.
+    nouns = {w for w in re.findall(r"\b[A-Z][A-Za-z]+\b", summary) if w not in GENERIC and w.lower() != name.lower()}
 
     def generalize(text):
         text = re.sub(r"(company\.json\"? <<'EOF'\n).*?(\nEOF)", lambda m: m.group(1) + JSON_TEMPLATE + m.group(2),
                       text, flags=re.S)
+        # The answer written some other way (a python dict, printf): replace the summary itself.
+        for literal in {summary, json.dumps(summary)[1:-1]}:
+            text = text.replace(literal, SUMMARY_PLACEHOLDER)
+        # Only in a Wikipedia URL: a title that equals the company name must still become <Company>.
         for title in wiki:
-            text = text.replace(title, "<Wikipedia_Title>")
+            text = re.sub(r"(/wiki/|/page/summary/)" + re.escape(title), r"\1<Wikipedia_Title>", text)
         text = re.sub(rf"(?:www\.)?{re.escape(domain)}", "<company-domain>", text, flags=re.I)
         text = text.replace(f"scout/{slug}", "scout/<slug>")
-        return re.sub(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", "<Company>", text, flags=re.I)
+        text = re.sub(rf"(?<![A-Za-z0-9]){re.escape(name)}(?![A-Za-z0-9])", "<Company>", text, flags=re.I)
+        for noun in nouns:
+            text = re.sub(rf"(?<![A-Za-z0-9]){re.escape(noun)}(?![A-Za-z0-9])", "<summary-term>", text, flags=re.I)
+        return text
 
     return generalize
 

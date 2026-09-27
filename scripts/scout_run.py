@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Run the Scout agent for one company through the live QM deployment.
 
-  scripts/scout_run.py [Company Name]      (default: Linear)
+  scripts/scout_run.py [--style thorough|minimal] [Company Name]      (default: Linear)
+
+--style appends method instructions to the prompt (the skill is unchanged), so teacher
+runs can differ in method: `thorough` gathers 4+ sources incl. about/pricing pages and
+the Wikipedia REST summary API; `minimal` uses only the homepage plus one more source.
 
 1. Mints a single-use admin sign-in (`qm admin-login`) and redeems it at the portal,
    exactly as a browser would. The token and cookies stay in memory, never printed.
@@ -96,8 +100,30 @@ def running(name):
     return docker("inspect", "-f", "{{.State.Running}}", name).stdout.strip() == "true"
 
 
+STYLES = {
+    "thorough": (
+        " Method: be thorough. Fetch at least four distinct sources before writing: the homepage, "
+        "its /about page, its /pricing page, and the Wikipedia REST summary API "
+        "(https://en.wikipedia.org/api/rest_v1/page/summary/<Title>); check each fetch's HTTP status "
+        "with curl -s -o /dev/null -w '%{http_code}' and cite only the ones that returned 200. "
+        "Write the JSON with a python3 script (json.dump) rather than a heredoc."
+    ),
+    "minimal": (
+        " Method: be quick and minimal. Fetch only the homepage and exactly one more source "
+        "(the Wikipedia article), extract the <title> and meta description with grep, "
+        "and write the file in a single printf command; cite exactly those two URLs."
+    ),
+}
+
+
 def main():
-    company = " ".join(sys.argv[1:]) or "Linear"
+    args = sys.argv[1:]
+    style = None
+    if len(args) >= 2 and args[0] == "--style":
+        style, args = args[1], args[2:]
+        if style not in STYLES:
+            sys.exit(f"unknown --style {style}; choose from {', '.join(STYLES)}")
+    company = " ".join(args) or "Linear"
     slug = slugify(company)
     opener = sign_in()
     print(f"signed in at {PORTAL} as the seeded admin")
@@ -106,7 +132,7 @@ def main():
         f"Use the scout-research-company skill to research the company \"{company}\". "
         f"Fetch real public sources with curl, write the artifact to "
         f"$HOME/workspace/scout/{slug}/company.json, validate it, and reply with its absolute path."
-    )
+    ) + (STYLES[style] if style else "")
     status, turn = call(opener, "POST", "/api/turn", {"text": prompt, "clientTurnId": str(uuid.uuid4())})
     if status not in (200, 201, 202) or not isinstance(turn, dict) or not turn.get("runId"):
         sys.exit(f"turn rejected: HTTP {status} {turn}")
