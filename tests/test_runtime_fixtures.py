@@ -96,5 +96,27 @@ class RuntimeFixtures(unittest.TestCase):
                 self.assertTrue(agent_id.startswith("qm-thread-sanitized-"), f"{name}: unsanitized id {agent_id}")
 
 
+# Other committed data derived from the live runs: the recorded run metrics and the frozen final demo.
+DERIVED = ["run-metrics.json", "final-demo.json", "composite/repo_analysis-vercel.json", "composite/score-vercel.json"]
+
+
+class DerivedFixturesArePrivate(unittest.TestCase):
+    def test_no_personal_or_machine_data(self):
+        patterns = [p for p in FORBIDDEN if p != r"token"] + [r"#token="]
+        for name in DERIVED:
+            with open(os.path.join(FIX, name)) as f:
+                text = f.read()
+            for pat in patterns:
+                self.assertIsNone(re.search(pat, text), f"{name} matches {pat!r}")
+            for agent_id in re.findall(r"qm-thread-[\w-]+", text):
+                self.assertTrue(agent_id.startswith("qm-thread-sanitized-"), f"{name}: unsanitized id {agent_id}")
+
+    def test_run_metrics_record_no_invented_tokens(self):
+        with open(os.path.join(FIX, "run-metrics.json")) as f:
+            runs = json.load(f)["runs"]
+        self.assertEqual([r["role"] for r in runs], ["teacher", "student"])
+        self.assertTrue(all(r["tokens"] is None for r in runs))
+
+
 if __name__ == "__main__":
     unittest.main()
