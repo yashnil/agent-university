@@ -1,0 +1,14 @@
+{
+  "company_name": "Vercel",
+  "repo_url": "https://github.com/vercel/next.js",
+  "summary": "SEEDED DEMO FIXTURE, hand-written, not produced by an agent and not certified. It stands in for the Analyze Repository skill, which is not implemented live. It points at Next.js, which the certified company.json names as Vercel's open-source React framework.",
+  "languages": ["TypeScript", "JavaScript", "Rust"],
+  "signals": [
+    {
+      "name": "flagship open-source project",
+      "evidence": "The certified company.json says Vercel created and maintains the open-source React framework Next.js.",
+      "source_url": "https://en.wikipedia.org/wiki/Vercel"
+    }
+  ],
+  "source_urls": ["https://github.com/vercel/next.js"]
+}

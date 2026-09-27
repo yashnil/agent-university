@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   { href: "/", label: "Record" },
   { href: "/arena", label: "Arena" },
+  { href: "/battle", label: "Battle" },
 ];
 
 /** Global navigation. Arena needs a way back that does not depend on knowing the logo links home. */

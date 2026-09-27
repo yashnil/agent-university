@@ -20,7 +20,7 @@
 //   demo/fixtures/certification-record{,-failed}.json   demo mode
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
@@ -34,7 +34,12 @@ import type {
 } from "./types.ts";
 import { COMPANY_CHECKS, verifyCompanyFile } from "./verifiers/company.ts";
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+// The repo root. Next inlines import.meta.url at build time, so in a deployed server bundle it names
+// the build machine's checkout (Vercel builds in /vercel/path0 and serves from /var/task, the working
+// directory, with the traced data files beside it). Use the module's own location only when it really
+// is the repo (CLI, tests, `next dev`/`next start` in place), else the working directory.
+const MODULE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const ROOT = process.env.AU_ROOT || (existsSync(join(MODULE_ROOT, "demo", "cases.json")) ? MODULE_ROOT : process.cwd());
 export const POLICY_ID = "au-transfer-v1";
 export const RECORD_VERSION = 1;
 

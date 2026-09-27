@@ -10,10 +10,15 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+// Relative, not "@/": the same functions back /api/skills, /api/exam and /api/run, and this adapter
+// must load under `node --test` too (tests/product.test.ts).
+import { getSkills, loadFinalDemo, runComposite, vercelHandoff } from "../../lib/product.ts";
+import type { RunResponse, SkillsResponse } from "../../lib/product.ts";
 import type { CertificationRecord, RegistryIndex } from "@/lib/certification";
 import type {
   AgentIdentity,
   AgentUniversityEvent,
+  ArtifactType,
   EventPayloads,
   Skill,
   SkillStatus,
@@ -62,7 +67,7 @@ export interface RegistryView {
 
 export interface CertificationView {
   policyId: string;
-  /** From policy.requireIsolation: whether isolation facts were required, not just recorded. */
+  /** From policy.requireIsolation: whether isolation facts were required, not merely recorded. */
   requireIsolation: boolean;
   summary: string;
   certified: boolean;
@@ -98,7 +103,12 @@ export interface LifecycleData {
   artifacts: Artifacts;
   plan: EventPayloads["plan.composed"] | null;
   gap: EventPayloads["gap.discovered"] | null;
+  /** The fresh Intern's composite run (POST /api/run's contract); null for the fictional case. */
+  composite: RunResponse | null;
+  /** The certified skills (GET /api/skills's contract); null for the fictional case. */
+  skills: SkillsResponse | null;
 }
+
 
 /** A live runtime record: a Skill with the events emitted for it so far. */
 type LiveRecord = Skill & { events?: AgentUniversityEvent[]; transferResult?: TransferResult };
@@ -159,8 +169,8 @@ async function readLiveArtifact(examCase: string, name: string): Promise<Record<
 
 /**
  * A promoted record's artifact path is either a sandbox path (only readable inside the QM
- * container) or a repo-relative path that certification committed. Read the latter, so the page
- * shows the artifact that was actually certified rather than a stand-in.
+ * container) or a repo-relative path certification committed. Read the latter, so the page shows
+ * the artifact that was actually certified rather than a stand-in.
  */
 async function readArtifactAtPath(artifactPath: string | undefined): Promise<Record<string, unknown> | null> {
   if (!artifactPath || artifactPath.startsWith("/") || artifactPath.includes("..")) return null;
@@ -215,7 +225,7 @@ function eventsForOutcome(events: AgentUniversityEvent[], certified: boolean): A
 export async function loadLifecycle(
   mode: Mode,
   outcome: Outcome = "certified",
-  demoCase: DemoCaseId = "northwind",
+  demoCase: DemoCaseId = "vercel",
   skillId = "research-company",
 ): Promise<LifecycleData> {
   const [events, skillObserved, skillCertified, transfer, casesFile, company, repoAnalysis, score, outreach] =
@@ -250,6 +260,8 @@ export async function loadLifecycle(
     artifacts: { company, repoAnalysis, score, outreach },
     plan: firstPayload(events, "plan.composed"),
     gap: firstPayload(events, "gap.discovered"),
+    composite: null,
+    skills: null,
   };
 
   if (mode === "demo") {
@@ -270,19 +282,30 @@ export async function loadLifecycle(
       (await readArtifactAtPath(registryRecord.transfer.artifact.path)) ??
       (await readLiveArtifact(liveTransfer.examCase, liveTransfer.artifact.type));
     const certification = toCertificationView(registryRecord, `registry/skills/${skillId}.json`);
-    const recordEvents = registryRecord.events?.length ? registryRecord.events : base.events;
+    // Live shows only events this record actually supports: its own (a tournament champion carries just
+    // exam.passed / skill.certified), the runtime's history only when this is the exam that history is
+    // about, then the Intern's composite events. Never the fictional fixtures' events.
+    const recordEvents = registryRecord.events ?? [];
+    const composite = runComposite("live");
+    const runtimeEvents = liveTransfer.runId === vercelHandoff().transfer.runId ? vercelHandoff().events : [];
+    const realRun = typeof liveTransfer.runId === "string" && !liveTransfer.runId.startsWith("run-fixture");
     return {
       ...base,
       mode: "live",
+      demoCase,
+      fromRealRun: realRun,
+      composite,
+      skills: getSkills("live"),
       outcome: certification.certified ? "certified" : "failed",
       source: `registry/skills/${skillId}.json (certified by policy ${certification.policyId})`,
       liveNote: liveCompany ? null : missingArtifactNote(liveTransfer),
-      events: redactEvents(eventsForOutcome(recordEvents, certification.certified)),
+      events: redactEvents([...runtimeEvents, ...eventsForOutcome(recordEvents, certification.certified), ...composite.events]),
       skillObserved: registryRecord.skill,
       skillCertified: registryRecord.skill.status === "certified" ? registryRecord.skill : null,
       transfer: liveTransfer,
       certification,
-      artifacts: { ...base.artifacts, company: liveCompany ?? base.artifacts.company },
+      // Never show another run's artifact as this student's: if the body is not on disk, say so.
+      artifacts: { ...base.artifacts, company: liveCompany ?? unavailableArtifact(liveTransfer) },
     };
   }
 
@@ -323,7 +346,7 @@ export async function loadLifecycle(
     skillObserved: record,
     skillCertified: record.status === "certified" ? record : null,
     transfer: liveTransfer,
-    artifacts: { ...base.artifacts, company: liveCompany ?? base.artifacts.company },
+    artifacts: { ...base.artifacts, company: liveCompany ?? unavailableArtifact(liveTransfer) },
     plan: firstPayload(liveEvents, "plan.composed") ?? base.plan,
     gap: firstPayload(liveEvents, "gap.discovered") ?? base.gap,
   };
@@ -336,10 +359,9 @@ export async function loadLifecycle(
  * view shows a proven-but-not-yet-certified skill unless a registry record exists.
  */
 async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
-  const [skill, transfer, events, company] = await Promise.all([
+  const [skill, transfer, company] = await Promise.all([
     readJsonOrNull<Skill>(FIXTURES, "skill-transferred-vercel.json"),
     readJsonOrNull<TransferResult>(FIXTURES, "transfer-result-vercel.json"),
-    readJsonOrNull<AgentUniversityEvent[]>(FIXTURES, "events-vercel-transferred.json"),
     readJsonOrNull<Record<string, unknown>>(FIXTURES, "company-vercel.json"),
   ]);
 
@@ -349,28 +371,29 @@ async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
     return {
       ...(await withDemoCertification(base, "certified")),
       liveNote:
-        "The real Linear → Vercel transfer fixtures (demo/fixtures/*-vercel*.json) are not on this " +
-        "branch yet; they arrive with feat/runtime's Milestone 2. Showing the fictional lifecycle.",
+        "The real Linear → Vercel transfer fixtures (demo/fixtures/*-vercel*.json) are missing. Showing the fictional lifecycle.",
     };
   }
 
+  // The frozen final demo: the production engine's decision on this exact transfer (identical to the
+  // registry's), the Intern's composite run, and the whole lifecycle. Same contracts as live mode.
+  const demo = loadFinalDemo();
+  const record = demo.exam.record;
   return {
     ...base,
     demoCase: "vercel",
     fromRealRun: true,
-    outcome: transfer.passed ? "certified" : "failed",
-    source: "demo/fixtures/*-vercel*.json (real QM transfer exam, sanitized)",
-    liveNote:
-      skill.status === "certified"
-        ? null
-        : "This is the real run, and it stops at `transferred` on purpose: runtime proves the " +
-          "transfer, certification decides. Promote it with the certification engine (or open live " +
-          "mode once registry/skills/research-company.json exists) to see it certified.",
-    events: events?.length ? events : base.events,
+    outcome: record.decision.certified ? "certified" : "failed",
+    source: "demo/fixtures: real QM transfer (sanitized) + final-demo.json (engine decision, composite run)",
+    liveNote: null,
+    events: demo.lifecycle,
     skillObserved: skill,
-    skillCertified: skill.status === "certified" ? skill : null,
+    skillCertified: record.skill.status === "certified" ? record.skill : null,
     transfer,
+    certification: toCertificationView(record as unknown as CertificationRecord, "demo/fixtures/final-demo.json (exam)"),
     artifacts: { ...base.artifacts, company: company ?? base.artifacts.company },
+    composite: demo.run,
+    skills: demo.skills,
   };
 }
 
@@ -410,9 +433,15 @@ async function withDemoCertification(base: LifecycleData, outcome: Outcome): Pro
 function missingArtifactNote(transfer: TransferResult): string {
   return (
     "Live lifecycle loaded, but the artifact body is still only inside the QM sandbox. Copy it to " +
-    `.agent-university/artifacts/${transfer.examCase}/${transfer.artifact.type} to show the real file; ` +
-    "the fixture is standing in below."
+    `.agent-university/artifacts/${transfer.examCase}/${transfer.artifact.type} to show the real file.`
   );
+}
+
+function unavailableArtifact(transfer: TransferResult): Record<string, unknown> {
+  return {
+    unavailable: `The ${transfer.artifact.type} from run ${transfer.runId ?? "unknown"} (${transfer.examCase}) is inside its QM ` +
+      "sandbox and not part of this deployment. Its verification is shown above; no other artifact stands in for it.",
+  };
 }
 
 function unknownAgent(): AgentIdentity {
@@ -439,7 +468,7 @@ function reportedIsolation(transfer: TransferResult): { name: string; passed: bo
     .map(([name, value]) => ({
       name,
       passed: value === true,
-      detail: value === true ? "checked by the runtime during the trial" : "runtime reported this as false",
+      detail: value === true ? "checked by the runtime during the exam" : "runtime reported this as false",
     }));
   return rows.length > 0 ? rows : null;
 }
@@ -457,19 +486,19 @@ export function isolationFacts(data: LifecycleData) {
     {
       name: "different_agent",
       passed: teacher.id !== student.id,
-      detail: `origin ${teacher.id} ≠ replica ${student.id}`,
+      detail: `teacher ${teacher.id} ≠ student ${student.id}`,
     },
     {
       name: "recalled_procedure_only",
       passed: Boolean(recalled?.procedureId) && recalled?.procedureId === data.transfer.procedureId,
-      detail: recalled?.procedureId ? `the replica ran from ${recalled.procedureId}` : "no skill.recalled event",
+      detail: recalled?.procedureId ? `student ran from ${recalled.procedureId}` : "no skill.recalled event",
     },
     {
       name: "unseen_exam_case",
       passed: Boolean(teacherCase) && teacherCase?.id !== data.transfer.examCase,
       detail: teacherCase
-        ? `learned on ${teacherCase.id}, retried on ${data.transfer.examCase}`
-        : `retried on ${data.transfer.examCase}`,
+        ? `taught on ${teacherCase.id}, examined on ${data.transfer.examCase}`
+        : `examined on ${data.transfer.examCase}`,
     },
   ];
 }

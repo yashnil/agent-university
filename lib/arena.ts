@@ -64,12 +64,40 @@ function paced(launch: LaunchStudent, paceMs: number): LaunchStudent {
   };
 }
 
+/** Live exams require the teacher's layer skill to be hidden from students (docs/HANDOFF.md).
+ *  Move it out of sandbox/skills and sync the QM layer; returns a function that puts it back. */
+async function hideLayerSkill(): Promise<() => Promise<void>> {
+  const { existsSync, mkdirSync, renameSync } = await import("node:fs");
+  const { execFile } = await import("node:child_process");
+  const root = join(RECORD_DIR, "..");
+  const live = join(root, "sandbox", "skills", "scout-research-company");
+  const hidden = join(RECORD_DIR, "hidden-skills", "scout-research-company");
+  const sync = () => new Promise<void>((resolve, reject) =>
+    execFile("npm", ["exec", "--silent", "qm", "--", "layer", "sync"], { cwd: root, timeout: 180_000 },
+      (err) => (err ? reject(new Error(`qm layer sync failed: ${err.message}`)) : resolve())));
+  if (!existsSync(live)) return async () => {};
+  mkdirSync(join(RECORD_DIR, "hidden-skills"), { recursive: true });
+  renameSync(live, hidden);
+  try {
+    await sync();
+  } catch (e) {
+    renameSync(hidden, live);
+    throw e;
+  }
+  return async () => {
+    if (existsSync(hidden) && !existsSync(live)) renameSync(hidden, live);
+    await sync().catch(() => {});
+  };
+}
+
 export async function runArena(opts: ArenaOptions, onEvent: (e: ArenaEvent) => void): Promise<void> {
   const dry = opts.mode !== "live";
   const flows = Math.min(Math.max(opts.flows ?? opts.heats ?? 3, 1), 5);
   const perFlow = Math.min(Math.max(opts.perFlow ?? opts.perHeat ?? 3, 1), 5);
   const before = registry.registryDir();
+  let restoreSkill: (() => Promise<void>) | null = null;
   try {
+    if (!dry) restoreSkill = await hideLayerSkill();
     const cases = loadCases();
     const companies = (opts.cases?.length ? opts.cases : DEFAULT_CASES).map((c) => resolveCase(c, cases));
     const tournamentId = newTournamentId().replace("tournament-", dry ? "tournament-dry-" : "tournament-");
@@ -88,5 +116,6 @@ export async function runArena(opts: ArenaOptions, onEvent: (e: ArenaEvent) => v
     emit(onEvent, { type: "error", at: now(), message: (e as Error)?.message ?? String(e) });
   } finally {
     registry.setRegistryDir(before);
+    if (restoreSkill) await restoreSkill();
   }
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ArtifactCard from "@/components/ArtifactCard";
+import CompositeRun from "@/components/CompositeRun";
 import ArtifactChip from "@/components/ArtifactChip";
 import GapBanner from "@/components/GapBanner";
 import LifecycleTimeline from "@/components/LifecycleTimeline";
@@ -24,7 +25,7 @@ const SCHEMA: Record<string, "frozen" | "v0-placeholder"> = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; outcome?: string; case?: string }>;
+  searchParams: Promise<{ mode?: string; outcome?: string; case?: string; run?: string }>;
 }) {
   const params = await searchParams;
   const mode: Mode = params.mode === "live" ? "live" : "demo";
@@ -238,7 +239,12 @@ export default async function Page({
           {steps.length} steps are backed by one. Where none exists the system reports a gap instead of
           improvising: the honest edge of what can be trusted, and the next skill to teach.
         </p>
-        <PipelineStrip steps={steps} missingArtifactType={data.gap?.missingArtifactType} />
+        {data.composite ? (
+          <CompositeRun mode={data.mode} fallback={data.composite} autoRun={params.run === "1"} />
+        ) : null}
+        <div className="stack">
+          <PipelineStrip steps={steps} missingArtifactType={data.gap?.missingArtifactType} />
+        </div>
         {data.gap ? <GapBanner gap={data.gap} /> : null}
         <div className="grid2 stack">
           <ArtifactCard

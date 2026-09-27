@@ -1,0 +1,23 @@
+{
+  "description": "Recorded metrics of the two real QM runs behind the certified Research Company skill. Single runs on different companies, not a benchmark. Produced by scripts/export_run_metrics.py from the local run cache; tokens are null because QM's run API does not record them.",
+  "runs": [
+    {
+      "role": "teacher",
+      "case": "teach-linear",
+      "runId": "9f8d36da-12d3-4d42-bd7d-924fce932f46",
+      "wallClockMs": 49971,
+      "shellToolCalls": 4,
+      "failedShellToolCalls": 2,
+      "tokens": null
+    },
+    {
+      "role": "student",
+      "case": "exam-vercel",
+      "runId": "5e30ec98-4e35-48eb-9460-d40b8ded3bc3",
+      "wallClockMs": 16611,
+      "shellToolCalls": 2,
+      "failedShellToolCalls": 0,
+      "tokens": null
+    }
+  ]
+}
