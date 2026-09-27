@@ -168,30 +168,30 @@ export default async function Page({
             </>
           )}
         </p>
-        {data.certification?.metrics ? (
+        {data.metrics ? (
           <dl className="kv metrics">
-            {data.certification.metrics.durationMs !== undefined ? (
+            {data.metrics.durationMs !== undefined ? (
               <>
                 <dt>trial duration</dt>
-                <dd>{(data.certification.metrics.durationMs / 1000).toFixed(1)}s</dd>
+                <dd>{(data.metrics.durationMs / 1000).toFixed(1)}s</dd>
               </>
             ) : null}
-            {data.certification.metrics.toolCalls !== undefined ? (
+            {data.metrics.toolCalls !== undefined ? (
               <>
                 <dt>tool calls</dt>
-                <dd>{data.certification.metrics.toolCalls}</dd>
+                <dd>{data.metrics.toolCalls}</dd>
               </>
             ) : null}
-            {data.certification.metrics.turns !== undefined ? (
+            {data.metrics.turns !== undefined ? (
               <>
                 <dt>turns</dt>
-                <dd>{data.certification.metrics.turns}</dd>
+                <dd>{data.metrics.turns}</dd>
               </>
             ) : null}
-            {data.certification.metrics.costUsd !== undefined ? (
+            {data.metrics.costUsd !== undefined ? (
               <>
                 <dt>cost</dt>
-                <dd>${data.certification.metrics.costUsd.toFixed(3)}</dd>
+                <dd>${data.metrics.costUsd.toFixed(3)}</dd>
               </>
             ) : null}
           </dl>

@@ -76,8 +76,6 @@ export interface CertificationView {
   rulings: RulingView[];
   decidedAt?: string;
   inputsDigest?: string;
-  /** Optional in the contract, and absent on hand-certified records. */
-  metrics?: { durationMs?: number; toolCalls?: number; turns?: number; costUsd?: number };
   /** Where this decision was read from, for the footer. */
   from: string;
 }
@@ -99,6 +97,9 @@ export interface LifecycleData {
   certification: CertificationView | null;
   /** registry/index.json: what the organization actually trusts. Null when nothing is promoted. */
   registry: RegistryView | null;
+  /** Optional in the contract and absent on hand-certified records; kept off CertificationView so
+   *  live and demo expose the same contract shape. */
+  metrics: { durationMs?: number; toolCalls?: number; turns?: number; costUsd?: number } | null;
   cases: DemoCase[];
   artifacts: Artifacts;
   plan: EventPayloads["plan.composed"] | null;
@@ -195,7 +196,6 @@ function toCertificationView(record: CertificationRecord, from: string): Certifi
     rulings: record.decision.rulings ?? [],
     decidedAt: record.decision.decidedAt,
     inputsDigest: record.decision.inputsDigest,
-    metrics: record.metrics,
     from,
   };
 }
@@ -256,6 +256,7 @@ export async function loadLifecycle(
     transfer,
     certification: null,
     registry,
+    metrics: null,
     cases: casesFile.cases,
     artifacts: { company, repoAnalysis, score, outreach },
     plan: firstPayload(events, "plan.composed"),
@@ -304,6 +305,7 @@ export async function loadLifecycle(
       skillCertified: registryRecord.skill.status === "certified" ? registryRecord.skill : null,
       transfer: liveTransfer,
       certification,
+      metrics: registryRecord.metrics ?? null,
       // Never show another run's artifact as this student's: if the body is not on disk, say so.
       artifacts: { ...base.artifacts, company: liveCompany ?? unavailableArtifact(liveTransfer) },
     };
@@ -391,6 +393,7 @@ async function realTransferCase(base: LifecycleData): Promise<LifecycleData> {
     skillCertified: record.skill.status === "certified" ? record.skill : null,
     transfer,
     certification: toCertificationView(record as unknown as CertificationRecord, "demo/fixtures/final-demo.json (exam)"),
+    metrics: (record as unknown as CertificationRecord).metrics ?? null,
     artifacts: { ...base.artifacts, company: company ?? base.artifacts.company },
     composite: demo.run,
     skills: demo.skills,
@@ -427,6 +430,7 @@ async function withDemoCertification(base: LifecycleData, outcome: Outcome): Pro
     skillCertified: record.skill.status === "certified" ? record.skill : null,
     transfer: toTransferResult(record, base.transfer),
     certification,
+    metrics: record.metrics ?? null,
   };
 }
 
