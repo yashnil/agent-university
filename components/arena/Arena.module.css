@@ -1,0 +1,94 @@
+.controls {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.segment {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+
+.option {
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.option:last-child { border-right: none; }
+.option:hover:not(:disabled) { color: var(--text); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.option:disabled { cursor: not-allowed; }
+
+.active {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset 0 -2px 0 0 var(--accent);
+}
+
+.select {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  min-width: 64px;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.run {
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 18px;
+  color: #06120c;
+  background: var(--certified);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.run:hover:not(:disabled) { filter: brightness(1.08); }
+.run:disabled { cursor: progress; background: var(--border-strong); color: var(--text-dim); }
+.run:focus-visible, .option:focus-visible, .select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.modeNote {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 11.5px;
+}
+
+@media (max-width: 520px) {
+  .run { margin-left: 0; width: 100%; }
+}
+
+.error { border-color: color-mix(in srgb, var(--fail) 45%, transparent); background: color-mix(in srgb, var(--fail) 8%, transparent); }
+
+.empty { margin-top: 32px; }
