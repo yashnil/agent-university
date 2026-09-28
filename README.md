@@ -1,12 +1,21 @@
-# Swarmem
+<p align="center">
+  <img src="public/logo.png" alt="" width="120" height="120">
+</p>
 
-<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/c926a5d9-5c29-4d39-ad16-48f0fb565fa7" />
+<h1 align="center">swar<em>mem</em></h1>
 
+<p align="center">
+  <strong>swarmem certifies that a procedure learned by one agent transfers to a different
+  agent on a fresh task before it becomes trusted organizational capability.</strong>
+</p>
 
-**Swarmem certifies that a procedure learned by one agent transfers to a different
-agent on a fresh task before it becomes trusted organizational capability.**
+<p align="center">
+  <em>one agent learns → another agent proves it → every agent can inherit it</em>
+</p>
 
-North star: *one agent learns → another agent proves it → every agent can inherit it.*
+<p align="center">
+  <a href="https://swarmem.vercel.app">swarmem.vercel.app</a>
+</p>
 
 ## Demo path (fixed)
 
